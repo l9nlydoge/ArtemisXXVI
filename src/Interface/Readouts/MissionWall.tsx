@@ -14,9 +14,8 @@ export function MissionWall() {
       ) : (
         <ul>
           {records.map((record) => (
-            <li key={`${record.number}-${record.seed}`}>
+            <li key={`${record.number}-${record.seed}`} title={translator.t('Wall.Result', { score: record.score, cost: record.costMusd })}>
               <MissionPatch record={record} />
-              <span>{translator.t('Wall.Result', { score: record.score, cost: record.costMusd })}</span>
             </li>
           ))}
         </ul>

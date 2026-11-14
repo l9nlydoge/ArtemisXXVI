@@ -121,12 +121,21 @@ input[type='checkbox'] { accent-color: var(--Foil); width: 20px; height: 20px; m
 .JoinForm { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 0; border-top: 1px solid var(--Line); }
 .JoinForm label { color: var(--Muted); }
 .JoinForm input { width: 6.4em; font-size: 1.2rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; }
-.MissionWall { justify-self: end; max-width: 460px; }
+.MainDeck { display: grid; gap: 14px; }
+.TourPanel { justify-self: end; width: min(100%, 430px); }
+.TourPanel > h2, .TourList { display: flex; flex-wrap: wrap; gap: 6px; }
+.TourList button { min-height: 34px; padding: 4px 12px; font-size: 0.9rem; border-color: var(--Line); color: var(--Muted); }
+.TourList button[aria-pressed='true'] { background: var(--Text); border-color: var(--Text); color: #000000; font-weight: 600; }
+.TourAbout { margin: 14px 0 10px; }
+.TourPanel dl { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-bottom: 10px; }
+.TourPanel dd { font-size: 1rem; }
+.WorldLabel { font: 500 12px/1 var(--Font); color: #f3f5f6; white-space: nowrap; pointer-events: none; text-shadow: 0 0 6px #000000, 0 0 2px #000000; transition: opacity 300ms var(--Ease); }
+.MissionWall { max-width: none; padding-block: 12px; }
 .MissionWall > h2 { font-size: 1rem; font-weight: 500; color: var(--Muted); margin-bottom: 10px; }
-.MissionWall > p { color: var(--Muted); max-width: 30ch; }
-.MissionWall ul { display: flex; flex-wrap: wrap; gap: 14px 18px; }
-.MissionWall li { display: grid; justify-items: center; gap: 4px; font-size: 0.82rem; color: var(--Muted); }
-.MissionWall .MissionPatch { width: 96px; height: 96px; }
+.MissionWall > p { color: var(--Muted); }
+.MissionWall ul { display: flex; flex-wrap: wrap; gap: 10px 20px; }
+.MissionWall li { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--Muted); }
+.MissionWall .MissionPatch { width: 60px; height: 60px; }
 .Colophon { font-size: 0.84rem; color: var(--Muted); max-width: 80ch; text-shadow: 0 0 6px #000000, 0 0 2px #000000; }
 
 .DockScreen { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 500px); grid-template-rows: auto 1fr auto; gap: 16px; height: 100dvh; padding: 20px var(--Gutter); }
@@ -358,8 +367,10 @@ thead :is(th, td) { border-top: 0; font-size: 0.82rem; color: var(--Muted); padd
 
 @media (max-width: 1000px) {
   .Deck { grid-template-columns: minmax(0, 1fr); }
-  .MissionWall { justify-self: stretch; max-width: none; }
-  .StartScreen { grid-template-rows: auto auto minmax(26vh, 1fr) auto; }
+  .TourPanel { justify-self: stretch; width: 100%; }
+  .StartScreen { grid-template-rows: auto auto auto auto; }
+  .Hero { margin-top: 26vh; text-shadow: 0 1px 2px #000000, 0 0 10px #000000, 0 0 24px #000000; }
+  .Hero p { font-weight: 500; }
   .DockScreen { display: flex; flex-direction: column; height: auto; padding: 16px 16px 0; }
   .Window { min-height: 46vh; order: -1; }
   .BriefPanel, .StatusPanel { max-width: none; width: 100%; }

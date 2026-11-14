@@ -37,6 +37,8 @@ interface GameState {
   sessionTick: number
   flight: FlightTelemetry
   worldReady: boolean
+  tourId?: string
+  visit(tourId?: string): void
   reportFlight(telemetry: FlightTelemetry): void
   markWorldReady(): void
   setLanguage(language: Language): void
@@ -84,6 +86,9 @@ export const useGameStore = create<GameState>((set, get) => {
     sessionTick: 0,
     flight: { coverage: 0, lost: false, view: CameraView.Wide },
     worldReady: false,
+    tourId: 'Station',
+
+    visit: (tourId) => set({ tourId }),
 
     reportFlight: (flight) => set({ flight }),
     markWorldReady: () => set({ worldReady: true }),

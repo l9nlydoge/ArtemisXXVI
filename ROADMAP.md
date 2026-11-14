@@ -9,6 +9,7 @@ Written Saturday 14 November 2026, 15:00 Ankara time.
 The engine is sound and the flight looks good. Almost everything around them is half-finished, and the site has two unrelated looks.
 
 **Works today**
+- Five real spacecraft (ISS, Hubble, Landsat 9, GOES, Webb) on their real orbits, with a tour on the start screen and labels in flight. Added 14 November.
 - Mission model: mass, power, data, cost and lifetime budgets, seeded random events, Failure Trace, star rating. Seven engine tests pass.
 - Solo loop from start screen to mission report, for two scenarios.
 - Photographic 3D flight with a detailed spacecraft built from the player's design.

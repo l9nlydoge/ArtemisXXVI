@@ -9,12 +9,13 @@ Read this before changing any UI. It exists so the game keeps one identity, whoe
 
 | Screen | Shot |
 |---|---|
-| Start | Low orbit, looking along the horizon |
+| Start | Following a real spacecraft (the ISS by default), or low orbit along the horizon |
 | Build, host, phone console | The spacecraft in the foreground in sunlight, the Earth behind it. Drag to turn it. |
 | Flight | Chase view behind the spacecraft, then the whole Earth for the finale |
 | Report | The whole Earth held to one side, dimmed behind the report |
 
 - **Space is photographic; the interface is quiet.** The Earth uses real day, night and cloud imagery. The spacecraft is a detailed model built from the player's design. Panels are plain and dark so the scene carries the look.
+- **Real neighbours share the sky.** The ISS, Hubble, Landsat 9, a GOES weather satellite and the Webb telescope fly on their real orbits, built from the same parts kit as the player's spacecraft. The start screen follows one of them, and they are labelled during the flight.
 - **The player gets something back.** Science shows as faint gold ground tracks on the globe, and a successful mission earns a mission patch.
 
 ## Palette
@@ -59,7 +60,7 @@ Read this before changing any UI. It exists so the game keeps one identity, whoe
 
 | Path | Contents |
 |---|---|
-| `src/World` | The persistent 3D scene: camera shots, Earth, spacecraft model. Loaded on demand. |
+| `src/World` | The persistent 3D scene: camera shots, Earth, spacecraft model, and the real spacecraft in `Landmarks`. Loaded on demand. |
 | `src/Interface` | Screens, controls, readouts, team panels and the flat diagrams used as a fallback without WebGL |
 | `src/Styles/Space.css` | All styling and the tokens above |
 | `public/Textures` | Earth imagery (see the README for credits) |

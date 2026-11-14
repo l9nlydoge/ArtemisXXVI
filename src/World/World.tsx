@@ -4,14 +4,17 @@ import { Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { CubeCamera, HalfFloatType, Matrix4, Quaternion, Vector3, WebGLCubeRenderTarget, type DirectionalLight, type Group, type Object3D } from 'three'
+import { Catalog } from '../Engine/Catalog/Catalog'
 import { useGameStore } from '../State/GameStore'
 import { Screen } from '../State/Screen'
 import { useMission } from '../State/UseMission'
-import { CameraDirector, type CraftFrame } from './CameraDirector'
+import { CameraDirector, type CraftFrame, type Subject } from './CameraDirector'
 import { DockControls } from './DockControls'
 import { CoveragePainter } from './Earth/CoveragePainter'
 import { Globe } from './Earth/Globe'
 import { OrbitPath } from './Earth/OrbitPath'
+import { LandmarkFleet } from './Landmarks/LandmarkFleet'
+import { LandmarkTrack } from './Landmarks/LandmarkTrack'
 import { MotionPreference } from './MotionPreference'
 import { Shot, ShotList } from './Shot'
 import { SpacecraftBlueprint } from './Spacecraft/SpacecraftBlueprint'
@@ -28,11 +31,13 @@ function Scene({ detailed }: { detailed: boolean }) {
   const airborne = screen === Screen.Flight || screen === Screen.Debrief
   const flightKey = airborne ? seed : undefined
 
-  const path = useMemo(() => new OrbitPath(resolved.orbit), [resolved.orbit])
+  const path = useMemo(() => OrbitPath.of(resolved.orbit), [resolved.orbit])
   const blueprint = useMemo(() => new SpacecraftBlueprint(resolved), [resolved])
   const painter = useMemo(() => new CoveragePainter(path, resolved.copies), [path, resolved.copies, flightKey])
   const ring = useMemo(() => path.ring(), [path])
   const director = useMemo(() => new CameraDirector(), [])
+  const tracks = useMemo(() => Catalog.shared.landmarks.items.map((landmark) => new LandmarkTrack(landmark)), [])
+  const scene3 = useRef<{ labelled: boolean; visited?: string }>({ labelled: false })
   const dock = useMemo(() => new DockControls(), [])
   const reflection = useMemo(() => {
     const target = new WebGLCubeRenderTarget(256, { type: HalfFloatType })
@@ -43,6 +48,7 @@ function Scene({ detailed }: { detailed: boolean }) {
   const sun = useRef<DirectionalLight>(null)
   const fill = useRef<DirectionalLight>(null)
   const fleetGroup = useRef<Group>(null)
+  const landmarkGroup = useRef<Group>(null)
   const ringGroup = useRef<Group>(null)
   const fleet = useRef<(Group | null)[]>([])
   const wings = useRef(new WeakMap<Group, Object3D[]>())
@@ -78,7 +84,8 @@ function Scene({ detailed }: { detailed: boolean }) {
 
   useFrame(({ camera, size }, delta) => {
     const game = useGameStore.getState()
-    const shot = ShotList.for(game.screen, game.flight.view)
+    const shot = ShotList.for(game.screen, game.flight.view, Boolean(game.tourId))
+    const visited = shot === Shot.Visit ? tracks.find((track) => track.landmark.id === game.tourId) : undefined
     const flying = ShotList.isAirborne(shot)
     const current = state.current
     const step = Math.min(delta, 0.1)
@@ -113,17 +120,23 @@ function Scene({ detailed }: { detailed: boolean }) {
       arrays.forEach((array) => { array.rotation.x = tilt })
     })
 
+    tracks.forEach((track) => track.advance(MotionPreference.reduced ? 0 : step, track === visited))
+    scene3.current.labelled = shot !== Shot.Dock && shot !== Shot.Report
+    scene3.current.visited = visited?.landmark.id
+
     locate(current.u)
-    if (fleetGroup.current) fleetGroup.current.visible = shot !== Shot.Start
+    if (fleetGroup.current) fleetGroup.current.visible = shot !== Shot.Start && shot !== Shot.Visit
     if (ringGroup.current) ringGroup.current.visible = flying
 
     if (current.frame++ % reflectionEvery === 0 && fleetGroup.current) {
       const shown = fleetGroup.current.visible
       fleetGroup.current.visible = false
-      reflection.camera.position.copy(shot === Shot.Start ? camera.position : craft.position)
+      if (landmarkGroup.current) landmarkGroup.current.visible = false
+      reflection.camera.position.copy(visited ? visited.frame.position : shot === Shot.Start ? camera.position : craft.position)
       reflection.camera.update(gl, scene)
       reflection.target.texture.needsPMREMUpdate = true
       fleetGroup.current.visible = shown
+      if (landmarkGroup.current) landmarkGroup.current.visible = true
     }
 
     const size3 = path.craftSize
@@ -140,12 +153,13 @@ function Scene({ detailed }: { detailed: boolean }) {
 
     dock.enabled = shot === Shot.Dock
     dock.advance(delta)
-    director.update(camera, shot, craft, path, dock, size.width / size.height, delta)
+    const subject: Subject | undefined = visited && { frame: visited.frame, size: visited.size, far: visited.path.radius > 3, halo: visited.path.isHalo }
+    director.update(camera, shot, craft, path, dock, size.width / size.height, delta, subject)
 
     if (fill.current) {
-      fill.current.intensity += ((shot === Shot.Dock ? 1.5 : 0) - fill.current.intensity) * ease
+      fill.current.intensity += ((shot === Shot.Visit ? 3.2 : shot === Shot.Dock ? 1.5 : 0) - fill.current.intensity) * ease
       fill.current.position.copy(camera.position)
-      fill.current.target.position.copy(craft.position)
+      fill.current.target.position.copy(visited ? visited.frame.position : craft.position)
       fill.current.target.updateMatrixWorld()
     }
   })
@@ -175,6 +189,9 @@ function Scene({ detailed }: { detailed: boolean }) {
       <Stars radius={300} depth={80} count={2600} factor={5} saturation={0} fade speed={0} />
       <group ref={earth}>
         <Globe painter={painter} onLoaded={markWorldReady} />
+      </group>
+      <group ref={landmarkGroup}>
+        <LandmarkFleet tracks={tracks} labelled={() => scene3.current.labelled} visiting={() => scene3.current.visited} />
       </group>
       <group ref={ringGroup}>
         <Line points={ring} color="#f0bc4f" lineWidth={1} transparent opacity={0.28} />

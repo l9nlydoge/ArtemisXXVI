@@ -1,6 +1,7 @@
 import { Bus } from './Bus'
 import { CommsBand } from './CommsBand'
 import { Instrument } from './Instrument'
+import { Landmark } from './Landmark'
 import { DedicatedPricing, RidesharePricing } from './LaunchPricing'
 import { LaunchVehicle } from './LaunchVehicle'
 import { Orbit } from './Orbit'
@@ -77,6 +78,14 @@ export class Catalog {
   readonly solarArrays = new Registry<SolarArrayType>([
     new SolarArrayType('Rigid', 'Rigid Panels', 350, 11.7, 0.5, [Sources.SmallSatPower]),
     new SolarArrayType('RollOut', 'Roll-Out Array', 350, 3.5, 1.5, [Sources.SmallSatPower]),
+  ])
+
+  readonly landmarks = new Registry<Landmark>([
+    new Landmark('Station', 'International Space Station', { orbitClass: OrbitClass.Leo, altitudeKm: 408, inclinationDeg: 51.6, periodMin: 92.9, lengthM: 109, launchedYear: 1998 }, [Sources.StationFacts]),
+    new Landmark('Hubble', 'Hubble Space Telescope', { orbitClass: OrbitClass.Leo, altitudeKm: 483, inclinationDeg: 28.5, periodMin: 95, lengthM: 13, launchedYear: 1990 }, [Sources.HubbleNumbers]),
+    new Landmark('Landsat', 'Landsat 9', { orbitClass: OrbitClass.Sso, altitudeKm: 705, inclinationDeg: 98.2, periodMin: 99, lengthM: 9.6, launchedYear: 2021 }, [Sources.Landsat9]),
+    new Landmark('Goes', 'GOES weather satellite', { orbitClass: OrbitClass.Geo, altitudeKm: 35786, inclinationDeg: 0, periodMin: 1436, lengthM: 6.1, launchedYear: 2016 }, [Sources.GoesSatellites]),
+    new Landmark('Webb', 'James Webb Space Telescope', { orbitClass: OrbitClass.L2, altitudeKm: 1500000, inclinationDeg: 0, periodMin: 262980, lengthM: 21, launchedYear: 2021 }, [Sources.WebbOrbit]),
   ])
 
   readonly scenarios = new Registry<Scenario>([

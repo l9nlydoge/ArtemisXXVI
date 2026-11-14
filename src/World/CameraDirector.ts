@@ -10,6 +10,13 @@ export interface CraftFrame {
   normal: Vector3
 }
 
+export interface Subject {
+  frame: CraftFrame
+  size: number
+  far: boolean
+  halo: boolean
+}
+
 class Pose {
   readonly position = new Vector3()
   readonly look = new Vector3()
@@ -53,9 +60,9 @@ export class CameraDirector {
 
   constructor(private readonly transitionSeconds = 2.4) {}
 
-  update(camera: Camera, shot: Shot, craft: CraftFrame, path: OrbitPath, dock: DockControls, aspect: number, delta: number): void {
+  update(camera: Camera, shot: Shot, craft: CraftFrame, path: OrbitPath, dock: DockControls, aspect: number, delta: number, subject?: Subject): void {
     this.startAngle += (delta * Math.PI * 2) / CameraDirector.startLapSeconds
-    this.compose(shot, craft, path, dock, aspect)
+    this.compose(shot, craft, path, dock, aspect, subject)
     if (this.shot === undefined) {
       this.current.copy(this.target)
     } else if (shot !== this.shot) {
@@ -72,7 +79,7 @@ export class CameraDirector {
     camera.lookAt(this.current.look)
   }
 
-  private compose(shot: Shot, craft: CraftFrame, path: OrbitPath, dock: DockControls, aspect: number): void {
+  private compose(shot: Shot, craft: CraftFrame, path: OrbitPath, dock: DockControls, aspect: number, subject?: Subject): void {
     const size = path.craftSize
     const portrait = aspect < 0.9
     const { position, look, up } = this.target
@@ -85,6 +92,22 @@ export class CameraDirector {
         position.copy(this.startRadial).multiplyScalar(CameraDirector.startAltitude)
         look.copy(position).add(this.startTangent).addScaledVector(this.startRadial, portrait ? -0.62 : -0.5)
         up.copy(this.startRadial).addScaledVector(this.startNormal, 0.2).normalize()
+        return
+      }
+      case Shot.Visit: {
+        if (!subject) return
+        const { frame, size: span, far, halo } = subject
+        position.copy(frame.position)
+        if (halo) position.addScaledVector(frame.radial, -span * 0.55).addScaledVector(frame.tangent, span * 1.7).addScaledVector(frame.normal, -span * 1.1)
+        else if (far) position.addScaledVector(frame.radial, span * 2.1).addScaledVector(frame.tangent, -span * 0.45).addScaledVector(frame.normal, -span * 0.8)
+        else position.addScaledVector(frame.radial, span * 0.55).addScaledVector(frame.tangent, -span * 1.7).addScaledVector(frame.normal, -span * 1.25)
+        this.forward.subVectors(frame.position, position).normalize()
+        up.copy(far && !halo ? frame.tangent : frame.radial)
+        this.right.crossVectors(this.forward, up).normalize()
+        this.screenUp.crossVectors(this.right, this.forward).normalize()
+        look.copy(frame.position)
+        if (portrait) look.addScaledVector(this.screenUp, -span * 0.62)
+        else look.addScaledVector(this.right, -span * 0.6).addScaledVector(this.screenUp, -span * 0.5)
         return
       }
       case Shot.Dock: {

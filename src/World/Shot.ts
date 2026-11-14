@@ -3,6 +3,7 @@ import { CameraView } from './CameraView'
 
 export enum Shot {
   Start = 'Start',
+  Visit = 'Visit',
   Dock = 'Dock',
   Chase = 'Chase',
   Wide = 'Wide',
@@ -10,10 +11,10 @@ export enum Shot {
 }
 
 export class ShotList {
-  static for(screen: Screen, flightView: CameraView): Shot {
+  static for(screen: Screen, flightView: CameraView, touring: boolean): Shot {
     switch (screen) {
       case Screen.Menu:
-        return Shot.Start
+        return touring ? Shot.Visit : Shot.Start
       case Screen.Flight:
         return flightView === CameraView.Chase ? Shot.Chase : Shot.Wide
       case Screen.Debrief:

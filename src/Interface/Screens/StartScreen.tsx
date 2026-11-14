@@ -6,6 +6,7 @@ import { useTranslator } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
 import { RoomCode } from '../../Sync/RoomCode'
 import { MissionWall } from '../Readouts/MissionWall'
+import { TourPanel } from '../Readouts/TourPanel'
 
 export function StartScreen() {
   const translator = useTranslator()
@@ -39,30 +40,33 @@ export function StartScreen() {
       </header>
 
       <div className="Deck">
-        <section className="MissionList Panel">
-          {Catalog.shared.scenarios.items.map((scenario) => (
-            <article key={scenario.id} className="MissionRow">
-              <div>
-                <h2>{scenario.name}</h2>
-                <p>{translator.t(`Scenario.${scenario.id}.Briefing`)}</p>
-                <dl>
-                  <div><dt>{translator.t('Brief.Budget')}</dt><dd>{translator.t('Fact.Cost', { cost: scenario.spec.budgetMusd })}</dd></div>
-                  <div><dt>{translator.t('Brief.Duration')}</dt><dd>{translator.t('Brief.Years', { years: scenario.spec.targetYears })}</dd></div>
-                </dl>
-              </div>
-              <div className="Actions">
-                <button type="button" className="Primary" onClick={() => startSolo(scenario.id)}>{translator.t('Menu.PlaySolo')}</button>
-                <button type="button" onClick={() => void hostTeam(scenario.id)}>{translator.t('Menu.HostTeam')}</button>
-              </div>
-            </article>
-          ))}
-          <form className="JoinForm" onSubmit={(event) => { event.preventDefault(); if (RoomCode.isValid(code)) void joinTeam(code) }}>
-            <label htmlFor="RoomCodeInput">{translator.t('Menu.JoinPrompt')}</label>
-            <input id="RoomCodeInput" value={code} autoCapitalize="characters" autoComplete="off" maxLength={4} placeholder="ABCD" onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
-            <button type="submit" disabled={!RoomCode.isValid(code)}>{translator.t('Menu.JoinTeam')}</button>
-          </form>
-        </section>
-        <MissionWall />
+        <div className="MainDeck">
+          <section className="MissionList Panel">
+            {Catalog.shared.scenarios.items.map((scenario) => (
+              <article key={scenario.id} className="MissionRow">
+                <div>
+                  <h2>{scenario.name}</h2>
+                  <p>{translator.t(`Scenario.${scenario.id}.Briefing`)}</p>
+                  <dl>
+                    <div><dt>{translator.t('Brief.Budget')}</dt><dd>{translator.t('Fact.Cost', { cost: scenario.spec.budgetMusd })}</dd></div>
+                    <div><dt>{translator.t('Brief.Duration')}</dt><dd>{translator.t('Brief.Years', { years: scenario.spec.targetYears })}</dd></div>
+                  </dl>
+                </div>
+                <div className="Actions">
+                  <button type="button" className="Primary" onClick={() => startSolo(scenario.id)}>{translator.t('Menu.PlaySolo')}</button>
+                  <button type="button" onClick={() => void hostTeam(scenario.id)}>{translator.t('Menu.HostTeam')}</button>
+                </div>
+              </article>
+            ))}
+            <form className="JoinForm" onSubmit={(event) => { event.preventDefault(); if (RoomCode.isValid(code)) void joinTeam(code) }}>
+              <label htmlFor="RoomCodeInput">{translator.t('Menu.JoinPrompt')}</label>
+              <input id="RoomCodeInput" value={code} autoCapitalize="characters" autoComplete="off" maxLength={4} placeholder="ABCD" onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
+              <button type="submit" disabled={!RoomCode.isValid(code)}>{translator.t('Menu.JoinTeam')}</button>
+            </form>
+          </section>
+          <MissionWall />
+        </div>
+        <TourPanel />
       </div>
 
       <p className="Colophon">{translator.t('App.Colophon')}</p>

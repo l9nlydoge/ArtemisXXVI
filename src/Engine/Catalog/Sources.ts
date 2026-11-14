@@ -35,4 +35,7 @@ export const Sources = {
   GeoEclipse: 'https://www.ospo.noaa.gov/operations/goes/eclipse.html',
   WebbOrbit: 'https://science.nasa.gov/mission/webb/orbit/',
   DeltaV: 'https://en.wikipedia.org/wiki/Delta-v_budget',
+  StationFacts: 'https://www.nasa.gov/international-space-station/space-station-facts-and-figures/',
+  HubbleNumbers: 'https://science.nasa.gov/mission/hubble/overview/hubble-by-the-numbers/',
+  GoesSatellites: 'https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites',
 } as const

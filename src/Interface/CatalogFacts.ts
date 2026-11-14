@@ -1,4 +1,5 @@
 import type { Bus } from '../Engine/Catalog/Bus'
+import { Catalog } from '../Engine/Catalog/Catalog'
 import type { CommsBand } from '../Engine/Catalog/CommsBand'
 import type { LaunchVehicle } from '../Engine/Catalog/LaunchVehicle'
 import type { Orbit } from '../Engine/Catalog/Orbit'
@@ -26,11 +27,13 @@ export class CatalogFacts {
     const t = this.translator
     const { periodMin, eclipseMin, continuousContact, contactMinPerStation } = orbit.spec
     const period = periodMin > 100000 ? t.t('Fact.HaloOrbit') : periodMin > 600 ? t.t('Fact.PeriodHours', { hours: Numbers.round(periodMin / 60) }) : t.t('Fact.PeriodMinutes', { minutes: Numbers.round(periodMin) })
+    const neighbours = Catalog.shared.landmarks.items.filter((landmark) => landmark.spec.orbitClass === orbit.orbitClass).map((landmark) => landmark.name)
     return [
       t.t('Fact.Fit', { fit: Numbers.percent(this.design.scenario.orbitFit(orbit.orbitClass)) }),
       period,
       eclipseMin === 0 ? t.t('Fact.NoShadow') : t.t('Fact.Shadow', { minutes: eclipseMin }),
       continuousContact ? t.t('Fact.ContinuousContact') : t.t('Fact.Contact', { minutes: contactMinPerStation }),
+      ...(neighbours.length ? [t.t('Fact.Neighbours', { names: neighbours.join(', ') })] : []),
     ]
   }
 

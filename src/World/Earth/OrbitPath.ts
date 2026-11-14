@@ -16,13 +16,18 @@ export class OrbitPath {
   private readonly haloAxisA = new Vector3()
   private readonly haloAxisB = new Vector3()
 
-  constructor(orbit: Orbit) {
-    this.isHalo = orbit.orbitClass === OrbitClass.L2
-    this.radius = this.isHalo ? OrbitPath.haloDistance : (OrbitPath.earthRadiusKm + orbit.spec.altitudeKm) / OrbitPath.earthRadiusKm
-    this.inclination = (orbit.spec.inclinationDeg * Math.PI) / 180
-    this.orbitsPerDay = this.isHalo ? Number.POSITIVE_INFINITY : 1440 / orbit.spec.periodMin
+  constructor(spec: { altitudeKm: number; inclinationDeg: number; periodMin: number; halo: boolean }) {
+    this.isHalo = spec.halo
+    this.radius = this.isHalo ? OrbitPath.haloDistance : (OrbitPath.earthRadiusKm + spec.altitudeKm) / OrbitPath.earthRadiusKm
+    this.inclination = (spec.inclinationDeg * Math.PI) / 180
+    this.orbitsPerDay = this.isHalo ? Number.POSITIVE_INFINITY : 1440 / spec.periodMin
     this.haloAxisA.crossVectors(OrbitPath.sunDirection, new Vector3(0, 1, 0)).normalize()
     this.haloAxisB.crossVectors(OrbitPath.sunDirection, this.haloAxisA).normalize()
+  }
+
+  static of(orbit: Orbit): OrbitPath {
+    const { altitudeKm, inclinationDeg, periodMin } = orbit.spec
+    return new OrbitPath({ altitudeKm, inclinationDeg, periodMin, halo: orbit.orbitClass === OrbitClass.L2 })
   }
 
   get craftSize(): number {
