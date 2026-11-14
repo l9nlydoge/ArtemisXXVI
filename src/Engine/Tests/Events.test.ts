@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
-import { AsteroidFlyby } from '../Events/AsteroidFlyby'
+import { AsteroidFlyby, ObservationHistory } from '../Events/AsteroidFlyby'
 import { Channel } from '../Events/Channel'
 import { DateWindow } from '../Events/DateWindow'
-import { ExoplanetTransit } from '../Events/ExoplanetTransit'
+import { ExoplanetTarget, ObservingMode } from '../Events/ExoplanetTarget'
 import { RadiationBand, RadiationBands } from '../Events/RadiationBand'
 import { Rarity } from '../Events/Rarity'
 import type { AsteroidRecord, SpaceWeather } from '../Events/Records'
@@ -20,14 +20,14 @@ describe('Asteroid flyby', () => {
   test('2019 OK, pinned, plays as in the spec', () => {
     const event = AsteroidFlyby.fromRecord(ok, true)
     expect(event.kind).toBe(EventKind.Asteroid)
-    expect(event.id).toBe('Asteroid.3843336')
+    expect(event.id).toBe('Asteroid.2019OK')
     expect(signals(event)).toEqual([1, 2, 1])
     expect(channels(event)).toEqual({ Visible: 9, Spectrum: 6, Radar: 11 })
     expect(event.rarity).toBe(Rarity.Headline)
     expect(event.startsUnidentified).toBe(true)
     expect(event.peakRadiation).toBe(0)
-    expect(event.dateUtc).toBe('2019-07-25T01:22:00Z')
-    expect(event.learned.key).toBe('Learned.Asteroid.3843336')
+    expect(event.dateUtc).toBe('2019-07-25T01:21:00Z')
+    expect(event.learned.key).toBe('Learned.Asteroid.2019OK')
   })
 
   test('2019 OD is a four-turn close pass and notable', () => {
@@ -36,7 +36,27 @@ describe('Asteroid flyby', () => {
     expect(channels(event)).toEqual({ Visible: 9, Spectrum: 6, Radar: 11 })
     expect(event.rarity).toBe(Rarity.Notable)
     expect(event.startsUnidentified).toBe(false)
-    expect(event.learned.key).toBe('Learned.Asteroid')
+    expect(event.learned.key).toBe('Learned.Asteroid.SeenBeforeAndAfter')
+  })
+
+  test('the card says whether the pass was ever observed', () => {
+    const history = (firstObserved: string, lastObserved: string) => AsteroidFlyby.fromRecord({ ...od, firstObserved, lastObserved })
+    expect(od.dateUtc.slice(0, 10)).toBe('2019-07-24')
+    expect(history('2019-07-05', '2019-07-25').history).toBe(ObservationHistory.SeenBeforeAndAfter)
+    expect(history('2019-07-24', '2019-07-24').history).toBe(ObservationHistory.SeenBeforeAndAfter)
+    expect(history('2019-07-25', '2019-09-01').history).toBe(ObservationHistory.FirstSeenAfter)
+    expect(history('2015-01-01', '2019-07-23').history).toBe(ObservationHistory.LastSeenBefore)
+    const late = history('2019-07-26', '2019-09-06')
+    expect(late.facts[3]).toMatchObject({ key: 'Fact.Observed.FirstSeenAfter', params: { first: '2019-07-26' } })
+    expect(late.learned.key).toBe('Learned.Asteroid.FirstSeenAfter')
+    expect(history('2015-01-01', '2019-07-23').learned).toMatchObject({ key: 'Learned.Asteroid.LastSeenBefore', params: { last: '2019-07-23' } })
+    expect(AsteroidFlyby.fromRecord(ok1).history).toBe(ObservationHistory.FirstSeenAfter)
+    expect(() => history('July 2019', '2019-07-25')).toThrow()
+  })
+
+  test('a size worked out from brightness is called an estimate', () => {
+    expect(AsteroidFlyby.fromRecord(od).facts[2].key).toBe('Fact.Diameter')
+    expect(AsteroidFlyby.fromRecord({ ...od, diameterMeasured: true }).facts[2].key).toBe('Fact.DiameterMeasured')
   })
 
   test('2019 OK1 is slow, distant, common and out of radar range', () => {
@@ -75,6 +95,7 @@ describe('Asteroid flyby', () => {
       ['Fact.Speed', { speed: 24.5 }],
       ['Fact.MissDistance', { km: 71355, lunar: 0.19 }],
       ['Fact.Diameter', { min: 58, max: 130 }],
+      ['Fact.Observed.SeenBeforeAndAfter', { name: '2019 OK', km: 71355, lunar: 0.19, first: '2017-02-21', last: '2019-07-25' }],
     ])
     expect(event.sourceUrl).toContain('ssd.jpl.nasa.gov')
   })
@@ -98,11 +119,42 @@ describe('Solar storm', () => {
     expect(storm.id).toBe('Storm.2024-05-11')
   })
 
-  test('10 May 2024 rounds Kp 8.67 down to 8', () => {
+  test('a reading is stamped at the end of its three hours, so midnight belongs to the evening before', () => {
     const storm = SolarStorm.forWindow(day(10), weather)!
+    expect(storm.reading.kp).toBe(9)
+    expect(storm.peak).toBe(12)
+    expect(storm.dateUtc).toBe('2024-05-10T21:00:00Z')
+    expect(storm.id).toBe('Storm.2024-05-10')
+    const only = (timeUtc: string) => ({ ...Fixtures.quietWeather, storms: [{ ...weather.storms[0], kpReadings: [{ timeUtc, kp: 6 }] }] })
+    expect(SolarStorm.forWindow(day(10), only('2024-05-11T00:00:00Z'))?.reading.kp).toBe(6)
+    expect(SolarStorm.forWindow(day(11), only('2024-05-11T00:00:00Z'))).toBeUndefined()
+    expect(SolarStorm.forWindow(day(11), only('2024-05-11T03:00:00Z'))?.dateUtc).toBe('2024-05-11T00:00:00Z')
+    expect(SolarStorm.forWindow(day(10), only('2024-05-10T03:00:00Z'))?.dateUtc).toBe('2024-05-10T00:00:00Z')
+    expect(SolarStorm.forWindow(day(10), only('2024-05-10T00:00:00Z'))).toBeUndefined()
+  })
+
+  test('a Kp of 8.67 counts as 8', () => {
+    const storm = SolarStorm.forWindow(day(11), { ...Fixtures.quietWeather, storms: [{ ...weather.storms[0], kpReadings: [{ timeUtc: '2024-05-11T09:00:00Z', kp: 8.67 }] }] })!
     expect(storm.reading.kp).toBe(8)
-    expect(storm.peak).toBe(10)
-    expect(radiation(storm)).toEqual([3, 7, 10, 7, 3])
+    expect(storm.peak).toBe(8)
+    expect(radiation(storm)).toEqual([2, 6, 8, 6, 2])
+  })
+
+  test('12 May 2024 is a notable Kp 7 storm with particles still arriving', () => {
+    const storm = SolarStorm.forWindow(day(12), weather)!
+    expect(storm.reading.kp).toBe(7)
+    expect(storm.reading.particles).toBe(true)
+    expect(storm.peak).toBe(8)
+    expect(radiation(storm)).toEqual([3, 8, 6, 3])
+    expect(storm.rarity).toBe(Rarity.Notable)
+  })
+
+  test('lead times count from the storm, not from the start of a long leg', () => {
+    const longLeg = new DateWindow('2024-05-06T00:00:00Z', '2024-05-14T00:00:00Z')
+    const flareAt = (peakUtc: string) => SolarStorm.forWindow(longLeg, { ...weather, flaresAvailable: true, flares: [{ id: 'F', weekId: 'Storm', peakUtc, classType: 'X1.0', detectedBy: ['GOES-P: EXIS 1.0-8.0'], url: '' }] })!.reading.flareClass
+    expect(flareAt('2024-05-07T15:00:00Z')).toBe(FlareClass.X)
+    expect(flareAt('2024-05-07T14:59:00Z')).toBe(FlareClass.None)
+    expect(flareAt('2024-05-06T01:00:00Z')).toBe(FlareClass.None)
   })
 
   test('13 May 2024 is a short moderate storm with no particle event', () => {
@@ -117,7 +169,7 @@ describe('Solar storm', () => {
   })
 
   test('days with no reading of Kp 5 or more have no storm', () => {
-    expect([8, 9, 12].map((date) => SolarStorm.forWindow(day(date), weather))).toEqual([undefined, undefined, undefined])
+    expect([8, 9].map((date) => SolarStorm.forWindow(day(date), weather))).toEqual([undefined, undefined])
     const mild: SpaceWeather = { ...Fixtures.quietWeather, storms: [{ ...weather.storms[0], kpReadings: [{ timeUtc: '2024-05-11T00:00:00Z', kp: 4.67 }] }] }
     expect(SolarStorm.forWindow(day(11), mild)).toBeUndefined()
   })
@@ -138,7 +190,7 @@ describe('Solar storm', () => {
 
   test('when flare data exists the strongest flare in the 72 hours before decides the channel', () => {
     const withFlares = (classes: string[], peakUtc = '2024-05-09T09:00:00Z') =>
-      SolarStorm.forWindow(day(11), { ...weather, flaresAvailable: true, flares: classes.map((classType, index) => ({ id: `F${index}`, weekId: 'Storm', peakUtc, classType, url: '' })) })!
+      SolarStorm.forWindow(day(11), { ...weather, flaresAvailable: true, flares: classes.map((classType, index) => ({ id: `F${index}`, weekId: 'Storm', peakUtc, classType, detectedBy: ['GOES-P: EXIS 1.0-8.0'], url: '' })) })!
     expect(withFlares(['M1.2', 'X2.2', 'C9']).reading.flareClass).toBe(FlareClass.X)
     expect(withFlares(['M1.2', 'X2.2']).capacity(Channel.HighEnergy)).toBe(12)
     expect(withFlares(['M5.0']).capacity(Channel.HighEnergy)).toBe(8)
@@ -161,59 +213,68 @@ describe('Solar storm', () => {
   })
 })
 
-describe('Planet crossing its star', () => {
-  const [trappist, radial, imaged, lens, odd] = Fixtures.exoplanets
+describe('Distant planets as standing targets', () => {
+  const [trappist, radial, imaged, wobbleThatTransits, odd] = Fixtures.exoplanets
 
-  test('a transit around a faint star is a camera target with a quarter more to record', () => {
-    const event = ExoplanetTransit.fromRecord(trappist)
+  test('a planet that transits is a camera target, with a quarter more to record around a faint star', () => {
+    const event = ExoplanetTarget.fromRecord(trappist)
     expect(event.kind).toBe(EventKind.Exoplanet)
+    expect(event.mode).toBe(ObservingMode.Transit)
     expect(channels(event)).toEqual({ Visible: 18 })
     expect(signals(event)).toEqual([1, 1, 1, 1, 1])
     expect(event.isDated).toBe(false)
     expect(event.rarity).toBe(Rarity.Common)
-    expect(event.learned.key).toBe('Learned.Method.Transit')
+    expect(event.learned.key).toBe('Learned.Mode.Transit')
   })
 
-  test('a wobble detection is a spectrometer target', () => {
-    const event = ExoplanetTransit.fromRecord(radial)
+  test('a planet that does not transit and was found by its wobble is a spectrometer target', () => {
+    const event = ExoplanetTarget.fromRecord(radial)
+    expect(event.mode).toBe(ObservingMode.RadialVelocity)
     expect(channels(event)).toEqual({ Spectrum: 14 })
-    expect(event.learned.key).toBe('Learned.Method.RadialVelocity')
+    expect(event.learned.key).toBe('Learned.Mode.RadialVelocity')
+  })
+
+  test('what decides the instrument is whether the planet transits, not how it was discovered', () => {
+    expect(wobbleThatTransits.method).toBe('Radial Velocity')
+    expect(ExoplanetTarget.fromRecord(wobbleThatTransits).mode).toBe(ObservingMode.Transit)
+    expect(channels(ExoplanetTarget.fromRecord(wobbleThatTransits))).toEqual({ Visible: 14 })
+    expect(ExoplanetTarget.fromRecord(odd).mode).toBe(ObservingMode.Transit)
+    expect(ExoplanetTarget.fromRecord({ ...trappist, transits: false }).mode).toBe(ObservingMode.Transit)
   })
 
   test('a directly imaged planet needs a Mk II camera', () => {
-    const event = ExoplanetTransit.fromRecord(imaged)
+    const event = ExoplanetTarget.fromRecord(imaged)
+    expect(event.mode).toBe(ObservingMode.Imaging)
     expect(event.channels.get(Channel.Visible)).toEqual({ capacity: 20, minMark: 2 })
   })
 
-  test('a microlensing event is three turns with a spike', () => {
-    const event = ExoplanetTransit.fromRecord(lens)
-    expect(signals(event)).toEqual([0.5, 3, 0.5])
-    expect(channels(event)).toEqual({ Visible: 10 })
-  })
-
-  test('an unlisted method falls back to a camera target', () => {
-    const event = ExoplanetTransit.fromRecord(odd)
-    expect(channels(event)).toEqual({ Visible: 14 })
-    expect(event.learned.key).toBe('Learned.Method.Transit')
+  test('a one-off detection, such as microlensing, cannot be a standing target', () => {
+    expect(ExoplanetTarget.canObserve(Fixtures.lensedPlanet)).toBe(false)
+    expect(() => ExoplanetTarget.fromRecord(Fixtures.lensedPlanet)).toThrow('standing target')
+    expect(ExoplanetTarget.canObserve({ ...odd, transits: false })).toBe(false)
+    expect(Fixtures.exoplanets.every((record) => ExoplanetTarget.canObserve(record))).toBe(true)
   })
 
   test('a measured atmosphere adds a spectrum channel, or deepens an existing one', () => {
-    expect(channels(ExoplanetTransit.fromRecord(odd, { famous: false, atmosphere: true }))).toEqual({ Visible: 14, Spectrum: 10 })
-    expect(channels(ExoplanetTransit.fromRecord(radial, { famous: false, atmosphere: true }))).toEqual({ Spectrum: 24 })
-    expect(channels(ExoplanetTransit.fromRecord(trappist, { famous: false, atmosphere: true }))).toEqual({ Visible: 18, Spectrum: 13 })
+    expect(channels(ExoplanetTarget.fromRecord(odd, { famous: false, atmosphere: true }))).toEqual({ Visible: 14, Spectrum: 10 })
+    expect(channels(ExoplanetTarget.fromRecord(radial, { famous: false, atmosphere: true }))).toEqual({ Spectrum: 24 })
+    expect(channels(ExoplanetTarget.fromRecord(trappist, { famous: false, atmosphere: true }))).toEqual({ Visible: 18, Spectrum: 13 })
+    expect(channels(ExoplanetTarget.fromRecord(wobbleThatTransits, { famous: false, atmosphere: true }))).toEqual({ Visible: 14, Spectrum: 10 })
   })
 
   test('a famous planet is notable and has its own line', () => {
-    const event = ExoplanetTransit.fromRecord(trappist, { famous: true, atmosphere: false })
+    const event = ExoplanetTarget.fromRecord(trappist, { famous: true, atmosphere: false })
     expect(event.rarity).toBe(Rarity.Notable)
     expect(event.id).toBe('Exoplanet.TRAPPIST1b')
     expect(event.learned.key).toBe('Learned.Exoplanet.TRAPPIST1b')
   })
 
-  test('facts skip numbers the archive does not have', () => {
-    expect(ExoplanetTransit.fromRecord(trappist).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.Radius'])
-    expect(ExoplanetTransit.fromRecord(lens).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered'])
-    expect(ExoplanetTransit.fromRecord(trappist).facts[2].params).toEqual({ lightYears: 41 })
+  test('facts skip numbers the archive does not have, and mark a radius that is only an estimate', () => {
+    expect(ExoplanetTarget.fromRecord(trappist).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.Radius'])
+    expect(ExoplanetTarget.fromRecord(radial).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.RadiusEstimated'])
+    expect(ExoplanetTarget.fromRecord(wobbleThatTransits).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Radius'])
+    expect(ExoplanetTarget.fromRecord(odd).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance'])
+    expect(ExoplanetTarget.fromRecord(trappist).facts[2].params).toEqual({ lightYears: 41 })
   })
 })
 

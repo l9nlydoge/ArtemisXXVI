@@ -185,7 +185,7 @@ describe('Progress rules the first tests left open', () => {
 
 describe('Flare facts', () => {
   const window = new DateWindow('2024-05-11T00:00:00Z', '2024-05-12T00:00:00Z')
-  const withFlares = (classes: string[]) => SolarStorm.forWindow(window, { ...Fixtures.mayWeather, flaresAvailable: true, flares: classes.map((classType, index) => ({ id: `F${index}`, weekId: 'Storm', peakUtc: '2024-05-09T09:00:00Z', classType, url: '' })) })!
+  const withFlares = (classes: string[]) => SolarStorm.forWindow(window, { ...Fixtures.mayWeather, flaresAvailable: true, flares: classes.map((classType, index) => ({ id: `F${index}`, weekId: 'Storm', peakUtc: '2024-05-09T09:00:00Z', classType, detectedBy: ['GOES-P: EXIS 1.0-8.0'], url: '' })) })!
   const strings: Record<string, string> = English
 
   test('a flare weaker than class C is not reported as an observed flare', () => {

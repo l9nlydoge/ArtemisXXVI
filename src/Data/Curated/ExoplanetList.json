@@ -1,14 +1,57 @@
 [
-  { "name": "TRAPPIST-1 e", "famous": true, "atmosphere": false },
-  { "name": "Kepler-452 b", "famous": false, "atmosphere": false },
-  { "name": "51 Peg b", "famous": true, "atmosphere": false },
-  { "name": "Proxima Cen b", "famous": true, "atmosphere": false },
-  { "name": "WASP-39 b", "famous": true, "atmosphere": true },
-  { "name": "HD 209458 b", "famous": false, "atmosphere": true },
-  { "name": "Kepler-186 f", "famous": false, "atmosphere": false },
-  { "name": "K2-18 b", "famous": false, "atmosphere": true },
-  { "name": "TOI-700 d", "famous": false, "atmosphere": false },
-  { "name": "55 Cnc e", "famous": false, "atmosphere": false },
-  { "name": "HR 8799 b", "famous": false, "atmosphere": false },
-  { "name": "OGLE-2005-BLG-390L b", "famous": false, "atmosphere": false }
+  {
+    "name": "TRAPPIST-1 e",
+    "famous": true,
+    "atmosphere": false
+  },
+  {
+    "name": "Kepler-452 b",
+    "famous": false,
+    "atmosphere": false
+  },
+  {
+    "name": "51 Peg b",
+    "famous": true,
+    "atmosphere": false
+  },
+  {
+    "name": "Proxima Cen b",
+    "famous": true,
+    "atmosphere": false
+  },
+  {
+    "name": "WASP-39 b",
+    "famous": true,
+    "atmosphere": true
+  },
+  {
+    "name": "HD 209458 b",
+    "famous": false,
+    "atmosphere": true
+  },
+  {
+    "name": "Kepler-186 f",
+    "famous": false,
+    "atmosphere": false
+  },
+  {
+    "name": "K2-18 b",
+    "famous": false,
+    "atmosphere": true
+  },
+  {
+    "name": "TOI-700 d",
+    "famous": false,
+    "atmosphere": false
+  },
+  {
+    "name": "55 Cnc e",
+    "famous": false,
+    "atmosphere": false
+  },
+  {
+    "name": "HR 8799 b",
+    "famous": false,
+    "atmosphere": false
+  }
 ]

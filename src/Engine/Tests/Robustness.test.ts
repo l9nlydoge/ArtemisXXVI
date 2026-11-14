@@ -223,12 +223,12 @@ describe('After the spacecraft is lost', () => {
     const flight = lose()
     const encounter = flight.encounter!
     expect(flight.phase).toBe(FlightPhase.Lost)
-    expect(encounter.contact.conditions.map((condition) => condition.radiation)).toEqual([3, 7, 10, 7, 3])
+    expect(encounter.contact.conditions.map((condition) => condition.radiation)).toEqual([4, 8, 12, 8, 4])
     expect(encounter.turnIndex).toBe(2)
     expect(encounter.turnsPlayed).toBe(3)
-    expect(encounter.current.radiation).toBe(10)
+    expect(encounter.current.radiation).toBe(12)
     expect(encounter.visible.map((condition) => condition !== undefined)).toEqual([true, true, true, false, false])
-    expect(encounter.history.map((outcome) => outcome.incoming)).toEqual([3, 7, 10])
+    expect(encounter.history.map((outcome) => outcome.incoming)).toEqual([4, 8, 12])
     expect(encounter.history.at(-1)).toMatchObject({ lost: true, encounterOver: true, hullAfter: 0 })
   })
 
@@ -241,7 +241,7 @@ describe('After the spacecraft is lost', () => {
 
   test('the report names the radiation of the fatal turn and what stood against it', () => {
     const report = lose().report()
-    expect(report.loss).toEqual({ legIndex: 2, eventId: 'Storm.2024-05-10', radiation: 10, shielding: 0, hadActiveShield: false })
+    expect(report.loss).toEqual({ legIndex: 2, eventId: 'Storm.2024-05-10', radiation: 12, shielding: 0, hadActiveShield: false })
     expect(report.legsFlown).toBe(3)
     const shielded = Flight.begin(Fixtures.setup(Fixtures.loadout('SmallSat', [['Camera', 1], ['MagneticShield', 1], ['RadiationShielding', 1]]), 'Storm', 4), options)
     shielded.apply(Commands.hold)

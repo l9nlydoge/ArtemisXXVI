@@ -6,13 +6,20 @@ import { Rarity } from './Rarity'
 import type { AsteroidRecord } from './Records'
 import { EventKind, SpaceEvent, type ChannelSpec, type EventTurn } from './SpaceEvent'
 
+export enum ObservationHistory {
+  SeenBeforeAndAfter = 'SeenBeforeAndAfter',
+  FirstSeenAfter = 'FirstSeenAfter',
+  LastSeenBefore = 'LastSeenBefore',
+}
+
 export class AsteroidFlyby extends SpaceEvent {
   readonly kind = EventKind.Asteroid
   private static readonly images = ['AsteroidA', 'AsteroidB', 'AsteroidC', 'AsteroidD']
 
   private constructor(readonly record: AsteroidRecord, pinned: boolean) {
     const diameter = AsteroidFlyby.diameterM(record)
-    const foundLater = AsteroidFlyby.foundAfterPassing(record)
+    const history = AsteroidFlyby.history(record)
+    const words = { name: record.name, km: Math.round(record.missKm), lunar: Number(record.missLunar.toFixed(2)), first: record.firstObserved, last: record.lastObserved }
     const size = AsteroidFlyby.sizeStep(diameter)
     const channels = new Map<Channel, ChannelSpec>([
       [Channel.Visible, { capacity: 6 + size, minMark: 1 }],
@@ -29,15 +36,10 @@ export class AsteroidFlyby extends SpaceEvent {
       facts: [
         new TextRef('Fact.Speed', { speed: Number(record.speedKmS.toFixed(1)) }),
         new TextRef('Fact.MissDistance', { km: Math.round(record.missKm), lunar: Number(record.missLunar.toFixed(2)) }),
-        new TextRef('Fact.Diameter', { min: Math.round(record.diameterMinM), max: Math.round(record.diameterMaxM) }),
-        ...(foundLater ? [new TextRef('Fact.FoundLater', { year: String(foundLater) })] : []),
+        new TextRef(record.diameterMeasured ? 'Fact.DiameterMeasured' : 'Fact.Diameter', { min: Math.round(record.diameterMinM), max: Math.round(record.diameterMaxM) }),
+        new TextRef(`Fact.Observed.${history}`, words),
       ],
-      learned: new TextRef(pinned ? `Learned.${AsteroidFlyby.idFor(record.id)}` : foundLater ? 'Learned.AsteroidUnseen' : 'Learned.Asteroid', {
-        name: record.name,
-        km: Math.round(record.missKm),
-        lunar: Number(record.missLunar.toFixed(2)),
-        year: String(foundLater ?? ''),
-      }),
+      learned: new TextRef(pinned ? `Learned.${AsteroidFlyby.idFor(record.id)}` : `Learned.Asteroid.${history}`, words),
       sourceUrl: record.url,
       imageId: AsteroidFlyby.images[SeededRandom.hashText(record.id) % AsteroidFlyby.images.length],
     })
@@ -45,6 +47,10 @@ export class AsteroidFlyby extends SpaceEvent {
 
   static fromRecord(record: AsteroidRecord, pinned = false): AsteroidFlyby {
     return new AsteroidFlyby(record, pinned)
+  }
+
+  get history(): ObservationHistory {
+    return AsteroidFlyby.history(this.record)
   }
 
   static idFor(recordId: string): string {
@@ -55,11 +61,12 @@ export class AsteroidFlyby extends SpaceEvent {
     return this.rarity === Rarity.Headline
   }
 
-  private static foundAfterPassing(record: AsteroidRecord): number | undefined {
-    const named = /^(\d{4}) [A-Z]{2}/.exec(record.name)
-    if (!named) return undefined
-    const found = Number(named[1])
-    return found > new Date(UtcDate.parse(record.dateUtc)).getUTCFullYear() ? found : undefined
+  private static history(record: AsteroidRecord): ObservationHistory {
+    const passDay = record.dateUtc.slice(0, 10)
+    for (const day of [record.firstObserved, record.lastObserved]) UtcDate.parse(`${day}T00:00:00Z`)
+    if (record.firstObserved > passDay) return ObservationHistory.FirstSeenAfter
+    if (record.lastObserved < passDay) return ObservationHistory.LastSeenBefore
+    return ObservationHistory.SeenBeforeAndAfter
   }
 
   private static diameterM(record: AsteroidRecord): number {

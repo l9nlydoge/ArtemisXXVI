@@ -109,7 +109,7 @@ In most deck builders you draw a few random cards each turn. Here, every install
 
 Before building, you pick a **week**: a real span of dates. The game shows a forecast taken from the real records, for example:
 
-> **8–14 May 2024.** 2 solar storms, the stronger at the top of the scale. 7 asteroid flybys. 4 planets crossing their stars.
+> **8–13 May 2024.** Storms on four of six legs, two at the top of the scale. 28 asteroid flybys. 11 distant planets.
 
 The forecast is what you design against. This is the mission-design moment.
 
@@ -164,12 +164,14 @@ Every event card is a real record. Its real numbers set how it plays.
 | Event | NASA source | Real numbers used | What they change in play |
 |---|---|---|---|
 | **Asteroid flyby** | NASA/JPL close-approach data (Center for Near-Earth Object Studies) | Size, speed, miss distance, date | Fast means fewer turns. Close means a stronger signal and a radar channel. Large means more to record. |
-| **Solar storm** | Space weather database (DONKI): geomagnetic storms, particle events, flares | Storm strength on the Kp scale, dates | Strength sets the radiation each turn. Dates set which legs it covers. |
-| **Planet crossing its star** | NASA Exoplanet Archive | How the planet was found, star brightness, planet size | The discovery method decides the instrument: a camera for a transit, a spectrometer for a star's wobble. |
+| **Solar storm** | Space weather database (DONKI): geomagnetic storms, particle events, flares | Storm strength on the Kp scale, dates, and which instruments near Earth detected particles and flares | Strength sets the radiation each turn. Dates set which legs it covers. |
+| **Distant planet** | NASA Exoplanet Archive | Whether the planet transits, how it was found, star brightness, planet size | How the planet can be observed decides the instrument: a camera for a transit, a spectrometer for a star's wobble. Planets are standing targets; the game does not time them to their real transits. |
 | **Rare event** | Hand-picked, each with a NASA page | Date, type | High-value contacts: a gamma-ray burst, a visitor from another star, a spacecraft hitting an asteroid on purpose. |
 | **Crossing the South Atlantic Anomaly** | A real region of stronger radiation in low Earth orbit | — | A small radiation hit on some turns, even on a quiet week. |
 
 After you record an object, its card shows one line on what was really learned from it, and a link to the source.
+
+**The cards do not overstate.** Every asteroid pass is computed by NASA/JPL from the asteroid's orbit, and the card says whether anyone actually observed the asteroid around that date, first saw it afterwards, or had lost track of it. Sizes are labelled as estimates. A picture that stands in for an object nobody has photographed is captioned "Representative".
 
 ### 8.1 The weeks
 

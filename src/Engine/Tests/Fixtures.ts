@@ -1,7 +1,7 @@
 import { TextRef } from '../Core/TextRef'
 import { AsteroidFlyby } from '../Events/AsteroidFlyby'
 import { Channel } from '../Events/Channel'
-import { ExoplanetTransit } from '../Events/ExoplanetTransit'
+import { ExoplanetTarget } from '../Events/ExoplanetTarget'
 import { RareEvent } from '../Events/RareEvent'
 import { Rarity } from '../Events/Rarity'
 import type { AsteroidRecord, ExoplanetRecord, SpaceWeather } from '../Events/Records'
@@ -27,6 +27,9 @@ const asteroid = (id: string, name: string, dateUtc: string, speedKmS: number, m
   missKm: missLunar * 384400,
   diameterMinM,
   diameterMaxM,
+  diameterMeasured: false,
+  firstObserved: `${dateUtc.slice(0, 8)}05`,
+  lastObserved: `${dateUtc.slice(0, 5)}09-15`,
   hazardous,
   url: `https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=${id}`,
   weekId: 'Calm',
@@ -35,12 +38,12 @@ const asteroid = (id: string, name: string, dateUtc: string, speedKmS: number, m
 const sampleDays = [20, 21, 22, 23, 24, 25]
 
 export class Fixtures {
-  static readonly okId = '3843336'
+  static readonly okId = '2019OK'
 
   static readonly realAsteroids: readonly AsteroidRecord[] = [
-    { ...asteroid(Fixtures.okId, '2019 OK', '2019-07-25T01:22:00Z', 24.5347, 0.1855, 58, 130), missKm: 71354.98 },
-    { ...asteroid('3843328', '2019 OD', '2019-07-24T13:31:00Z', 19.192, 0.9303, 56, 124), missKm: 357784.86 },
-    { ...asteroid('3843361', '2019 OK1', '2019-07-22T12:00:00Z', 6.1762, 10.0, 38, 86), missKm: 3845781.2 },
+    { ...asteroid(Fixtures.okId, '2019 OK', '2019-07-25T01:21:00Z', 24.535, 0.1856, 58.2, 130), missKm: 71355, firstObserved: '2017-02-21', lastObserved: '2019-07-25' },
+    { ...asteroid('2019OD', '2019 OD', '2019-07-24T13:30:00Z', 19.193, 0.9308, 55.5, 124.2), missKm: 357785, firstObserved: '2019-07-05', lastObserved: '2019-07-25' },
+    { ...asteroid('2019OK1', '2019 OK1', '2019-07-22T16:19:00Z', 6.176, 10.0046, 38.4, 85.9), missKm: 3845781, firstObserved: '2019-07-26', lastObserved: '2019-09-06' },
   ]
 
   static readonly sampleAsteroids: readonly AsteroidRecord[] = sampleDays.flatMap((day, index) => [
@@ -53,12 +56,14 @@ export class Fixtures {
   static readonly asteroids: readonly AsteroidRecord[] = [...Fixtures.realAsteroids, ...Fixtures.sampleAsteroids]
 
   static readonly exoplanets: readonly ExoplanetRecord[] = [
-    { name: 'TRAPPIST-1 b', host: 'TRAPPIST-1', method: 'Transit', year: 2016, facility: 'La Silla Observatory', radiusEarth: 1.116, periodDays: 1.510826, distanceParsec: 12.42988881, starVmag: 17.02, url: 'https://exoplanetarchive.ipac.caltech.edu/overview/TRAPPIST-1%20b' },
-    { name: 'Sample RV b', host: 'Sample RV', method: 'Radial Velocity', year: 1995, facility: 'Sample Observatory', radiusEarth: null, periodDays: 4.23, distanceParsec: 15.5, starVmag: 5.5, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
-    { name: 'Sample Imaged b', host: 'Sample Imaged', method: 'Imaging', year: 2008, facility: 'Sample Observatory', radiusEarth: 13, periodDays: null, distanceParsec: 41, starVmag: 5.96, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
-    { name: 'Sample Lens b', host: 'Sample Lens', method: 'Microlensing', year: 2005, facility: 'Sample Observatory', radiusEarth: null, periodDays: null, distanceParsec: null, starVmag: null, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
-    { name: 'Sample Odd b', host: 'Sample Odd', method: 'Astrometry', year: 2013, facility: 'Sample Observatory', radiusEarth: null, periodDays: null, distanceParsec: 6, starVmag: 9, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
+    { name: 'TRAPPIST-1 b', host: 'TRAPPIST-1', method: 'Transit', year: 2016, facility: 'La Silla Observatory', transits: true, radiusEarth: 1.116, radiusEstimated: false, periodDays: 1.510826, distanceParsec: 12.42988881, starVmag: 17.02, url: 'https://exoplanetarchive.ipac.caltech.edu/overview/TRAPPIST-1%20b' },
+    { name: 'Sample RV b', host: 'Sample RV', method: 'Radial Velocity', year: 1995, facility: 'Sample Observatory', transits: false, radiusEarth: 14.1, radiusEstimated: true, periodDays: 4.23, distanceParsec: 15.5, starVmag: 5.5, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
+    { name: 'Sample Imaged b', host: 'Sample Imaged', method: 'Imaging', year: 2008, facility: 'Sample Observatory', transits: false, radiusEarth: 13, radiusEstimated: false, periodDays: null, distanceParsec: 41, starVmag: 5.96, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
+    { name: 'Sample Wobble b', host: 'Sample Wobble', method: 'Radial Velocity', year: 1999, facility: 'Sample Observatory', transits: true, radiusEarth: 15.6, radiusEstimated: false, periodDays: 3.5, distanceParsec: null, starVmag: 7.65, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
+    { name: 'Sample Odd b', host: 'Sample Odd', method: 'Astrometry', year: 2013, facility: 'Sample Observatory', transits: true, radiusEarth: null, radiusEstimated: false, periodDays: null, distanceParsec: 6, starVmag: 9, url: 'https://exoplanetarchive.ipac.caltech.edu/' },
   ]
+
+  static readonly lensedPlanet: ExoplanetRecord = { name: 'Sample Lens b', host: 'Sample Lens', method: 'Microlensing', year: 2005, facility: 'Sample Observatory', transits: false, radiusEarth: 2.21, radiusEstimated: true, periodDays: null, distanceParsec: 6600, starVmag: null, url: 'https://exoplanetarchive.ipac.caltech.edu/' }
 
   static readonly mayWeather: SpaceWeather = {
     storms: [
@@ -66,12 +71,7 @@ export class Fixtures {
         id: '2024-05-10T15:00:00-GST-001',
         weekId: 'Storm',
         startUtc: '2024-05-10T15:00:00Z',
-        kpReadings: [
-          { timeUtc: '2024-05-10T18:00:00Z', kp: 7.67 },
-          { timeUtc: '2024-05-10T21:00:00Z', kp: 8.67 },
-          { timeUtc: '2024-05-11T00:00:00Z', kp: 9.0 },
-          { timeUtc: '2024-05-11T03:00:00Z', kp: 9.0 },
-        ],
+        kpReadings: ([['10T18', 7.67], ['10T21', 8.67], ['11T00', 9], ['11T03', 9], ['11T06', 8.33], ['11T09', 8.67], ['11T12', 9], ['11T15', 8.67], ['11T18', 8.33], ['11T21', 7.33], ['12T00', 7.33], ['12T03', 6.67], ['12T06', 7]] as [string, number][]).map(([stamp, kp]) => ({ timeUtc: `2024-05-${stamp}:00:00Z`, kp })),
         url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/GST/30693/-1',
       },
       {
@@ -87,9 +87,10 @@ export class Fixtures {
       },
     ],
     particleEvents: [
-      { id: '2024-05-09T13:59:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-09T13:59:00Z', url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30609/-1' },
-      { id: '2024-05-09T14:25:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-09T14:25:00Z', url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30610/-1' },
-      { id: '2024-05-10T12:59:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-10T12:59:00Z', url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30675/-1' },
+      { id: '2024-05-10T12:59:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-10T12:59:00Z', detectedBy: ['SOHO: COSTEP 15.8-39.8 MeV'], url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30675/-1' },
+      { id: '2024-05-10T13:35:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-10T13:35:00Z', detectedBy: ['GOES-P: SEISS >10 MeV'], url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30678/-1' },
+      { id: '2024-05-11T02:10:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-11T02:10:00Z', detectedBy: ['GOES-P: SEISS >100 MeV'], url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30700/-1' },
+      { id: '2024-05-13T14:00:00-SEP-001', weekId: 'Storm', timeUtc: '2024-05-13T14:00:00Z', detectedBy: ['GOES-P: SEISS >10 MeV'], url: 'https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30800/-1' },
     ],
     flares: [],
     flaresAvailable: false,
@@ -133,12 +134,17 @@ export class Fixtures {
 
   static readonly rareSample = Fixtures.event('Rare.Sample', [[Channel.Visible, 12], [Channel.Spectrum, 8]], [{ signal: 1, radiation: 0 }, { signal: 3, radiation: 0 }, { signal: 1, radiation: 0 }], Rarity.Headline, '2019-07-22T23:14:00Z')
 
-  static readonly planets: readonly SpaceEvent[] = Fixtures.exoplanets.map((record, index) => ExoplanetTransit.fromRecord(record, { famous: index === 0, atmosphere: false }))
+  static readonly planets: readonly SpaceEvent[] = Fixtures.exoplanets.map((record, index) => ExoplanetTarget.fromRecord(record, { famous: index === 0, atmosphere: false }))
 
   static readonly calmWeek = new WeekBuilder({ asteroids: Fixtures.asteroids, weather: Fixtures.quietWeather, undated: Fixtures.planets, rare: [Fixtures.rareSample] }).build(Fixtures.calmDefinition)
 
   static readonly stormWeek = new WeekBuilder({
-    asteroids: Fixtures.sampleAsteroids.map((record) => ({ ...record, dateUtc: record.dateUtc.replace(/^2019-07-(\d\d)/, (_, day: string) => `2024-05-${String(Number(day) - 12).padStart(2, '0')}`) })),
+    asteroids: Fixtures.sampleAsteroids.map((record) => ({
+      ...record,
+      dateUtc: record.dateUtc.replace(/^2019-07-(\d\d)/, (_, day: string) => `2024-05-${String(Number(day) - 12).padStart(2, '0')}`),
+      firstObserved: '2024-04-20',
+      lastObserved: '2024-06-10',
+    })),
     weather: Fixtures.mayWeather,
     undated: Fixtures.planets,
     rare: [],

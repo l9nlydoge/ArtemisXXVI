@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 import { AsteroidFlyby } from '../Events/AsteroidFlyby'
 import { Channel } from '../Events/Channel'
 import { DateWindow } from '../Events/DateWindow'
-import { ExoplanetTransit } from '../Events/ExoplanetTransit'
+import { ExoplanetTarget } from '../Events/ExoplanetTarget'
 import { Rarity } from '../Events/Rarity'
 import { SolarStorm } from '../Events/SolarStorm'
 import { CraftState } from '../Flight/CraftState'
@@ -86,7 +86,7 @@ describe('Boundaries', () => {
   })
 
   test('a star of magnitude exactly 12 is not faint and one just dimmer is', () => {
-    const visible = (starVmag: number) => ExoplanetTransit.fromRecord({ ...Fixtures.exoplanets[0], starVmag }).capacity(Channel.Visible)
+    const visible = (starVmag: number) => ExoplanetTarget.fromRecord({ ...Fixtures.exoplanets[0], starVmag }).capacity(Channel.Visible)
     expect(visible(12)).toBe(14)
     expect(visible(12.01)).toBe(18)
   })

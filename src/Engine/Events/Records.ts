@@ -7,6 +7,9 @@ export interface AsteroidRecord {
   missKm: number
   diameterMinM: number
   diameterMaxM: number
+  diameterMeasured: boolean
+  firstObserved: string
+  lastObserved: string
   hazardous: boolean
   url: string
   weekId: string
@@ -29,6 +32,7 @@ export interface ParticleEventRecord {
   id: string
   weekId: string
   timeUtc: string
+  detectedBy: readonly string[]
   url: string
 }
 
@@ -37,6 +41,7 @@ export interface FlareRecord {
   weekId: string
   peakUtc: string
   classType: string
+  detectedBy: readonly string[]
   url: string
 }
 
@@ -53,7 +58,9 @@ export interface ExoplanetRecord {
   method: string
   year: number
   facility: string
+  transits: boolean
   radiusEarth: number | null
+  radiusEstimated: boolean
   periodDays: number | null
   distanceParsec: number | null
   starVmag: number | null

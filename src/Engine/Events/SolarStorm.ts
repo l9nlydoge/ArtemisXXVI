@@ -1,11 +1,14 @@
 import { Numbers } from '../Core/Numbers'
 import { Rules } from '../Core/Rules'
 import { TextRef } from '../Core/TextRef'
+import { UtcDate } from '../Core/UtcDate'
 import { Channel } from './Channel'
 import type { DateWindow } from './DateWindow'
 import { Rarity } from './Rarity'
 import type { SpaceWeather } from './Records'
 import { EventKind, SpaceEvent, type ChannelSpec } from './SpaceEvent'
+
+const HourMs = 3600000
 
 export enum FlareClass {
   None = 'None',
@@ -61,20 +64,28 @@ export class SolarStorm extends SpaceEvent {
   }
 
   static forWindow(window: DateWindow, weather: SpaceWeather): SolarStorm | undefined {
-    const readings = weather.storms.flatMap((storm) => storm.kpReadings.filter((reading) => window.contains(reading.timeUtc)).map((reading) => ({ reading, storm })))
+    const stampLag = Rules.kpStampHours * HourMs
+    const readings = weather.storms
+      .flatMap((storm) => storm.kpReadings.map((reading) => ({ kp: reading.kp, begins: UtcDate.parse(reading.timeUtc) - stampLag, ends: UtcDate.parse(reading.timeUtc), storm })))
+      .filter((reading) => window.contains(new Date(reading.begins).toISOString()))
+      .sort((a, b) => a.begins - b.begins)
     if (readings.length === 0) return undefined
-    const strongest = readings.reduce((best, entry) => (entry.reading.kp > best.reading.kp ? entry : best))
-    const kp = Math.min(9, Math.floor(strongest.reading.kp))
+    const strongest = readings.reduce((best, reading) => (reading.kp > best.kp ? reading : best))
+    const kp = Math.min(9, Math.floor(strongest.kp))
     if (kp < Rules.stormKp) return undefined
 
-    const particleWindow = window.withLead(Rules.particleLeadHours)
-    const flareWindow = window.withLead(Rules.flareLeadHours)
-    const flares = weather.flares.filter((flare) => flareWindow.contains(flare.peakUtc)).map((flare) => SolarStorm.classOf(flare.classType))
+    const begins = readings[0].begins
+    const ends = readings[readings.length - 1].ends
+    const within = (timeUtc: string, leadHours: number) => {
+      const time = UtcDate.parse(timeUtc)
+      return time >= begins - leadHours * HourMs && time < ends
+    }
+    const flares = weather.flares.filter((flare) => within(flare.peakUtc, Rules.flareLeadHours)).map((flare) => SolarStorm.classOf(flare.classType))
     const observed = weather.flaresAvailable
     return new SolarStorm({
-      dateUtc: window.startUtc,
+      dateUtc: new Date(strongest.begins).toISOString().replace('.000Z', 'Z'),
       kp,
-      particles: weather.particleEvents.some((event) => particleWindow.contains(event.timeUtc)),
+      particles: weather.particleEvents.some((event) => within(event.timeUtc, Rules.particleLeadHours)),
       flareClass: observed ? SolarStorm.strongest(flares) : kp >= 8 ? FlareClass.X : FlareClass.M,
       flareObserved: observed,
       sourceUrl: strongest.storm.url,

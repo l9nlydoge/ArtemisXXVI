@@ -12,6 +12,7 @@ export class Rules {
   static readonly fullBonus = 5
   static readonly lostShare = 0.5
   static readonly stormKp = 5
+  static readonly kpStampHours = 3
   static readonly particleLeadHours = 24
   static readonly flareLeadHours = 72
   static readonly asteroidsPerLeg = 6

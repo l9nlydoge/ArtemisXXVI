@@ -6,7 +6,7 @@ export interface LearnedSource {
 
 export class LearnedSources {
   static readonly all: readonly LearnedSource[] = [
-    { eventId: 'Asteroid.2019OK', url: 'https://ssd.jpl.nasa.gov/tools/sbdb_lookup.html#/?sstr=2019%20OK', checkedOn: '2026-11-14' },
+    { eventId: 'Asteroid.2019OK', url: 'https://ssd-api.jpl.nasa.gov/cad.api?des=2019%20OK&date-min=2019-07-25&date-max=2019-07-26&dist-max=1LD', checkedOn: '2026-11-14' },
     { eventId: 'Rare.DartImpact', url: 'https://science.nasa.gov/mission/dart/', checkedOn: '2026-11-14' },
     { eventId: 'Rare.Grb221009A', url: 'https://www.nasa.gov/universe/nasa-missions-study-what-may-be-a-1-in-10000-year-gamma-ray-burst/', checkedOn: '2026-11-14' },
     { eventId: 'Exoplanet.TRAPPIST1e', url: 'https://science.nasa.gov/exoplanet-catalog/trappist-1-e/', checkedOn: '2026-11-14' },

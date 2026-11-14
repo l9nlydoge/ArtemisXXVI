@@ -45,7 +45,9 @@ describe('Week builder', () => {
   })
 
   test('storm legs come from the Kp readings on their dates', () => {
-    expect(storm.legs.map((leg) => leg.storm?.reading.kp)).toEqual([undefined, undefined, 8, 9, undefined, 6])
+    expect(storm.legs.map((leg) => leg.storm?.reading.kp)).toEqual([undefined, undefined, 9, 9, 7, 6])
+    expect(storm.legs.map((leg) => leg.storm?.peak)).toEqual([undefined, undefined, 12, 12, 8, 4])
+    expect(storm.storms.map((each) => each.id)).toEqual(['Storm.2024-05-10', 'Storm.2024-05-11', 'Storm.2024-05-12', 'Storm.2024-05-13'])
     expect(storm.stormOn(3)?.peak).toBe(12)
     expect(storm.stormOn(0)).toBeUndefined()
   })
@@ -99,11 +101,11 @@ describe('Forecast', () => {
 
   test('counts storms and what they ask for', () => {
     const forecast = storm.forecast
-    expect(forecast.stormLegs).toBe(3)
+    expect(forecast.stormLegs).toBe(4)
     expect(forecast.worstBand).toBe(RadiationBand.Severe)
     expect(forecast.unknownsExpected).toBe(false)
-    expect(forecast.channelDemand(Channel.Particles)).toBe(30 * 3 + 36 * 3 + 12 * 1)
-    expect(forecast.channelDemand(Channel.HighEnergy)).toBe(12 * 3 + 12 * 3 + 8 * 1)
+    expect(forecast.channelDemand(Channel.Particles)).toBe(36 * 3 + 36 * 3 + 24 * 2 + 12 * 1)
+    expect(forecast.channelDemand(Channel.HighEnergy)).toBe(12 * 3 + 12 * 3 + 8 * 2 + 8 * 1)
     const shares = [Channel.Visible, Channel.Spectrum, Channel.Radar, Channel.Particles, Channel.HighEnergy].reduce((sum, channel) => sum + forecast.demandShare(channel), 0)
     expect(shares).toBeCloseTo(1)
   })

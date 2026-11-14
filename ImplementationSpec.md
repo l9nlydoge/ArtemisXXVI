@@ -2,7 +2,7 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. Step 3 (data) is done except for the storm download, which is waiting for NASA's demo key to reset. The engine has 237 passing tests and no screens yet. It was reviewed independently against this document twice, and after each review deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
+**Status:** steps 1 (setup), 2 (engine) and 3 (data) of the build plan are done. There are 273 passing tests and no game screens yet. The engine was reviewed independently twice and the data once; after each review deliberate errors were planted in a copy to confirm the tests catch them.
 
 **How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
 
@@ -453,12 +453,25 @@ Source record: one close approach from NASA/JPL's close-approach data service (t
 | Miss distance `d` (lunar distances) | `dist` in astronomical units × 389.17 |
 | Diameter `D` (m) | mean of the smallest and largest estimate. The estimates come from brightness `h`: `1329 / √albedo × 10^(−h/5)` km, with albedo 0.25 for the smallest and 0.05 for the largest. NeoWs publishes the same two figures. A measured `diameter` is used when the record has one. |
 | Hazard flag | whether the object is in the same query repeated with `pha=true` |
-| Date | `jd`, the Julian date, converted to UTC and rounded to the minute |
+| Date | `jd`, the Julian date in Barycentric Dynamical Time, converted to UTC by subtracting 69.2 seconds and rounded to the minute |
+| Observed | `first_obs` and `last_obs` from the Small-Body Database record for the object |
 | Link | the JPL Small-Body Database page for the designation |
 
 An asteroid's id is its designation without spaces, for example `2019OK`.
 
-**Found later.** Some asteroids in the data passed before anyone had seen them: their designation year is later than the year of the pass. Their card says "Not discovered until 2023", and their "what was learned" line says the pass went unseen.
+**Every pass is computed by NASA/JPL from the asteroid's orbit. Whether anyone watched it is a separate fact, and the card states it.** The pass date is compared with the object's first and last recorded observations:
+
+| The pass is | The card says | "What was learned" says |
+|---|---|---|
+| Between the first and last observation | "Observed from 2017-02-21 to 2019-07-25" | its orbit rests on those observations |
+| Before the first observation | "First observed 2019-07-26, after this pass" | it passed before anyone had recorded it |
+| After the last observation | "Last observed 2021-05-17. This pass is computed from its orbit" | nobody recorded it going by |
+
+Of the 77 asteroids in the three weeks, 32 fall in the first group, 28 in the second and 17 in the third.
+
+**Rough passes are left out.** The service gives a three-sigma uncertainty for the time of each pass and a smallest and largest possible distance. A pass is dropped when its time is uncertain by more than an hour, or when the gap between the largest and smallest distance is more than a quarter of the distance. Fifteen were dropped; the snapshot lists them under `leftOut`. One, 2021 JG9, could have passed anywhere from 0.3 to 51 lunar distances.
+
+**Sizes are estimates** and the card says so: "Estimated 58 to 130 m across, from its brightness".
 
 | Derived | Rule |
 |---|---|
@@ -472,19 +485,25 @@ An asteroid's id is its designation without spaces, for example `2019OK`.
 | Rarity | Notable if `d < 1`, or hazard flag, or `D ≥ 140`. Otherwise Common. Headline only when pinned by a week. |
 | Radiation | none |
 
-Worked example, confirmed against the feed on 14 November 2026: **2019 OK**, 25 July 2019 01:22 UT, `v = 24.53`, `d = 0.186`, `D ≈ 94`. So `T = 3`, signal `[1, 2, 1]`, Visible 9, Spectrum 6, Radar 11. Pinned as Headline in the July 2019 week.
+Worked example, confirmed against the data on 14 November 2026: **2019 OK**, 25 July 2019 01:21 UTC, `v = 24.53`, `d = 0.186`, `D ≈ 94`. So `T = 3`, signal `[1, 2, 1]`, Visible 9, Spectrum 6, Radar 11. Pinned as Headline in the July 2019 week.
 
 ### 6.2 Solar storm
 
-Source records: DONKI geomagnetic storms (GST) and solar energetic particle events (SEP), plus flares (FLR) when that endpoint answers (section 7.2).
+Source records: DONKI geomagnetic storms (GST), solar energetic particle events (SEP) and flares (FLR).
 
-A leg is a **storm leg** when any GST Kp reading of 5 or more falls inside the leg's date window.
+**Reading the Kp times.** DONKI stamps each three-hour Kp reading at the end of its three hours: a storm that "starts" at 15:00 has its first reading at 18:00. So a reading stamped at midnight belongs to the evening before. The engine places each reading at its stamp minus three hours.
+
+A leg is a **storm leg** when any reading of Kp 5 or more begins inside the leg's date window.
 
 | Input | Rule |
 |---|---|
-| `kp` | highest `allKpIndex[].kpIndex` inside the window, rounded down to a whole number, capped at 9 |
-| `sep` | true if any SEP `eventTime` falls in the window or the 24 hours before it |
-| `flareClass` | strongest flare class letter (X, M, C) in the window or the 72 hours before it, if flare data is available; otherwise inferred: `kp ≥ 8` → X, otherwise M. The lead is 72 hours because a flare's eruption takes one to three days to reach Earth. |
+| `kp` | highest reading that begins inside the window, rounded down to a whole number, capped at 9 |
+| Storm span | from the start of the leg's first reading to the stamp of its last |
+| `sep` | true if a particle event falls in the storm span or the 24 hours before it |
+| `flareClass` | strongest flare (X or M) in the storm span or the 72 hours before it. The lead is 72 hours because a flare's eruption takes one to three days to reach Earth. If there is none, the storm has no flare and no HighEnergy channel. If flare data could not be downloaded at all, the class is inferred: `kp ≥ 8` → X, otherwise M, and the card says "assumed". |
+| Storm date | the start of the strongest reading |
+
+**Only real detections near Earth count.** DONKI also lists model forecasts and detections at other spacecraft, such as STEREO A or the MAVEN orbiter at Mars. The download keeps a particle event or a flare only if an instrument on GOES, SOHO or ACE recorded it, and keeps only flares of class M or X. Each record carries the instruments that saw it.
 
 | Derived | Rule |
 |---|---|
@@ -493,35 +512,54 @@ A leg is a **storm leg** when any GST Kp reading of 5 or more falls inside the l
 | Radiation by turn | T=4: `round(P × [0.4, 1, 0.8, 0.4])`; T=5: `round(P × [0.3, 0.7, 1, 0.7, 0.3])` |
 | Signal by turn | `2 × radiation[t] / P` |
 | Particles capacity | `3 × P` |
-| HighEnergy capacity | 12 if flare class X; 8 if M; no channel if C, or if flare data exists and shows no flare of class C or stronger in that time |
+| HighEnergy capacity | 12 if flare class X; 8 if M; otherwise no channel |
 | Rarity | `kp ≥ 8` → Headline; `kp = 7` → Notable; otherwise Common |
 
-Worked example, confirmed against DONKI on 14 November 2026: **the leg of 11 May 2024**. Kp reached 9.0 at 00:00 and 03:00 UT that day, and an SEP event began at 12:59 UT on 10 May, inside the 24 hours before. So `P = 12`, `T = 5`, radiation `[4, 8, 12, 8, 4]`, Particles 36, HighEnergy 12, Headline. The leg of 10 May reads Kp 8.67 at 21:00 UT, so `kp = 8`, `P = 10`.
+Worked examples from the downloaded data, May 2024:
 
-### 6.3 Planet crossing its star
+| Leg | Readings that begin in it | `kp` | Particles | `P` | Radiation by turn |
+|---|---|---|---|---|---|
+| 10 May | 7.67, 8.67, 9.0 | 9 | SOHO and GOES, 10 May 12:59 onward | 12 | 4, 8, 12, 8, 4 |
+| 11 May | 9.0 down to 7.33, eight readings | 9 | yes | 12 | 4, 8, 12, 8, 4 |
+| 12 May | 6.67, 7.0, 6.33 | 7 | GOES, 11 May 02:10 | 8 | 3, 8, 6, 3 |
+| 13 May | 5.67, 6.0 | 6 | none in time | 4 | 2, 4, 3, 2 |
+
+The 11 May storm follows class X flares seen by GOES, so it has Particles 36 and HighEnergy 12.
+
+### 6.3 Distant planet
 
 Source record: one row of the Exoplanet Archive table `pscomppars`.
 
+**Planets are standing targets.** They are offered on any leg of any week. The game does not time them to their real transits, and the Sources screen says so. A planet known only from a one-off event, such as a microlensing detection, cannot be a standing target and is not included.
+
 | Input | Field |
 |---|---|
-| Method | `discoverymethod` |
+| Discovery method | `discoverymethod` |
+| Whether it transits | `tran_flag` |
 | Star brightness `V` | `sy_vmag` |
-| Planet radius (Earth radii) | `pl_rade` |
+| Planet radius (Earth radii) | `pl_rade`; `pl_rade_reflink` shows whether it is measured or calculated |
 | Distance (parsecs) | `sy_dist` |
 | Year, facility | `disc_year`, `disc_facility` |
 
+How the planet is observed decides the instrument. That is not always how it was discovered: HD 209458 b was found by its star's wobble and also transits.
+
+| Observing mode | When | Channel |
+|---|---|---|
+| Transit | the planet transits | Visible 14 |
+| Radial velocity | it does not transit and was found by radial velocity | Spectrum 14 |
+| Imaging | it does not transit and was found by imaging | Visible 20, needs Mk II |
+
 | Derived | Rule |
 |---|---|
-| Turns | 5 |
-| Signal | `[1, 1, 1, 1, 1]` |
-| Channel | Transit → Visible 14. Radial Velocity → Spectrum 14. Imaging → Visible 20 with `minMark` 2. Microlensing → Visible 10 with signal `[0.5, 3, 0.5]` and 3 turns. Any other method → Visible 14. |
+| Turns | 5, signal 1 on each |
 | Faint star | if `V > 12`, multiply each capacity amount by 1.25 and round, the atmosphere's 10 included |
 | Atmosphere | if the curated list marks the planet as having a measured atmosphere, add Spectrum 10 |
 | Rarity | Notable if on the curated "famous" list, otherwise Common |
+| Radius fact | "About 14.1 times Earth's radius, estimated" when the archive's value is calculated |
 | Radiation | none |
 | Dated | no |
 
-Planets to fetch, by archive name: TRAPPIST-1 e, Kepler-452 b, 51 Peg b, Proxima Cen b, WASP-39 b (atmosphere), HD 209458 b (atmosphere), Kepler-186 f, K2-18 b (atmosphere), TOI-700 d, 55 Cnc e, HR 8799 b, OGLE-2005-BLG-390L b. The script reports any name the archive does not return.
+The eleven planets: TRAPPIST-1 e, Kepler-452 b, 51 Peg b, Proxima Cen b, WASP-39 b (atmosphere), HD 209458 b (atmosphere), Kepler-186 f, K2-18 b (atmosphere), TOI-700 d, 55 Cnc e, HR 8799 b. Famous: TRAPPIST-1 e, 51 Peg b, Proxima Cen b, WASP-39 b. The script reports any name the archive does not return, and the game refuses to start if the curated list names a planet the snapshot lacks.
 
 ### 6.4 Rare events
 
@@ -553,7 +591,7 @@ A week definition lists six legs, each with a date window, and any pinned events
 
 Expected storms: none. If DONKI shows a storm in these dates, it becomes a storm leg like any other.
 
-The real data gives 14 asteroids within 20 lunar distances: 1, 1, 2, 2, 4 and 4 per leg. The early legs are thin, so they offer one asteroid and one planet. The earlier title, "The one nobody saw coming", was dropped because no NASA page was found in this session to confirm how late 2019 OK was discovered. Its designation shows only that it was found in the second half of July 2019.
+The real data gives 13 well-determined asteroids within 20 lunar distances: 1, 1, 2, 2, 4 and 3 per leg. The early legs are thin, so they offer one asteroid and one planet. The earlier title, "The one nobody saw coming", was dropped because no NASA page was found in this session to confirm how late 2019 OK was discovered. Its designation shows only that it was found in the second half of July 2019.
 
 **AutumnTwentyTwo — "Impact and burst"** (rank 2)
 
@@ -579,7 +617,7 @@ Storm legs: whatever DONKI records for these dates.
 | 5 | 12 May 2024 | — |
 | 6 | 13 May 2024 | — |
 
-Storm legs: from DONKI. Legs 3 and 4 are expected to be Severe.
+Storm legs, from DONKI: legs 3 and 4 at Kp 9 (Severe), leg 5 at Kp 7 (Severe with particles), leg 6 at Kp 6 (High). Autumn 2022 has one storm leg, Kp 6 on 27 September. July 2019 has none.
 
 **Per-leg limit:** at most 6 asteroids per leg are kept, chosen by smallest miss distance. Asteroids beyond 20 lunar distances are dropped.
 
@@ -597,18 +635,22 @@ Reasons: no rate limit or outage can break the game in front of a judge, no key 
 
 ### 7.2 Sources, as used on 14 November 2026
 
-| Source | Request | Result |
-|---|---|---|
-| JPL close-approach data | `GET https://ssd-api.jpl.nasa.gov/cad.api?date-min=…&date-max=…&dist-max=20LD&fullname=true&diameter=true`, and the same with `&pha=true` | **Used for asteroids.** No key, no limit met. |
-| DONKI GST | `GET https://api.nasa.gov/DONKI/GST?startDate=…&endDate=…&api_key=KEY` | Used for storms. Needs the key. |
-| DONKI SEP | `GET https://api.nasa.gov/DONKI/SEP?startDate=…&endDate=…&api_key=KEY` | Used for particle events. Needs the key. |
-| DONKI FLR | `GET https://api.nasa.gov/DONKI/FLR?…` | Returned 404 on first test. Optional; section 6.2 has the fallback. |
-| Exoplanet Archive | `GET https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=<ADQL>&format=json` | **Used for planets.** No key. No browser access header, so script only. |
-| Image library | `GET https://images-api.nasa.gov/search?q=…&media_type=image` and `/asset/<nasa_id>` | **Used for images.** No key. The file server is slow: allow minutes per image. |
-| NeoWs feed | `GET https://api.nasa.gov/neo/rest/v1/feed?…&api_key=KEY` | Works, at most 7 days per request. Not used: see the key note. |
-| DONKI direct host | `kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/…` | Does not answer from the team's network. |
+Every source is keyless. No key is used, stored or needed.
 
-**Key:** `DEMO_KEY` allows 10 requests, and the count takes about ten hours to clear, not one. It ran out after two NeoWs requests on top of the morning's tests. So the script now needs the key for three requests only (GST, SEP, FLR over the whole span of all weeks) and takes asteroids from the keyless JPL service. A personal key from api.nasa.gov, passed as `NASA_API_KEY`, removes the wait. The key is never committed.
+| Source | Request | Used for |
+|---|---|---|
+| JPL close-approach data | `GET https://ssd-api.jpl.nasa.gov/cad.api?date-min=…&date-max=…&dist-max=20LD&fullname=true&diameter=true`, and the same with `&pha=true` | Asteroid passes, and which are hazardous |
+| JPL Small-Body Database | `GET https://ssd-api.jpl.nasa.gov/sbdb.api?des=<designation>` | First and last observation of each asteroid |
+| DONKI | `GET https://ccmc.gsfc.nasa.gov/DONKI/api/donki/nuggets/<gst\|sep\|flr>/?startDate=YYYY-MM-DD HH:MM:SS&endDate=…` | Storms, particle events, flares. This is the endpoint the DONKI website itself uses. |
+| Exoplanet Archive | `GET https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=<ADQL>&format=json` | Planets. No browser access header, so script only. |
+| Image library | `GET https://images-api.nasa.gov/search?…` and `/asset/<nasa_id>` | Card images. The file server is slow: allow minutes per image. |
+
+Not used:
+
+- **api.nasa.gov (NeoWs and DONKI with a key).** The demo key allows 10 requests and takes about ten hours to clear. It ran out during the first download.
+- **`kauai.ccmc.gsfc.nasa.gov`,** the documented keyless DONKI host. It does not answer from the team's network.
+
+The asteroid numbers were compared with NeoWs for the eleven records both had: speed, distance, size and hazard flag agree.
 
 ### 7.3 The script
 
@@ -617,16 +659,15 @@ node Tools/FetchNasaData.mjs [--dry] [--offline]
 ```
 
 1. Read the week definitions and the planet list from `src/Data/Curated/`.
-2. For each week: two close-approach requests (all objects, and hazardous ones).
-3. One GST, one SEP and one FLR request covering every week, with 72 hours of lead. FLR may fail without stopping the run.
+2. For each week: two close-approach requests (all objects, and hazardous ones), then one Small-Body Database request per asteroid kept.
+3. For each week: one GST, one SEP and one FLR request, from 75 hours before the week to 3 hours after it.
 4. One exoplanet request by name.
-5. Trim to the fields in section 7.4, keeping at most six asteroids per leg, and write each snapshot file that downloaded in full, with `retrievedAt`, `source` and `requests`.
-6. Print a report: asteroids per week and leg, storm legs found, names not found, any request that failed.
+5. Drop rough passes (section 6.1), keep at most six asteroids per leg, keep only near-Earth detections (section 6.2), and write each snapshot file that downloaded in full.
+6. Print a report: asteroids per week and leg, storm legs found, passes left out, names not found, any request that failed.
 
-- **Every response is cached** in `Tools/.cache` (not committed), so a rerun repeats no request that already worked.
+- **Every response is cached** in `Tools/.cache` (not committed) together with the time it was fetched. A rerun repeats no request that already worked.
+- **`retrievedAt` is the time of the newest request behind a file,** and `firstRetrievedAt` the oldest. Neither is the time the script last ran.
 - **A part that fails does not stop the others.** The script writes what it has, lists the problem and exits with an error.
-- **It also reports** a week with fewer than 8 events or a missing pinned asteroid.
-- **`SpaceWeather.json` carries `pending: true` until the storm download succeeds,** and a data test fails while it does.
 
 ### 7.4 Snapshot shapes
 
@@ -640,6 +681,9 @@ interface AsteroidRecord {
   missKm: number
   diameterMinM: number
   diameterMaxM: number
+  diameterMeasured: boolean  // false: estimated from brightness
+  firstObserved: string      // YYYY-MM-DD
+  lastObserved: string       // YYYY-MM-DD
   hazardous: boolean
   url: string                // JPL Small-Body Database page
   weekId: string
@@ -654,9 +698,10 @@ interface StormRecord {
 }
 
 interface ParticleEventRecord {
-  id: string                 // DONKI sepID
+  id: string                 // DONKI activityID
   weekId: string
   timeUtc: string
+  detectedBy: string[]       // near-Earth instruments, for example "GOES-P: SEISS >10 MeV"
   url: string
 }
 
@@ -664,7 +709,8 @@ interface FlareRecord {
   id: string                 // DONKI flrID
   weekId: string
   peakUtc: string
-  classType: string          // for example "X2.2"
+  classType: string          // "M…" or "X…" only
+  detectedBy: string[]
   url: string
 }
 
@@ -681,7 +727,9 @@ interface ExoplanetRecord {
   method: string
   year: number
   facility: string
+  transits: boolean
   radiusEarth: number | null
+  radiusEstimated: boolean
   periodDays: number | null
   distanceParsec: number | null
   starVmag: number | null
@@ -690,6 +738,7 @@ interface ExoplanetRecord {
 
 interface SnapshotFile<T> {
   retrievedAt: string
+  firstRetrievedAt: string
   source: string
   requests: string[]         // with the key removed
   records: T[]
@@ -698,7 +747,7 @@ interface SnapshotFile<T> {
 
 ### 7.5 Images
 
-Ten images from NASA's Image and Video Library are in `public/Images/Events/`, 916 KB in all. Each was resized to at most 1280 px and looked at before it went in: none carries a logo, insignia or mission patch.
+Ten images are in `public/Images/Events/`, about 960 KB in all. Nine are from NASA's Image and Video Library and one from a NASA article. Each was resized to at most 1280 px and looked at before it went in: none carries a logo, insignia or mission patch.
 
 | File | NASA id | What it shows | Credit | Kind |
 |---|---|---|---|---|
@@ -707,16 +756,17 @@ Ten images from NASA's Image and Video Library are in `public/Images/Events/`, 9
 | AsteroidC | PIA02900 | The saddle of asteroid Eros | NASA/JPL/JHUAPL | Photograph |
 | AsteroidD | PIA00333 | Asteroid Ida in enhanced colour | NASA/JPL/USGS | Photograph |
 | Storm | iss074e0150531 | Aurora from a geomagnetic storm, seen from the ISS, January 2026 | NASA | Photograph |
-| StormSevere | PIA21949 | The X9.3 solar flare of 6 September 2017 | NASA/GSFC/Solar Dynamics Observatory | Photograph |
+| StormSevere | PIA21949 | The X9.3 solar flare of 6 September 2017 | NASA/GSFC/Solar Dynamics Observatory | Telescope image |
 | ExoplanetVisible | PIA21429 | The TRAPPIST-1 planets crossing their star | NASA/JPL-Caltech | Illustration |
 | ExoplanetSpectrum | PIA20687 | A hot Jupiter whose clouds hide its water | NASA/JPL-Caltech | Illustration |
 | DartImpact | PIA25329 | The DART spacecraft approaching Dimorphos | NASA/Johns Hopkins APL/Steve Gribben | Illustration |
-| Grb221009A | GSFC_20171208_Archive_e001889 | A different burst, GRB 110328A, seen by Swift | NASA/Swift/Stefan Immler | Photograph |
+| Grb221009A | from NASA's article on the burst | GRB 221009A itself, in X-rays, seen by Swift | NASA/Swift/A. Beardmore (University of Leicester) | Telescope image |
 
 - **Most are representative, and say so.** No photograph exists of a 30 m asteroid passing Earth, or of these particular storms. Each image has a caption such as "Representative image: asteroid Gaspra, from NASA's Galileo spacecraft", and the card must show it.
 - **Illustrations are labelled as illustrations.**
 - **`Data/Curated/Images.ts` lists each file** with its NASA id, title, credit, kind, caption key and library page link. The Sources screen reads from it. A test fails if an event wants an image that is not listed, or a file is on disk without a credit.
-- **The first gamma-ray image considered was dropped** because it carried a mission logo.
+- **Two gamma-ray images were dropped:** the first carried a mission logo, and the second turned out to show a star torn apart by a black hole, not an ordinary burst. The one used is NASA's own image of the 2022 burst.
+- **Every image but that one and the DART illustration is representative,** and its caption begins "Representative". A test checks this.
 
 ### 7.6 Credit and use
 
@@ -887,13 +937,17 @@ abstract class SpaceEvent {
 class AsteroidFlyby    { static fromRecord(record: AsteroidRecord, pinned?: boolean); static idFor(recordId) }
 class SolarStorm       { static forWindow(window: DateWindow, weather: SpaceWeather): SolarStorm | undefined; readonly reading; readonly peak }
 enum FlareClass { None, C, M, X }       // None: flare data exists and shows no flare before the storm
-class ExoplanetTransit { static fromRecord(record: ExoplanetRecord, note?: ExoplanetNote); static idFor(name) }
+class ExoplanetTarget  { static fromRecord(record, note?); static modeFor(record); static canObserve(record); readonly mode: ObservingMode; static idFor(name) }
+enum ObservingMode { Transit, RadialVelocity, Imaging }
+enum ObservationHistory { SeenBeforeAndAfter, FirstSeenAfter, LastSeenBefore }     // AsteroidFlyby.history
 class RareEvent        { /* constructed directly from EventDetails in Curated/RareEvents.ts */ }
 ```
 
 Event ids: `Asteroid.<designation without spaces>`, `Storm.<YYYY-MM-DD of the leg>`, `Exoplanet.<name without spaces or punctuation>`, and whatever a rare event is given.
 
-"What was learned" keys: a pinned asteroid, a famous planet and every rare event use `Learned.<event id>`, written by hand in step 3. Everything else uses a shared template: `Learned.Asteroid`, `Learned.Storm`, `Learned.Method.<Transit | RadialVelocity | Imaging | Microlensing>`.
+"What was learned" keys: a pinned asteroid, a famous planet and every rare event use `Learned.<event id>`, written by hand in step 3. Everything else uses a shared template: `Learned.Asteroid.<observation history>`, `Learned.Storm`, `Learned.Mode.<Transit | RadialVelocity | Imaging>`.
+
+**Hand-written lines are locked.** A test holds a checksum of every hand-written line, image credit, source link and curated flag. Changing any of them fails the test until it has been checked against its source again and the number updated.
 
 ### 8.5 Weeks
 
@@ -1485,30 +1539,31 @@ Run with bots, 300 seeds each. These are the targets the numbers are tuned to.
 
 ### 13.3 What the engine shows so far
 
-Flown by the engine's test players, 300 flights per row, on the two sample weeks used by the tests. The quiet sample week is 21 asteroids, 5 planets and one rare event. The storm sample week uses the real May 2024 storm readings.
+Flown by the engine's test players on the real weeks, 300 flights per row.
 
-| Loadout | Week | Player | Mean points | Completed | Turns where power ran short |
-|---|---|---|---|---|---|
-| Starter | Quiet | Greedy | 143 | 100% | 0% |
-| Camera only, nothing else | Quiet | Greedy | 142 | 99% | 0% |
-| Camera and Radar, small spacecraft | Quiet | Greedy | 226 | 99% | 7% |
-| Camera, Spectrometer, Radar, one Solar Array | Quiet | Greedy | 268 | 100% | 59% |
-| Camera, Spectrometer, Radar, no power modules | Quiet | Greedy | 147 | 99% | 79% |
-| Camera, Spectrometer, Radar, large spacecraft's power | Quiet | Greedy | 402 | 100% | 0% |
-| Starter | Storm | Greedy | 31 | 0% | 0% |
-| Medium, Mk II shielding, no Magnetic Shield | Storm | Greedy | 65 | 0% | 0% |
-| Medium, Magnetic Shield Mk II, two instruments | Storm | Cautious | 185 | 100% | 0% |
-| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | Storm | Greedy | 253 | 62% | 9% |
-| The same | Storm | Cautious | 264 | 95% | 22% |
+| Loadout | Week | Player | Mean points | Completed |
+|---|---|---|---|---|
+| Starter | July 2019 | Greedy | 109 | 100% |
+| Camera, Spectrometer, Radar, one Solar Array, no shielding | July 2019 | Greedy | 208 | 98% |
+| Starter | Autumn 2022 | Greedy | 99 | 99% |
+| Camera, Spectrometer, Radar, one Solar Array, no shielding | Autumn 2022 | Greedy | 203 | 85% |
+| Starter | May 2024 | Greedy | 28 | 0% |
+| Medium, Magnetic Shield Mk II, two instruments | May 2024 | Cautious | 186 | 100% |
+| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | May 2024 | Greedy | 129 | 15% |
+| The same | May 2024 | Cautious | 163 | 71% |
+
+On the sample weeks used by the unit tests, the same three instruments earn 147, 268 or 402 points depending only on how much power the spacecraft has.
 
 What this says:
 
-- **Power is the real limit once you carry three instruments.** The same three instruments earn 147, 268 or 402 depending only on power. That is the trade-off between instruments and power modules.
-- **The first flight is safe and is not a puzzle.** The starter never runs short of power. It earns enough for one or two unlocks, and three of its five modules do nothing on a quiet week. Swapping them out is the first design lesson.
-- **The storm cannot be survived without the Magnetic Shield.**
-- **How you fly matters.** On thin power in the storm, a player who saves charge for the shield survives 95% of the time. One who spends it all on instruments survives 62%.
-- **A quiet week is not perfectly safe without shielding.** About one flight in a hundred with no Radiation Shielding is lost to the South Atlantic Anomaly alone. That is the price of the bay unit it frees.
-- **With plenty of power the storm is safe once you own the shield.** If real-data playtests find that too easy, raise the shield's power cost before touching anything else.
+- **Power is the real limit once you carry three instruments.**
+- **The first flight is safe and is not a puzzle.** The starter earns about 109 points, enough for one or two unlocks, and several of its modules do nothing on a quiet week. Swapping them out is the first design lesson: the same small spacecraft earns 208 with a spectrometer and a radar.
+- **Dropping the shielding has a price even on calm weeks.** It costs 2% of flights in July 2019 and 15% in autumn 2022, which has one moderate storm.
+- **May 2024 cannot be survived without the Magnetic Shield.**
+- **How you fly matters most in the storm.** On thin power, a player who saves charge for the shield completes 71% of flights. One who spends it all on instruments completes 15%.
+- **With plenty of power the storm is safe once you own the shield.** If playtests find that too easy, raise the shield's power cost before touching anything else.
+
+These are starting values. The balance targets in section 13.2 are checked in step 6.
 
 ### 13.4 Manual checks before each merge
 
