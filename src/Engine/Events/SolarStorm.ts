@@ -89,7 +89,7 @@ export class SolarStorm extends SpaceEvent {
 
   private static classOf(classType: string): FlareClass {
     const letter = classType.trim().charAt(0).toUpperCase()
-    return letter === 'X' ? FlareClass.X : letter === 'M' ? FlareClass.M : FlareClass.C
+    return letter === 'X' ? FlareClass.X : letter === 'M' ? FlareClass.M : letter === 'C' ? FlareClass.C : FlareClass.None
   }
 
   private static strongest(classes: readonly FlareClass[]): FlareClass {

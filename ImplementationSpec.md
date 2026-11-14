@@ -2,7 +2,7 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 216 passing tests and no screens yet. It was reviewed independently against this document, and 19 deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
+**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 237 passing tests and no screens yet. It was reviewed independently against this document twice, and after each review deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
 
 **How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
 
@@ -118,14 +118,16 @@ src/
   Main.tsx
   App.tsx
   Engine/
-    Core/                      SeededRandom, Numbers
-    Modules/                   ModuleCard and subclasses, MarkSpec, ModuleCatalog
-    Spacecraft/                Bus, BusCatalog, InstalledModule, Loadout, Spacecraft
-    Events/                    Channel, Rarity, TurnCondition, SpaceEvent and subclasses, EventFactory
-    Weeks/                     Week, LegSpec, WeekCatalog, Forecast
-    Flight/                    FlightSetup, CraftState, Contact, Scanner, Encounter,
-                               TurnPlan, TurnPreview, TurnOutcome, Flight, FlightCommand,
-                               FlightReport
+    Core/                      SeededRandom, Numbers, Rules, TextRef, UtcDate
+    Modules/                   ModuleFamily, MarkSpec, ModuleCard, PowerModules, Instrument,
+                               ProtectionModules, UtilityModules, ModuleCatalog
+    Spacecraft/                Bus, BusCatalog, InstalledModule, Loadout, LoadoutIssue, Spacecraft
+    Events/                    Channel, Rarity, RadiationBand, DateWindow, Records, SpaceEvent,
+                               AsteroidFlyby, SolarStorm, ExoplanetTransit, RareEvent
+    Weeks/                     WeekDefinition, Week, WeekBuilder, Forecast, WeekCatalog
+    Flight/                    FlightSetup, EngineOptions, CraftState, TurnCondition, Contact,
+                               Scanner, Scoring, TurnPlan, TurnPreview, Encounter, EncounterResult,
+                               FlightCommand, Flight, FlightReport
     Progress/                  Profile, Rank, Lab, Logbook
     Bots/                      FlightBot, GreedyBot, CautiousBot
     Tests/
@@ -198,6 +200,7 @@ Derived spacecraft values:
 
 - A flight has **6 legs**.
 - A flight will not start unless its loadout passes rule 4.1, its seed is a whole number from 0 to 2³²−1, and, when the setup carries a week signature, the week data still matches it. The engine checks the structural rules itself and the ownership rules when it is given the player's profile.
+- A setup whose loadout names an unknown bus, an unknown module, a bad mark, the same module key twice or the Crew Capsule is refused outright. It is never repaired and flown.
 - Starting state: `charge = capacity`, `hull = maxHull`, `burnsLeft = burns`, `repairUsed = false`.
 - Each leg runs: **Scan → (Encounter | Hold) → Cruise**.
 - **Cruise** (after every leg, including a held one): `charge = min(capacity, charge + 2 × generation)`.
@@ -210,8 +213,8 @@ For each leg the scanner deals contacts from the week's pool.
 1. Take the week's events that have not been dealt on an earlier leg of this flight.
 2. **Dated events** (asteroids, rare events) are eligible only on the leg whose date window contains their date. **Undated events** (exoplanets) are eligible on every leg.
 3. **Pinned events** (set in the week definition) are always dealt on their leg.
-4. Fill up to **2** contacts by weighted draw without replacement. Weights: Common 6, Notable 3, Headline 1. The draw gives every eligible event its own random key for the leg, `roll^(1/weight)`, and takes the highest keys. Removing one event therefore never changes the order of the others.
-5. If the leg has no pinned event, the first contact is drawn from the dated events only, when there are any. This keeps a week's own events in front of the player; without it the always-eligible planets crowd them out.
+4. Fill up to **2** contacts by weighted draw without replacement. Weights: Common 6, Notable 3, Headline 1. The draw gives every eligible event its own random key for the leg, `roll^(1/weight)`, and takes the highest keys.
+5. If the leg has no pinned event, the first contact is its own weighted draw from the dated events only, when there are any. This keeps a week's own events in front of the player; without it the always-eligible planets crowd them out. The remaining contacts are a second, independent weighted draw from everything left.
 6. If the pool runs out, the leg has fewer contacts. A leg with none can only be held.
 7. An event pinned to one leg is never dealt on another.
 
@@ -334,11 +337,12 @@ Then: `profile.points += banked`, `profile.lifetimePoints += banked`, logbook up
 ### 4.10 Randomness
 
 - Every random draw comes from a `SeededRandom` (mulberry32) derived from `FlightSetup.seed`.
-- Each event has its own streams on each leg, keyed by leg and event: one for its place in the draw order, one for whether it arrives unidentified, one for its shadow and anomaly rolls. So using the survey, or the order contacts are played in, changes nothing else: later legs differ only by the one event the survey took.
+- Each event has its own streams on each leg, keyed by leg and event: for its place in each draw, for whether it arrives unidentified, and for its shadow and anomaly rolls. So a survey never changes the rolls of anything else: a contact met on the same leg, with or without an earlier survey, is identical.
+- A survey does change which contacts later legs offer. The event it reveals is used up, and if that event would have appeared on a later leg, the next one in line takes its place, and so on. That is unavoidable when nothing is dealt twice.
 - Shadow and anomaly rolls for a contact are drawn when it is dealt, for all its turns.
 - A flight is fully determined by `(FlightSetup, command log)` and the week data. `Flight.replay` rebuilds it. Tests and resume both depend on this. The cooldown option travels inside the setup for that reason.
 - Commands are checked strictly. A command with a missing or wrongly typed field, as a damaged save could hold, is refused and changes nothing.
-- All dates must carry a time zone (a trailing `Z` or an offset). A date without one is refused, because browsers would read it as local time and deal differently in different countries.
+- All dates must be written as `YYYY-MM-DDTHH:MM`, with optional seconds, and end in `Z` or an offset such as `+03:00`. Anything else is refused, as is a date that does not exist. Looser forms are read as local time by some browsers, which would deal differently in different countries.
 
 ### 4.11 Option kept off by default: cooldowns
 
@@ -485,7 +489,7 @@ A leg is a **storm leg** when any GST Kp reading of 5 or more falls inside the l
 | Radiation by turn | T=4: `round(P × [0.4, 1, 0.8, 0.4])`; T=5: `round(P × [0.3, 0.7, 1, 0.7, 0.3])` |
 | Signal by turn | `2 × radiation[t] / P` |
 | Particles capacity | `3 × P` |
-| HighEnergy capacity | 12 if flare class X; 8 if M; no channel if C, or if flare data exists and shows no flare in that time |
+| HighEnergy capacity | 12 if flare class X; 8 if M; no channel if C, or if flare data exists and shows no flare of class C or stronger in that time |
 | Rarity | `kp ≥ 8` → Headline; `kp = 7` → Notable; otherwise Common |
 
 Worked example, confirmed against DONKI on 14 November 2026: **the leg of 11 May 2024**. Kp reached 9.0 at 00:00 and 03:00 UT that day, and an SEP event began at 12:59 UT on 10 May, inside the 24 hours before. So `P = 12`, `T = 5`, radiation `[4, 8, 12, 8, 4]`, Particles 36, HighEnergy 12, Headline. The leg of 10 May reads Kp 8.67 at 21:00 UT, so `kp = 8`, `P = 10`.
@@ -720,7 +724,7 @@ class SeededRandom {
   static randomSeed(): number
 }
 
-class UtcDate { static parse(text: string): number }  // throws unless the text carries a time zone
+class UtcDate { static parse(text: string): number }  // strict ISO form with a time zone; throws otherwise
 
 class Numbers {
   static round(value: number, digits?: number): number
@@ -799,6 +803,7 @@ class Loadout {                            // immutable; installed is kept in ca
   constructor(bus: Bus, installed: readonly InstalledModule[])
   static starter(): Loadout
   static fromJson(json: unknown): Loadout  // never throws: anything unreadable, unknown, duplicated or unobtainable is dropped
+  static readsExactly(json: unknown): boolean      // true when fromJson would drop or change nothing
   toJson(): LoadoutJson                    // { busId, modules: { id, mark, copy }[] }
   get costMusd, bayUsed, budgetLeft, bayLeft
   copiesOf(cardId): InstalledModule[]
@@ -873,10 +878,11 @@ interface WeekDefinition { id: string; minRank: number; legs: { startUtc; endUtc
 interface Leg { window: DateWindow; pinnedEventIds: readonly string[]; storm?: SolarStorm }
 
 class Week {
-  constructor(id, minRank, legs: readonly Leg[], events: readonly SpaceEvent[])   // throws unless 6 legs and every pin exists
+  constructor(id, minRank, legs: readonly Leg[], events: readonly SpaceEvent[])
+      // throws unless: 6 legs in date order without overlap, no event id twice, every pin an ordinary event pinned once
   readonly forecast: Forecast
   get storms, everything, startUtc, endUtc
-  get signature(): string                  // changes whenever the week's events, turns or legs change
+  get signature(): string                  // changes with anything that changes play; not with the order events or channels are listed in
   event(id): SpaceEvent | undefined
   stormOn(legIndex): SolarStorm | undefined
   pinnedOn(legIndex): SpaceEvent[]
@@ -986,6 +992,7 @@ class Commands { static survey, hold, proceed; static choose(index), chase(index
 class Flight {
   static setup(loadout, week, seed, cooldowns?): FlightSetup      // fills in the week signature
   static begin(setup: FlightSetup, options?: EngineOptions): Flight   // throws on a bad loadout, seed or week signature
+  readonly setup: FlightSetup              // the flight's own normalised copy, with the week signature filled in
   static replay(setup, log: readonly FlightCommand[], options?): Flight
   readonly setup, craft: Spacecraft, state: CraftState, week: Week
   get phase, legIndex, contacts, encounter, results, log, lastOutcome, pointsEarned, isOver, isStormLeg, hasSurveyed

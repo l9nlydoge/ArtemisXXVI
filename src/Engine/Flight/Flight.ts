@@ -41,17 +41,21 @@ export class Flight {
   private loss?: FlightLoss
   private last?: TurnOutcome
 
-  private constructor(readonly setup: FlightSetup, options: EngineOptions) {
+  readonly setup: FlightSetup
+
+  private constructor(setup: FlightSetup, options: EngineOptions) {
     if (!SeededRandom.isSeed(setup.seed)) throw new Error(`Not a usable seed: ${String(setup.seed)}`)
     this.week = (options.weeks ?? WeekCatalog.shared).get(setup.weekId)
     if (setup.weekSignature !== undefined && setup.weekSignature !== this.week.signature) throw new Error(`Week ${this.week.id} has changed since this flight was saved`)
+    if (!Loadout.readsExactly(setup.loadout)) throw new Error('The loadout names a bus or module that does not exist or cannot be fitted')
     const loadout = Loadout.fromJson(setup.loadout)
     const issues = options.owner ? loadout.issues(options.owner) : loadout.structuralIssues
     if (issues.length > 0) throw new Error(`The loadout cannot fly: ${issues.map((issue) => issue.kind).join(', ')}`)
     this.craft = new Spacecraft(loadout)
     this.state = new CraftState(this.craft)
     this.scanner = new Scanner(this.week, setup.seed)
-    this.cooldowns = setup.cooldowns ?? false
+    this.cooldowns = setup.cooldowns === true
+    this.setup = { loadout: loadout.toJson(), weekId: this.week.id, seed: setup.seed, cooldowns: this.cooldowns, weekSignature: this.week.signature }
     this.dealt = this.scanner.deal(0)
   }
 
@@ -114,6 +118,7 @@ export class Flight {
   }
 
   can(command: FlightCommand): boolean {
+    if (typeof command !== 'object' || command === null) return false
     switch (command.type) {
       case CommandType.Survey:
         return this.currentPhase === FlightPhase.Scanning && this.craft.hasRadar && !this.surveyed && this.state.charge >= Rules.surveyCost
@@ -165,7 +170,7 @@ export class Flight {
         this.engage(command.contactIndex)
         break
     }
-    this.history.push(command)
+    this.history.push(Flight.copyOf(command))
   }
 
   report(): FlightReport {
@@ -175,7 +180,19 @@ export class Flight {
   }
 
   private static areKeys(keys: unknown): keys is readonly string[] {
-    return Array.isArray(keys) && keys.every((key) => typeof key === 'string')
+    return Array.isArray(keys) && keys.every((key) => typeof key === 'string') && new Set(keys).size === keys.length
+  }
+
+  private static copyOf(command: FlightCommand): FlightCommand {
+    switch (command.type) {
+      case CommandType.Commit:
+        return { type: command.type, keys: [...command.keys] }
+      case CommandType.Choose:
+      case CommandType.Chase:
+        return { type: command.type, contactIndex: command.contactIndex }
+      default:
+        return { type: command.type }
+    }
   }
 
   private isOpen(contactIndex: unknown): boolean {

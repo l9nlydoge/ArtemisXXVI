@@ -7,9 +7,10 @@ import { Contact } from './Contact'
 import { ConditionRoller } from './TurnCondition'
 
 enum Stream {
-  Order = 1,
+  FirstPick = 1,
   Identity = 2,
   Conditions = 3,
+  Order = 4,
 }
 
 export class Scanner {
@@ -23,12 +24,11 @@ export class Scanner {
   deal(legIndex: number): Contact[] {
     const storm = this.week.stormOn(legIndex)
     const picks = this.week.pinnedOn(legIndex).filter((event) => !this.dealt.has(event.id))
-    const queue = this.queue(legIndex, picks)
-
     if (picks.length === 0) {
-      const dated = queue.find((event) => event.isDated)
-      if (dated) picks.push(...queue.splice(queue.indexOf(dated), 1))
+      const dated = this.queue(legIndex, picks, Stream.FirstPick).find((event) => event.isDated)
+      if (dated) picks.push(dated)
     }
+    const queue = this.queue(legIndex, picks, Stream.Order)
     while (picks.length < Rules.contactsPerLeg && queue.length > 0) picks.push(queue.shift()!)
 
     const contacts: Contact[] = []
@@ -38,21 +38,21 @@ export class Scanner {
   }
 
   dealExtra(legIndex: number): Contact | undefined {
-    const next = this.queue(legIndex, [])[0]
+    const next = this.queue(legIndex, [], Stream.Order)[0]
     return next ? this.contact(next, true, legIndex) : undefined
   }
 
-  private queue(legIndex: number, taken: readonly SpaceEvent[]): SpaceEvent[] {
+  private queue(legIndex: number, taken: readonly SpaceEvent[], stream: Stream): SpaceEvent[] {
     return this.week
       .eligible(legIndex, this.dealt)
       .filter((event) => !taken.includes(event))
-      .map((event) => ({ event, key: this.drawKey(event, legIndex) }))
+      .map((event) => ({ event, key: this.drawKey(event, legIndex, stream) }))
       .sort((a, b) => b.key - a.key || a.event.id.localeCompare(b.event.id))
       .map((entry) => entry.event)
   }
 
-  private drawKey(event: SpaceEvent, legIndex: number): number {
-    const roll = this.stream(Stream.Order, event, legIndex).next()
+  private drawKey(event: SpaceEvent, legIndex: number, stream: Stream): number {
+    const roll = this.stream(stream, event, legIndex).next()
     return Math.pow(roll, 1 / RarityTable.dealWeight(event.rarity))
   }
 

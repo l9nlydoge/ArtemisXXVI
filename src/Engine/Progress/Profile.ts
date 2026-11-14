@@ -49,7 +49,7 @@ export class Profile implements Ownership {
     const logbook: Record<string, LogbookMark> = {}
     if (Profile.isRecord(json.logbook)) {
       for (const [id, entry] of Object.entries(json.logbook)) {
-        if (Profile.isRecord(entry)) logbook[id] = { recorded: entry.recorded === true, complete: entry.complete === true, bestPoints: count(entry.bestPoints) }
+        if (id !== '__proto__' && Profile.isRecord(entry)) logbook[id] = { recorded: entry.recorded === true, complete: entry.complete === true, bestPoints: count(entry.bestPoints) }
       }
     }
     const lifetimePoints = count(json.lifetimePoints)
@@ -90,7 +90,7 @@ export class Profile implements Ownership {
   }
 
   ownedMark(moduleId: string): OwnedMark {
-    return this.data.ownedMarks[moduleId] ?? 0
+    return Object.hasOwn(this.data.ownedMarks, moduleId) ? this.data.ownedMarks[moduleId] : 0
   }
 
   owns(moduleId: string, mark: number = 1): boolean {
@@ -98,7 +98,7 @@ export class Profile implements Ownership {
   }
 
   logged(eventId: string): LogbookMark {
-    return this.data.logbook[eventId] ?? { recorded: false, complete: false, bestPoints: 0 }
+    return Object.hasOwn(this.data.logbook, eventId) ? this.data.logbook[eventId] : { recorded: false, complete: false, bestPoints: 0 }
   }
 
   hasSeen(hint: string): boolean {

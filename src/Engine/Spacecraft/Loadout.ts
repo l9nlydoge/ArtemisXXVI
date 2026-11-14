@@ -43,6 +43,12 @@ export class Loadout {
     return new Loadout(bus, installed, modules)
   }
 
+  static readsExactly(json: unknown, modules: ModuleCatalog = ModuleCatalog.shared, buses: BusCatalog = BusCatalog.shared): boolean {
+    if (!Loadout.isRecord(json) || !Array.isArray(json.modules)) return false
+    const read = Loadout.fromJson(json, modules, buses)
+    return read.bus.id === json.busId && read.installed.length === json.modules.length
+  }
+
   toJson(): LoadoutJson {
     return { busId: this.bus.id, modules: this.installed.map((module) => ({ id: module.card.id, mark: module.mark, copy: module.copy })) }
   }

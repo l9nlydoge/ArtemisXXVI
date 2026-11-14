@@ -1,10 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { SeededRandom } from '../Core/SeededRandom'
 import { AsteroidFlyby } from '../Events/AsteroidFlyby'
+import { Channel } from '../Events/Channel'
 import { Rarity } from '../Events/Rarity'
 import { EventKind } from '../Events/SpaceEvent'
 import { Scanner } from '../Flight/Scanner'
 import { ConditionRoller } from '../Flight/TurnCondition'
+import { Week } from '../Weeks/Week'
 import { Fixtures } from './Fixtures'
 
 const calm = Fixtures.calmWeek
@@ -112,33 +114,48 @@ describe('Scanner', () => {
     expect(extra.identified).toBe(true)
   })
 
-  test('a survey changes later legs only by taking away the one event it revealed', () => {
-    let untouched = 0
-    let replaced = 0
-    for (const seed of seeds) {
-      const plain = new Scanner(calm, seed)
-      const surveyed = new Scanner(calm, seed)
-      plain.deal(0)
-      surveyed.deal(0)
-      const extra = surveyed.dealExtra(0)!
-      for (let leg = 1; leg < 6; leg++) {
-        const without = plain.deal(leg)
-        const withSurvey = surveyed.deal(leg)
-        if (!ids(without).includes(extra.event.id)) {
-          expect(ids(withSurvey)).toEqual(ids(without))
-          expect(withSurvey.map((contact) => contact.conditions)).toEqual(without.map((contact) => contact.conditions))
-          expect(withSurvey.map((contact) => contact.identified)).toEqual(without.map((contact) => contact.identified))
-          untouched += 1
-        } else {
-          expect(ids(withSurvey)).not.toContain(extra.event.id)
-          expect(ids(withSurvey).filter((id) => ids(without).includes(id))).toHaveLength(without.length - 1)
-          replaced += 1
-          break
+  test('a survey never changes the rolls of anything else: a contact met on the same leg is identical with or without it', () => {
+    let shared = 0
+    let shifted = 0
+    for (const week of [calm, storm]) {
+      for (const seed of seeds) {
+        const surveyLeg = seed % 4
+        const plain = new Scanner(week, seed)
+        const surveyed = new Scanner(week, seed)
+        for (let leg = 0; leg < 6; leg++) {
+          const without = plain.deal(leg)
+          const withSurvey = surveyed.deal(leg)
+          if (leg === surveyLeg) surveyed.dealExtra(leg)
+          const common = withSurvey.filter((contact) => ids(without).includes(contact.event.id))
+          for (const contact of common) {
+            const twin = without.find((other) => other.event.id === contact.event.id)!
+            expect(contact.conditions).toEqual(twin.conditions)
+            expect(contact.identified).toBe(twin.identified)
+            shared += 1
+          }
+          expect(ids(common)).toEqual(ids(without).filter((id) => ids(common).includes(id)))
+          if (common.length < without.length) shifted += 1
+          if (leg <= surveyLeg) expect(ids(withSurvey)).toEqual(ids(without))
         }
       }
     }
-    expect(untouched).toBeGreaterThan(500)
-    expect(replaced).toBeGreaterThan(5)
+    expect(shared).toBeGreaterThan(3000)
+    expect(shifted).toBeGreaterThan(20)
+  })
+
+  test('the survey reveals the next contact in line, so common events come up most', () => {
+    const pool = [Rarity.Common, Rarity.Notable, Rarity.Headline].flatMap((rarity) =>
+      Array.from({ length: 12 }, (_, index) => Fixtures.event(`Pool.${rarity}.${index}`, [[Channel.Visible, 5]], [{ signal: 1, radiation: 0 }], rarity)),
+    )
+    const even = new Week('Even', 1, calm.legs.map((leg) => ({ window: leg.window, pinnedEventIds: [] })), pool)
+    const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0 }
+    for (const seed of seeds) {
+      const scanner = new Scanner(even, seed)
+      scanner.deal(0)
+      counts[scanner.dealExtra(0)!.event.rarity] += 1
+    }
+    expect(counts[1] / seeds.length).toBeGreaterThan(0.45)
+    expect(counts[3] / seeds.length).toBeLessThan(0.2)
   })
 
   test('a contact keeps the same conditions whichever position it is dealt in', () => {

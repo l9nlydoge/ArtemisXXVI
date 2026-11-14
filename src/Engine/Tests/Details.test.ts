@@ -66,14 +66,15 @@ describe('Dealing', () => {
     expect(undated).toBeLessThan(seeds.length)
   })
 
-  test('on a leg without one the second contact may be undated too, and the first never is', () => {
+  test('the second contact is a fresh weighted draw from what is left: about 78% undated on this leg', () => {
     let undatedSecond = 0
     for (const seed of seeds) {
       const [first, second] = new Scanner(Fixtures.calmWeek, seed).deal(0)
       expect(first.event.isDated).toBe(true)
       if (!second.event.isDated) undatedSecond += 1
     }
-    expect(undatedSecond).toBeGreaterThan(60)
+    expect(undatedSecond / seeds.length).toBeGreaterThan(0.72)
+    expect(undatedSecond / seeds.length).toBeLessThan(0.85)
   })
 })
 

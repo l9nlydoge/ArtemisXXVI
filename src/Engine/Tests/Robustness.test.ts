@@ -19,6 +19,13 @@ const begin = (loadout: unknown, extra: object = {}) => Flight.begin({ loadout: 
 describe('Dates', () => {
   test('a date without a time zone is refused, so no browser reads it as local time', () => {
     for (const bad of ['2019-07-25', '2019-07-25T01:22', '2019-07-25T01:22:00', '2019-Jul-25 01:22', '', 'soon']) expect(() => UtcDate.parse(bad), bad).toThrow()
+    for (const loose of ['2019/07/25-05:00', '2019-7-25-05:00', 'Jul 25 2019-10:30', '2019-07-25 (Z', '2019-07-25 01:22-05:00', '2019-Jul-25 01:22-05:00', '2019-07-25T01:22:00z', '2019-07-25T01:22:00+0300', '2019-07-25T01:22:00Z ']) {
+      expect(() => UtcDate.parse(loose), loose).toThrow()
+    }
+    for (const unreal of ['2019-02-30T00:00:00Z', '2019-13-01T00:00:00Z', '2019-07-25T24:00:00Z', '2019-07-25T10:61:00Z']) expect(() => UtcDate.parse(unreal), unreal).toThrow()
+    expect(() => UtcDate.parse(7 as never)).toThrow()
+    expect(UtcDate.parse('2024-05-10T18:00Z')).toBe(Date.UTC(2024, 4, 10, 18))
+    expect(UtcDate.parse('2024-02-29T00:00:00.000Z')).toBe(Date.UTC(2024, 1, 29))
     expect(UtcDate.parse('2019-07-25T01:22:00Z')).toBe(Date.UTC(2019, 6, 25, 1, 22))
     expect(UtcDate.parse('2019-07-25T04:22:00+03:00')).toBe(Date.UTC(2019, 6, 25, 1, 22))
   })
@@ -76,7 +83,49 @@ describe('Starting a flight checks its setup', () => {
   test('the crew capsule can never be flown', () => {
     const capsule = ModuleCatalog.shared.get('CrewCapsule')
     expect(starter.install(capsule, 1).issues(Fixtures.everything)).toEqual([{ kind: LoadoutIssueKind.NotOwned, moduleId: 'CrewCapsule', amount: 1 }])
-    expect(() => begin({ busId: 'SmallSat', modules: [{ id: 'CrewCapsule', mark: 1, copy: 1 }] })).toThrow(LoadoutIssueKind.NoInstrument)
+    expect(() => begin({ busId: 'SmallSat', modules: [{ id: 'CrewCapsule', mark: 1, copy: 1 }, { id: 'Camera', mark: 1, copy: 1 }] })).toThrow('cannot be fitted')
+  })
+
+  test('a setup that names an unknown bus or module is refused, not quietly repaired', () => {
+    const camera = { id: 'Camera', mark: 1, copy: 1 }
+    for (const bad of [
+      { busId: 'Nope', modules: [camera] },
+      { busId: 'SmallSat', modules: [camera, { id: 'Laser', mark: 1, copy: 1 }] },
+      { busId: 'SmallSat', modules: [camera, { id: 'Radar', mark: 9, copy: 1 }] },
+      { busId: 'SmallSat', modules: [camera, camera] },
+      { busId: 'SmallSat', modules: [camera, null] },
+      { busId: 'SmallSat' },
+      null,
+    ]) {
+      expect(() => begin(bad), JSON.stringify(bad)).toThrow()
+      expect(() => Flight.begin({ loadout: bad as never, weekId: 'Calm', seed: 7 }, { ...options, owner: Profile.starter() })).toThrow()
+    }
+    expect(Loadout.readsExactly(starter.toJson())).toBe(true)
+  })
+
+  test('a flight keeps its own copy of the setup and of each command', () => {
+    const setup = Fixtures.setup(starter, 'Calm', 9)
+    const flight = Flight.begin(setup, options)
+    setup.seed = 1
+    setup.loadout.modules.length = 0
+    expect(flight.setup.seed).toBe(9)
+    expect(flight.setup.loadout.modules).toHaveLength(5)
+    expect(flight.setup.weekSignature).toBe(Fixtures.calmWeek.signature)
+    flight.apply(Commands.choose(0))
+    const command = { type: CommandType.Commit as const, keys: ['Camera#1'] }
+    flight.apply(command)
+    command.keys.push('Radar#9')
+    ;(command as { type: string }).type = 'Explode'
+    expect(flight.log[1]).toEqual({ type: CommandType.Commit, keys: ['Camera#1'] })
+    expect(() => Flight.replay(flight.setup, flight.log, options)).not.toThrow()
+  })
+
+  test('cooldowns are on only for a true boolean', () => {
+    for (const odd of ['false', 'true', 1, {}, null]) {
+      const flight = begin(starter.toJson(), { cooldowns: odd })
+      expect(flight.setup.cooldowns).toBe(false)
+    }
+    expect(begin(starter.toJson(), { cooldowns: true }).setup.cooldowns).toBe(true)
   })
 
   test('with an owner given, modules and buses the player has not unlocked are refused', () => {
@@ -128,8 +177,13 @@ describe('Commands from a damaged log', () => {
     { type: CommandType.Commit },
     { type: CommandType.Commit, keys: 'Camera#1' },
     { type: CommandType.Commit, keys: [7] },
+    { type: CommandType.Commit, keys: ['Camera#1', 'Camera#1'] },
     { type: 'Explode' },
     {},
+    null,
+    undefined,
+    'Hold',
+    7,
   ] as unknown as FlightCommand[]
 
   test('are refused in every phase and change nothing', () => {
@@ -194,7 +248,11 @@ describe('After the spacecraft is lost', () => {
     shielded.apply(Commands.hold)
     shielded.apply(Commands.choose(0))
     while (shielded.phase === FlightPhase.Encounter) shielded.apply(Commands.commit([]))
-    expect(shielded.report().loss).toMatchObject({ shielding: 1, hadActiveShield: true })
+    const loss = shielded.report().loss!
+    expect(loss).toMatchObject({ shielding: 1, hadActiveShield: true })
+    const fatal = shielded.encounter!.history.at(-1)!
+    expect(loss.radiation).toBe(shielded.encounter!.current.radiation)
+    expect(loss.radiation).toBe(fatal.incoming + 1)
   })
 
   test('no command is accepted any more', () => {
