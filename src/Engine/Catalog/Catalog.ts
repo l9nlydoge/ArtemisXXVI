@@ -57,7 +57,8 @@ export class Catalog {
     new Instrument('MicrowaveSounder', 'Microwave Sounder', 85, 130, 0.032, 1, 60, 60, [Sources.Atms], true),
     new Instrument('MiniRadiometer', 'Mini Microwave Radiometer', 1.5, 10, 0.1, 1, 3, 25, [Sources.Tropics], true),
     new Instrument('CubeCamera', 'CubeSat Camera', 1.5, 8, 50, 0.25, 1, 20, [Sources.Planet], true),
-    new Instrument('Radar', 'Imaging Radar (SAR)', 1000, 4000, 2000, 0.15, 400, 120, [Sources.Nisar], true),
+    new Instrument('Radar', 'Imaging Radar (SAR)', 600, 2500, 2000, 0.15, 250, 120, [Sources.Nisar], true),
+    new Instrument('InfraredTelescope', 'Infrared Telescope', 500, 250, 3.1, 1, 250, 100, [Sources.WebbKaBand, Sources.WebbFacts], true),
   ])
 
   readonly buses = new Registry<Bus>([
@@ -115,5 +116,18 @@ export class Catalog {
       { key: ReferenceFactKey.Launch, value: 'Rocket Lab Electron', source: Sources.Tropics },
       { key: ReferenceFactKey.Cost, value: '~$30M', source: Sources.TropicsCost },
     ], 'Many tiny satellites beat one big one when revisit matters.')),
+    new Scenario('DeepSky', 'Deep Sky', 'Survey the infrared sky for 5 years, away from the Earth\'s heat and glare.', {
+      budgetMusd: 700, targetYears: 5, requiredScience: 240, requiredRevisitHours: 1, maxCopies: 4,
+      instrumentFit: { InfraredTelescope: 1 },
+      orbitFit: { [OrbitClass.L2]: 1, [OrbitClass.Leo]: 0.5, [OrbitClass.Sso]: 0.45, [OrbitClass.Geo]: 0.4 },
+      orbitRevisitHours: { [OrbitClass.L2]: 1, [OrbitClass.Leo]: 1, [OrbitClass.Sso]: 1, [OrbitClass.Geo]: 1 },
+    }, new ReferenceMission('James Webb Space Telescope', [
+      { key: ReferenceFactKey.Mass, value: 'About 6,200 kg', source: Sources.WebbFacts },
+      { key: ReferenceFactKey.Orbit, value: 'Sun–Earth L2, 1.5 million km away', source: Sources.WebbOrbit },
+      { key: ReferenceFactKey.Instruments, value: '6.5 m mirror of 18 gold-coated segments', source: Sources.WebbFacts },
+      { key: ReferenceFactKey.Downlink, value: 'Ka-band 28 Mbps', source: Sources.WebbKaBand },
+      { key: ReferenceFactKey.DesignLife, value: '5 to 10 years', source: Sources.WebbFacts },
+      { key: ReferenceFactKey.Launch, value: 'Ariane 5 ECA', source: Sources.WebbFacts },
+    ], 'NASA sent it far from the Earth, where a sunshield can keep the telescope cold.')),
   ])
 }

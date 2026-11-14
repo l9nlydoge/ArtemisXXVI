@@ -8,6 +8,7 @@ export enum Shot {
   Chase = 'Chase',
   Wide = 'Wide',
   Report = 'Report',
+  Aside = 'Aside',
 }
 
 export class ShotList {
@@ -19,6 +20,8 @@ export class ShotList {
         return flightView === CameraView.Chase ? Shot.Chase : Shot.Wide
       case Screen.Debrief:
         return Shot.Report
+      case Screen.Sources:
+        return Shot.Aside
       default:
         return Shot.Dock
     }

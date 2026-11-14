@@ -48,6 +48,7 @@ export class SpacecraftBlueprint {
     MiniRadiometer: [0.12, 0.1, InstrumentShape.Dish],
     CubeCamera: [0.09, 0.11, InstrumentShape.Telescope],
     Radar: [6, 0.5, InstrumentShape.Panel],
+    InfraredTelescope: [1.6, 2.3, InstrumentShape.Telescope],
   }
 
   private static readonly antennas: Record<string, [AntennaShape, number]> = {

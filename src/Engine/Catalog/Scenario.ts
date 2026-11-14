@@ -24,6 +24,10 @@ export class Scenario extends CatalogItem {
     super(id, name)
   }
 
+  get revisitMatters(): boolean {
+    return Object.values(this.spec.orbitRevisitHours).some((hours) => Number.isFinite(hours) && hours > this.spec.requiredRevisitHours)
+  }
+
   instrumentFit(instrumentId: string): number {
     return this.spec.instrumentFit[instrumentId] ?? 0
   }

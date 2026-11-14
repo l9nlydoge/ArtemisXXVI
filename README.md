@@ -30,7 +30,7 @@ To make rooms work across phones:
 |---|---|
 | `src/Engine/Catalog` | Launch vehicles, orbits, instruments, buses and scenarios, with source links |
 | `src/Engine/Models` | Mass, power, data, cost and lifetime budgets |
-| `src/Engine/Simulation` | `MissionSimulator`, seeded random events, `FailureTracer`, star rating, design sampler |
+| `src/Engine/Simulation` | `MissionSimulator`, seeded random events, `FailureTracer`, star rating, design sampler, mission ranking and the strategy finder used by the balance tests |
 | `src/Sync` | `RoomSync` with Firebase and local implementations, plus `TeamSession` |
 | `src/State` | Zustand game store and saved mission patches |
 | `src/I18n` | English and Turkish strings |

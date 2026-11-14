@@ -140,9 +140,11 @@ export function StationPanel({ role }: { role: Role }) {
         max={scenario.spec.maxCopies}
         step={1}
         hint={
-          Number.isFinite(revisit)
-            ? translator.t('Hint.Copies', { revisit: Numbers.round(revisit, 1), required: scenario.spec.requiredRevisitHours })
-            : translator.t('Hint.NoView')
+          !scenario.revisitMatters
+            ? translator.t('Hint.CopiesPlain')
+            : Number.isFinite(revisit)
+              ? translator.t('Hint.Copies', { revisit: Numbers.round(revisit, 1), required: scenario.spec.requiredRevisitHours })
+              : translator.t('Hint.NoView')
         }
         onChange={(copies) => edit('Program', { copies })}
       />

@@ -3,6 +3,7 @@ import type { TraceParams } from './TraceLink'
 export enum MissionEventKind {
   Launch = 'Launch',
   LaunchFailure = 'LaunchFailure',
+  Reflight = 'Reflight',
   OrbitReached = 'OrbitReached',
   SolarStorm = 'SolarStorm',
   Micrometeoroid = 'Micrometeoroid',

@@ -138,6 +138,7 @@ export class CameraDirector {
         if (path.isHalo) look.copy(craft.position).multiplyScalar(0.5)
         up.set(0, 1, 0)
         return
+      case Shot.Aside:
       case Shot.Report:
         position.copy(CameraDirector.wideDirection).multiplyScalar(path.viewDistance * 1.2)
         this.right.crossVectors(CameraDirector.wideDirection, up.set(0, 1, 0)).normalize()

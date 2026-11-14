@@ -4,11 +4,12 @@ import { useGameStore } from '../../State/GameStore'
 import { ComparisonTable } from '../Readouts/ComparisonTable'
 import { Criteria } from '../Readouts/Criteria'
 import { MissionPatch } from '../Readouts/MissionPatch'
+import { RankingChart } from '../Readouts/RankingChart'
 import { TraceView } from '../Readouts/TraceView'
 
 export function ReportScreen() {
   const translator = useTranslator()
-  const { result, patch, retry, backToMenu, session } = useGameStore()
+  const { result, patch, retry, backToMenu, openSources, session } = useGameStore()
   if (!result) return null
   const primary = result.primaryTrace
   const canRetry = !session || session.isHost
@@ -58,10 +59,15 @@ export function ReportScreen() {
       )}
 
       <div className="Panel">
+        <RankingChart result={result} />
+      </div>
+
+      <div className="Panel">
         <ComparisonTable result={result} />
       </div>
 
       <footer className="ReportBar">
+        <button type="button" className="Quiet" onClick={openSources}>{translator.t('Sources.Open')}</button>
         {canRetry ? (
           <>
             {!session && <button type="button" className="Quiet" onClick={backToMenu}>{translator.t('Debrief.Menu')}</button>}

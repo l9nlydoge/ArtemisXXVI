@@ -10,7 +10,7 @@ import { TourPanel } from '../Readouts/TourPanel'
 
 export function StartScreen() {
   const translator = useTranslator()
-  const { difficulty, language, setDifficulty, setLanguage, startSolo, hostTeam, joinTeam } = useGameStore()
+  const { difficulty, language, setDifficulty, setLanguage, startSolo, hostTeam, joinTeam, openSources } = useGameStore()
   const [code, setCode] = useState('')
 
   useEffect(() => {
@@ -23,6 +23,7 @@ export function StartScreen() {
   return (
     <main className="StartScreen">
       <div className="Settings">
+        <button type="button" className="Quiet" onClick={openSources}>{translator.t('Sources.Open')}</button>
         <div className="Segmented" role="group" aria-label={translator.t('Menu.Difficulty')}>
           {Object.values(Difficulty).map((option) => (
             <button key={option} type="button" aria-pressed={difficulty === option} onClick={() => setDifficulty(option)}>{translator.t(`Difficulty.${option}`)}</button>

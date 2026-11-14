@@ -10,8 +10,8 @@ The engine is sound and the flight looks good. Almost everything around them is 
 
 **Works today**
 - Five real spacecraft (ISS, Hubble, Landsat 9, GOES, Webb) on their real orbits, with a tour on the start screen and labels in flight. Added 14 November.
-- Mission model: mass, power, data, cost and lifetime budgets, seeded random events, Failure Trace, star rating. Seven engine tests pass.
-- Solo loop from start screen to mission report, for two scenarios.
+- Mission model: mass, power, data, cost and lifetime budgets, seeded random events, Failure Trace, star rating. 21 engine tests pass.
+- Solo loop from start screen to mission report, for three scenarios.
 - Photographic 3D flight with a detailed spacecraft built from the player's design.
 - Mission patches earned on success.
 - English and Turkish interface text.
@@ -27,15 +27,15 @@ The engine is sound and the flight looks good. Almost everything around them is 
 | Flight | Events are only text. A solar storm, a micrometeoroid hit or a dead battery look the same on screen. A lost spacecraft just tumbles. A destroyed instrument stays on the model. |
 | Mission report | A long page of text. The Failure Trace, the game's signature idea, is a plain list. |
 | Team play | Rooms only sync between tabs on one computer until Firebase is set up. Secret objectives, the mid-design requirement change and the manager's override are not built. Never tested with phones or with the 3D flight. |
-| Game depth | Only two scenarios. Balance is untested. One unlucky event can kill a mission in its first year. The L2 orbit is selectable but useless in both scenarios. |
-| Validity | No in-game sources screen, so judges cannot see where the numbers come from or which are estimates. |
+| Game depth | Fixed in Phase 3. Three scenarios, tested balance, and luck can no longer end a sound mission early. |
+| Validity | Fixed in Phase 3. A sources screen lists every number with its link and an estimated label. |
 | Turkish | Menus are translated. Catalog names, mission facts and several hints are still English. |
 | Checking | Only one spacecraft design has been looked at in 3D. Phones, slow laptops and frame rate are unverified. |
 
 **Missing entirely**
 - A public link. There is no GitHub remote and no deployment.
 - The demo, the project page text and the required disclosures.
-- Share-by-link loading, the "you beat X% of missions" chart, a leaderboard, sound.
+- Share-by-link loading, a leaderboard, sound.
 
 ## 2. What "done" means
 
@@ -102,15 +102,22 @@ Also checked: a full team round (host, join from a second tab at phone size, vot
 | Failure you can see: dark and drifting for a dead battery, glowing re-entry for a decayed orbit | 0.5 | The cause is visible before the text says it |
 | Failure Trace as an animated chain over the frozen flight | 0.75 | The chain draws link by link back to "you chose" |
 
-### Phase 3: Fair, deep and checkable (Sunday 09:00 to 12:00, build plus one of you playing)
+### Phase 3: Fair, deep and checkable (done, Saturday 14 November)
 
-| Task | Hours | Done when |
+Every task below is finished. The engine parts are covered by automated tests, and the two new screens were checked in the browser at desktop and phone size.
+
+| Task | Status | How it was checked |
 |---|---|---|
-| Balance pass with the random-design sampler | 1 | At least three different strategies win each scenario |
-| Fairness: no mission-ending random event in year one on Normal | 0.25 | A sound design never dies to luck early |
-| Sources screen: every number, its link, and an "estimated" label | 0.75 | Reachable from the start screen and the report |
-| "You beat X% of possible missions" chart on the report | 0.75 | Shown after every flight |
-| Hide the L2 orbit, or add the Deep Sky telescope scenario | 0.25 or 1.5 | No option is useless |
+| Balance pass | Done | A test searches each scenario for designs that win in at least 4 of 5 random runs, and requires three or more distinct ones. It finds 8 for Crop Watch, 3 for Storm Chaser and 8 for Deep Sky. A second test requires at least three different rockets among Crop Watch winners. |
+| Fairness | Done | On Normal: no random event in the first year, a micrometeoroid cannot destroy the last instrument, and a failed launch is flown again out of the budget reserve. A design with no reserve still loses, and the report says why. On Easy launches never fail. Tests run 300 seeds for each rule. |
+| Sources screen | Done | Reachable from the start screen and the report. 44 rows in 8 sections, each marked sourced, part sourced or estimated, with links. |
+| "How you compare" chart | Done | Shown on every report: your mission against 300 computer-designed missions that reached orbit, with the science goal and budget drawn in. |
+| Make L2 useful | Done | New Deep Sky scenario: an infrared telescope, with the Webb telescope as the real mission to compare against. L2 wins it outright; a cheaper low-orbit telescope can just scrape through. |
+
+Notes on what changed in the numbers:
+- Only estimated values were tuned. The imaging radar became lighter and cheaper (600 kg, 2.5 kW, $250M) so it can fit a medium bus.
+- Storm Chaser has one winning kind of spacecraft, the CubeSat fleet, flown three ways (rideshare or Electron to sun-synchronous orbit, Electron to low orbit). That is the TROPICS lesson, so the budget was left tight on purpose.
+- Geostationary orbit is still out of reach for both Earth-observing budgets. It teaches by failing; it never wins.
 
 ### Phase 4: Team play (Sunday 12:00 to 15:00, build plus both of you with phones)
 

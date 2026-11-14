@@ -38,6 +38,9 @@ interface GameState {
   flight: FlightTelemetry
   worldReady: boolean
   tourId?: string
+  sourcesFrom?: Screen
+  openSources(): void
+  closeSources(): void
   visit(tourId?: string): void
   reportFlight(telemetry: FlightTelemetry): void
   markWorldReady(): void
@@ -89,6 +92,8 @@ export const useGameStore = create<GameState>((set, get) => {
     tourId: 'Station',
 
     visit: (tourId) => set({ tourId }),
+    openSources: () => set({ sourcesFrom: get().screen, screen: Screen.Sources }),
+    closeSources: () => set({ screen: get().sourcesFrom ?? Screen.Menu, sourcesFrom: undefined }),
 
     reportFlight: (flight) => set({ flight }),
     markWorldReady: () => set({ worldReady: true }),

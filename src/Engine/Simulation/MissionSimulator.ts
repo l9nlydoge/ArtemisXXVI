@@ -1,6 +1,7 @@
 import type { Instrument } from '../Catalog/Instrument'
 import type { Scenario } from '../Catalog/Scenario'
-import { Difficulty } from '../Design/Difficulty'
+import { Difficulty, LaunchPolicy } from '../Design/Difficulty'
+import { DesignField } from '../Design/DesignField'
 import type { MissionDesign } from '../Design/MissionDesign'
 import { ResolvedDesign } from '../Design/ResolvedDesign'
 import { EngineConstants } from '../EngineConstants'
@@ -51,8 +52,9 @@ export class MissionSimulator {
     const budgets = BudgetSheet.evaluate(design)
     const tracer = new FailureTracer(design, budgets)
     const coverage = this.scienceModel.coverage(design)
+    let extraCost = 0
     const finish = (verdict: Verdict, events: MissionEvent[], traces: FailureTrace[], science = 0, life = 0) =>
-      new SimulationResult(design, budgets, verdict, events, traces, science, coverage, life, input.seed)
+      new SimulationResult(design, budgets, verdict, events, traces, science, coverage, life, input.seed, extraCost)
 
     if (budgets.cost.overBudget) return finish(Verdict.Cancelled, [], [tracer.cancelled()])
     if (!budgets.mass.reachable) return finish(Verdict.Grounded, [], [tracer.unreachable()])
@@ -62,12 +64,22 @@ export class MissionSimulator {
     const random = new SeededRandom(input.seed)
     const events: MissionEvent[] = [new MissionEvent(0, MissionEventKind.Launch, { vehicle: design.vehicle.name })]
     const traces: FailureTrace[] = []
-    const aliveCopies = this.launch(design, budgets, random)
+    let aliveCopies = this.launch(design, budgets, random)
     if (aliveCopies === 0) {
-      events.push(new MissionEvent(0, MissionEventKind.LaunchFailure))
-      return finish(Verdict.LaunchFailure, events, [tracer.launchFailure()])
+      const reflight = this.reflightCostMusd(budgets)
+      const affordable = budgets.cost.totalMusd + reflight <= budgets.cost.budgetMusd
+      if (design.difficulty.launchPolicy !== LaunchPolicy.ReflightFromReserve || !affordable) {
+        events.push(new MissionEvent(0, MissionEventKind.LaunchFailure))
+        const trace = design.difficulty.launchPolicy === LaunchPolicy.ReflightFromReserve ? tracer.launchFailureWithoutReserve(reflight) : tracer.launchFailure()
+        return finish(Verdict.LaunchFailure, events, [trace])
+      }
+      extraCost = reflight
+      aliveCopies = design.copies
+      events.push(new MissionEvent(0, MissionEventKind.Reflight, { cost: Numbers.round(reflight) }))
+      traces.push(tracer.reflight(reflight))
+    } else if (aliveCopies < design.copies) {
+      traces.push(tracer.launchFailure())
     }
-    if (aliveCopies < design.copies) traces.push(tracer.launchFailure())
     events.push(new MissionEvent(0, MissionEventKind.OrbitReached, { orbit: design.orbit.name, copies: aliveCopies }))
 
     const state = new FlightState(design, aliveCopies)
@@ -118,7 +130,14 @@ export class MissionSimulator {
     return finish(Verdict.Success, events, state.fatal ? [...traces, state.fatal] : traces, state.science, state.year)
   }
 
+  private reflightCostMusd(budgets: BudgetSheet): number {
+    const launch = budgets.cost.lines.filter((line) => line.field === DesignField.LaunchVehicle).reduce((sum, line) => sum + line.amount, 0)
+    const hardware = budgets.cost.lines.filter((line) => line.field !== DesignField.LaunchVehicle && line.field !== DesignField.GroundStations).reduce((sum, line) => sum + line.amount, 0)
+    return launch + hardware * EngineConstants.reflightSpareFraction
+  }
+
   private launch(design: ResolvedDesign, budgets: BudgetSheet, random: SeededRandom): number {
+    if (design.difficulty.launchPolicy === LaunchPolicy.AlwaysSucceeds) return design.copies
     let alive = design.copies
     for (let launch = 0; launch < budgets.mass.launches; launch++) {
       if (random.chance(design.vehicle.failureChance)) {
@@ -130,12 +149,13 @@ export class MissionSimulator {
   }
 
   private applyRandomEvents(design: ResolvedDesign, kinds: MissionEventKind[], state: FlightState, events: MissionEvent[], random: SeededRandom): void {
+    if (state.year < design.difficulty.graceYears) return
     for (const kind of kinds) {
       if (kind === MissionEventKind.SolarStorm) {
         state.arrayFactor *= 0.9
         if (!design.orbit.spec.dragEventsPossible && design.orbit.spec.radiationLifeYears < 15) state.radiationLifeYears -= 1
         events.push(new MissionEvent(state.year, kind))
-      } else if (kind === MissionEventKind.Micrometeoroid && state.instruments.length > 0) {
+      } else if (kind === MissionEventKind.Micrometeoroid && state.instruments.length > (design.difficulty.sparesLastInstrument ? 1 : 0)) {
         const hit = random.pick(state.instruments)
         state.instruments = state.instruments.filter((instrument) => instrument !== hit)
         events.push(new MissionEvent(state.year, kind, { instrument: hit.name }))

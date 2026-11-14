@@ -16,6 +16,10 @@ export class LaunchVehicle extends CatalogItem {
     super(id, name, sources, estimated)
   }
 
+  capacityTo(capacityClass: CapacityClass): number {
+    return this.capacityKg[capacityClass] ?? 0
+  }
+
   capacityFor(orbit: Orbit): number {
     return this.capacityKg[orbit.spec.capacityClass] ?? 0
   }

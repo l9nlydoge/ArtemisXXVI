@@ -37,5 +37,6 @@ export const Sources = {
   DeltaV: 'https://en.wikipedia.org/wiki/Delta-v_budget',
   StationFacts: 'https://www.nasa.gov/international-space-station/space-station-facts-and-figures/',
   HubbleNumbers: 'https://science.nasa.gov/mission/hubble/overview/hubble-by-the-numbers/',
+  WebbFacts: 'https://science.nasa.gov/mission/webb/fact-sheet/',
   GoesSatellites: 'https://www.nesdis.noaa.gov/our-satellites/currently-flying/geostationary-satellites',
 } as const

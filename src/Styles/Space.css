@@ -108,7 +108,8 @@ input[type='checkbox'] { accent-color: var(--Foil); width: 20px; height: 20px; m
 .VeilTrack span { display: block; width: 40%; height: 100%; background: var(--Foil); animation: Sweep 1400ms var(--Ease) infinite; }
 
 .StartScreen { display: grid; grid-template-rows: auto auto 1fr auto; gap: 18px; padding: 24px var(--Gutter) 20px; }
-.Settings { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
+.Settings { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; }
+.Settings .Quiet { min-height: 36px; text-shadow: 0 0 8px #000000; }
 .Hero h1 { font-size: clamp(3.4rem, 11vw, 9rem); font-weight: 800; letter-spacing: -0.045em; line-height: 0.9; white-space: nowrap; }
 .Hero p { font-size: clamp(1.05rem, 1.7vw, 1.35rem); max-width: 34ch; margin-top: 16px; }
 .Deck { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); gap: 20px; align-items: end; align-self: end; }
@@ -308,6 +309,22 @@ thead :is(th, td) { border-top: 0; font-size: 0.82rem; color: var(--Muted); padd
 .Comparison th[scope='row'] { color: var(--Muted); width: 9.5em; }
 .Comparison thead th { font-size: 1rem; color: var(--Text); font-weight: 600; }
 .Lesson { margin-top: 14px; max-width: 62ch; }
+.RankingHeadline { font-size: 1.2rem; font-weight: 600; margin-bottom: 10px; max-width: 60ch; }
+.RankingChart { width: 100%; height: auto; max-height: 340px; }
+.RankingChart .Axis { stroke: var(--LineStrong); stroke-width: 1; }
+.RankingChart .GoalLine { stroke: var(--Go); stroke-width: 1; stroke-dasharray: 5 4; }
+.RankingChart .BudgetLine { stroke: var(--NoGo); stroke-width: 1; stroke-dasharray: 5 4; }
+.RankingChart text { font-family: var(--Font); font-size: 12px; fill: var(--Muted); }
+.RankingChart .FieldDot { fill: rgba(243, 245, 246, 0.42); }
+.RankingChart .FieldDot.IsSuccess { fill: var(--Go); }
+.RankingChart .YourDot { fill: var(--Foil); stroke: #000000; stroke-width: 2; }
+.RankingChart .YourLabel { fill: var(--Foil); font-size: 14px; font-weight: 700; }
+.SourcesScreen header p { margin-top: 10px; max-width: 70ch; color: var(--Muted); }
+.SourcesScreen section > h2 { color: var(--Text); font-size: 1.2rem; font-weight: 600; margin-bottom: 6px; }
+.SourceTable th { width: 30%; font-weight: 600; }
+.SourceTable td:is(.IsEstimated, .IsMixed) { color: var(--Caution); white-space: nowrap; }
+.SourceTable td.IsSourced { color: var(--Go); white-space: nowrap; }
+.SourceTable a { margin-right: 10px; white-space: nowrap; }
 .ReportBar { position: sticky; bottom: 0; display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding: 12px 0 16px; background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.9) 40%); }
 
 .MissionPatch .PatchField { fill: #101317; }
@@ -396,6 +413,13 @@ thead :is(th, td) { border-top: 0; font-size: 0.82rem; color: var(--Muted); padd
   .EventLog li { grid-template-columns: 70px 1fr; }
   .FlightScreen { padding: 18px 16px; }
   .ControlFooter .Actions, .ControlFooter .Launch { flex: 1; }
+}
+
+@media (max-width: 700px) {
+  .SourceTable tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid var(--Line); }
+  .SourceTable :is(th, td) { border-top: 0; padding: 0; width: auto; }
+  .SourceTable th, .SourceTable td:nth-child(2) { grid-column: 1 / -1; }
+  .SourceTable td:nth-child(4) { text-align: right; }
 }
 
 @media (prefers-reduced-motion: reduce) {

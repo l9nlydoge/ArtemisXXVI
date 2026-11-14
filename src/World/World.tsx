@@ -121,7 +121,7 @@ function Scene({ detailed }: { detailed: boolean }) {
     })
 
     tracks.forEach((track) => track.advance(MotionPreference.reduced ? 0 : step, track === visited))
-    scene3.current.labelled = shot !== Shot.Dock && shot !== Shot.Report
+    scene3.current.labelled = shot !== Shot.Dock && shot !== Shot.Report && shot !== Shot.Aside
     scene3.current.visited = visited?.landmark.id
 
     locate(current.u)

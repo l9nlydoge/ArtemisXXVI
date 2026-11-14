@@ -4,6 +4,7 @@ import { FlightScreen } from './Interface/Screens/FlightScreen'
 import { HostScreen } from './Interface/Screens/HostScreen'
 import { JoinScreen } from './Interface/Screens/JoinScreen'
 import { ReportScreen } from './Interface/Screens/ReportScreen'
+import { SourcesScreen } from './Interface/Screens/SourcesScreen'
 import { StartScreen } from './Interface/Screens/StartScreen'
 import { Veil } from './Interface/Veil'
 import { RoleView } from './Interface/RoleView'
@@ -27,6 +28,8 @@ function CurrentScreen({ screen }: { screen: Screen }) {
       return <HostScreen />
     case Screen.Join:
       return <JoinScreen />
+    case Screen.Sources:
+      return <SourcesScreen />
   }
 }
 

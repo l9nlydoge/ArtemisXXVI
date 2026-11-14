@@ -52,6 +52,24 @@ export class FailureTracer {
     ], 0)
   }
 
+  launchFailureWithoutReserve(reflightMusd: number): FailureTrace {
+    const vehicle = this.design.vehicle
+    const reserve = this.budgets.cost.budgetMusd - this.budgets.cost.totalMusd
+    return this.fatal(new TraceLink('Trace.LaunchFailure', { vehicle: vehicle.name }), [
+      new TraceLink('Trace.LaunchOdds', { vehicle: vehicle.name, chance: Numbers.percent(vehicle.failureChance) }),
+      new TraceLink('Trace.NoReflight', { needed: Numbers.round(reflightMusd), reserve: Numbers.round(reserve) }),
+      this.decision(DesignField.LaunchVehicle, vehicle.name),
+    ], 0)
+  }
+
+  reflight(reflightMusd: number): FailureTrace {
+    const vehicle = this.design.vehicle
+    return new FailureTrace(new TraceLink('Trace.Reflight', { vehicle: vehicle.name, cost: Numbers.round(reflightMusd) }), [
+      new TraceLink('Trace.LaunchOdds', { vehicle: vehicle.name, chance: Numbers.percent(vehicle.failureChance) }),
+      this.decision(DesignField.LaunchVehicle, vehicle.name),
+    ], TraceSeverity.Degraded, 0)
+  }
+
   batteryWornOut(year: number): FailureTrace {
     const { power } = this.budgets
     return this.fatal(new TraceLink('Trace.BatteryWornOut', { year: Numbers.round(year, 1) }), [

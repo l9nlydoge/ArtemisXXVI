@@ -5,4 +5,5 @@ export enum Screen {
   Debrief = 'Debrief',
   Host = 'Host',
   Join = 'Join',
+  Sources = 'Sources',
 }

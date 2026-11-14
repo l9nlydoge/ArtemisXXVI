@@ -18,8 +18,9 @@ export class SimulationResult {
     readonly coverage: number,
     readonly lifeYears: number,
     readonly seed: number,
+    readonly extraCostMusd = 0,
   ) {
-    this.rating = new StarRating(verdict, budgets)
+    this.rating = new StarRating(verdict, budgets, this.reserveFraction)
   }
 
   get score(): number {
@@ -35,7 +36,12 @@ export class SimulationResult {
   }
 
   get costMusd(): number {
-    return this.budgets.cost.totalMusd
+    return this.budgets.cost.totalMusd + this.extraCostMusd
+  }
+
+  get reserveFraction(): number {
+    const budget = this.budgets.cost.budgetMusd
+    return (budget - this.budgets.cost.totalMusd - this.extraCostMusd) / budget
   }
 
   get sciencePerMillion(): number {

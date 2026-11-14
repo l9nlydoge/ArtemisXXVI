@@ -19,4 +19,5 @@ export class EngineConstants {
   static readonly flightReadyMargin = 0.2
   static readonly reserveForStar = 0.1
   static readonly timeStepYears = 0.25
+  static readonly reflightSpareFraction = 0.1
 }

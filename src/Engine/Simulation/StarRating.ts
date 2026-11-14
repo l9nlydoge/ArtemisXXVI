@@ -1,3 +1,4 @@
+import { EngineConstants } from '../EngineConstants'
 import type { BudgetSheet } from '../Models/BudgetSheet'
 import { Verdict } from './Verdict'
 
@@ -10,11 +11,11 @@ export enum StarBadge {
 export class StarRating {
   readonly badges: readonly StarBadge[]
 
-  constructor(verdict: Verdict, budgets: BudgetSheet) {
+  constructor(verdict: Verdict, budgets: BudgetSheet, reserveFraction: number) {
     const badges: StarBadge[] = []
     if (verdict === Verdict.Success) {
       badges.push(StarBadge.MissionSuccess)
-      if (budgets.cost.isFlightReady) badges.push(StarBadge.SmartSpending)
+      if (reserveFraction >= EngineConstants.reserveForStar) badges.push(StarBadge.SmartSpending)
       if (budgets.flightReady) badges.push(StarBadge.FlightReady)
     }
     this.badges = badges
