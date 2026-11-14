@@ -14,7 +14,7 @@ export enum ObservationHistory {
 
 export class AsteroidFlyby extends SpaceEvent {
   readonly kind = EventKind.Asteroid
-  private static readonly images = ['AsteroidA', 'AsteroidB', 'AsteroidC', 'AsteroidD']
+  private static readonly images = ['AsteroidA', 'AsteroidB', 'AsteroidC']
 
   private constructor(readonly record: AsteroidRecord, pinned: boolean) {
     const diameter = AsteroidFlyby.diameterM(record)

@@ -23,7 +23,7 @@ export class RareEvents {
     new RareEvent({
       id: 'Rare.Grb221009A',
       label: new TextRef('Event.Rare.Grb221009A'),
-      dateUtc: '2022-10-09T12:00:00Z',
+      dateUtc: '2022-10-09T13:17:00Z',
       rarity: Rarity.Headline,
       channels: new Map([
         [Channel.HighEnergy, { capacity: 18, minMark: 1 }],

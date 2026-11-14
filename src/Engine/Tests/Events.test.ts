@@ -272,6 +272,7 @@ describe('Distant planets as standing targets', () => {
   test('facts skip numbers the archive does not have, and mark a radius that is only an estimate', () => {
     expect(ExoplanetTarget.fromRecord(trappist).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.Radius'])
     expect(ExoplanetTarget.fromRecord(radial).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.RadiusEstimated'])
+    expect(ExoplanetTarget.fromRecord(imaged).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance', 'Fact.RadiusEstimated'])
     expect(ExoplanetTarget.fromRecord(wobbleThatTransits).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Radius'])
     expect(ExoplanetTarget.fromRecord(odd).facts.map((fact) => fact.key)).toEqual(['Fact.Method', 'Fact.Discovered', 'Fact.Distance'])
     expect(ExoplanetTarget.fromRecord(trappist).facts[2].params).toEqual({ lightYears: 41 })

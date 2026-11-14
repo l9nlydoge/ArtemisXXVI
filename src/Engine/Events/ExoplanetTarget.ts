@@ -46,7 +46,7 @@ export class ExoplanetTarget extends SpaceEvent {
     }
     const facts = [new TextRef('Fact.Method', { method: record.method }), new TextRef('Fact.Discovered', { year: String(record.year), facility: record.facility })]
     if (record.distanceParsec !== null) facts.push(new TextRef('Fact.Distance', { lightYears: Math.round(record.distanceParsec * 3.26156) }))
-    if (record.radiusEarth !== null) facts.push(new TextRef(record.radiusEstimated ? 'Fact.RadiusEstimated' : 'Fact.Radius', { radius: Number(record.radiusEarth.toFixed(2)) }))
+    if (record.radiusEarth !== null) facts.push(new TextRef(record.radiusEstimated || !record.transits ? 'Fact.RadiusEstimated' : 'Fact.Radius', { radius: Number(record.radiusEarth.toFixed(2)) }))
     super({
       id: ExoplanetTarget.idFor(record.name),
       label: TextRef.literal(record.name),

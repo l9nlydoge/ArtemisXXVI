@@ -166,12 +166,12 @@ Every event card is a real record. Its real numbers set how it plays.
 | **Asteroid flyby** | NASA/JPL close-approach data (Center for Near-Earth Object Studies) | Size, speed, miss distance, date | Fast means fewer turns. Close means a stronger signal and a radar channel. Large means more to record. |
 | **Solar storm** | Space weather database (DONKI): geomagnetic storms, particle events, flares | Storm strength on the Kp scale, dates, and which instruments near Earth detected particles and flares | Strength sets the radiation each turn. Dates set which legs it covers. |
 | **Distant planet** | NASA Exoplanet Archive | Whether the planet transits, how it was found, star brightness, planet size | How the planet can be observed decides the instrument: a camera for a transit, a spectrometer for a star's wobble. Planets are standing targets; the game does not time them to their real transits. |
-| **Rare event** | Hand-picked, each with a NASA page | Date, type | High-value contacts: a gamma-ray burst, a visitor from another star, a spacecraft hitting an asteroid on purpose. |
+| **Rare event** | Hand-picked, each with a NASA page | Date, type | High-value contacts: a gamma-ray burst, and a spacecraft hitting an asteroid on purpose. |
 | **Crossing the South Atlantic Anomaly** | A real region of stronger radiation in low Earth orbit | — | A small radiation hit on some turns, even on a quiet week. |
 
 After you record an object, its card shows one line on what was really learned from it, and a link to the source.
 
-**The cards do not overstate.** Every asteroid pass is computed by NASA/JPL from the asteroid's orbit, and the card says whether anyone actually observed the asteroid around that date, first saw it afterwards, or had lost track of it. Sizes are labelled as estimates. A picture that stands in for an object nobody has photographed is captioned "Representative".
+**The cards do not overstate.** Every asteroid pass is computed by NASA/JPL from the asteroid's orbit. The card gives the dates of the first and last observations on record, and says so when the pass falls before the first or after the last. Sizes are labelled as estimates. A picture that stands in for an object nobody has photographed is captioned "Representative".
 
 ### 8.1 The weeks
 

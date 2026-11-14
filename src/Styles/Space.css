@@ -1,30 +1,58 @@
 :root {
   --Space: #000000;
   --Panel: rgba(7, 9, 12, 0.94);
+  --Plate: #0b0d10;
   --Line: rgba(255, 255, 255, 0.14);
+  --LineStrong: rgba(255, 255, 255, 0.4);
   --Text: #f3f5f6;
   --Muted: #a6b0bb;
   --Foil: #e8a838;
   --Go: #3ecf85;
   --NoGo: #ff5263;
   --Caution: #f2e05a;
-  --Gutter: clamp(16px, 4vw, 56px);
+  --Gutter: clamp(16px, 2.6vw, 40px);
+  --Ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #Root { height: 100%; }
-body { background: var(--Space); color: var(--Text); font-family: 'Jost', system-ui, sans-serif; font-size: 17px; line-height: 1.45; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; overflow: hidden; }
-button { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--Foil); outline-offset: 3px; }
-
-.WorldLayer { position: fixed; inset: 0; z-index: 0; }
-.World { width: 100%; height: 100%; display: block; }
-.Interface { position: relative; z-index: 1; height: 100dvh; }
+body { background: var(--Space); color: var(--Text); font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif; font-size: 16px; line-height: 1.4; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; overflow: hidden; }
+ul, ol { list-style: none; }
+h1, h2, h3 { font-weight: 600; line-height: 1.15; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 1rem; }
+a { color: var(--Text); text-underline-offset: 3px; }
+button { font: inherit; color: inherit; background: none; border: 1px solid var(--Line); border-radius: 2px; padding: 8px 14px; cursor: pointer; transition: border-color 120ms, background-color 120ms, color 120ms; }
+button:hover:not(:disabled) { border-color: var(--LineStrong); }
+button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
+:focus-visible { outline: 2px solid var(--Foil); outline-offset: 2px; }
+.Primary { background: var(--Foil); border-color: var(--Foil); color: #14100a; font-weight: 600; }
+.Primary:hover:not(:disabled) { background: #f4b94e; border-color: #f4b94e; }
+.Primary:disabled { background: transparent; border-color: var(--Line); color: var(--Muted); opacity: 1; }
+.Primary.IsLarge { font-size: 1.15rem; padding: 13px 28px; }
+.Quiet { border-color: transparent; color: var(--Muted); padding-inline: 10px; }
+.Quiet:hover:not(:disabled) { color: var(--Text); border-color: var(--Line); }
 .Muted { color: var(--Muted); }
+.Panel { background: var(--Panel); border: 1px solid var(--Line); border-radius: 2px; }
 
-.HomeScreen { height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(24px, 6vh, 64px) var(--Gutter) 20px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.55) 34%, rgba(0, 0, 0, 0) 60%); }
-.HomeIntro { max-width: 30rem; display: grid; gap: 14px; }
-.HomeIntro h1 { font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; }
-.Pitch { font-size: 1.25rem; font-weight: 500; }
-.HomeFooter { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 0.82rem; color: var(--Muted); }
+.WorldLayer { position: fixed; inset: 0; z-index: 0; background: var(--Space); }
+.WorldLayer.IsStill { background: radial-gradient(120% 90% at 78% 60%, #10233f 0%, #050a14 45%, #000000 75%); }
+.World { width: 100%; height: 100% !important; display: block; }
+.Interface { position: relative; z-index: 1; height: 100dvh; }
+.Interface > main { height: 100%; }
+
+.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(28px, 7vh, 72px) var(--Gutter) 18px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.72) 30%, rgba(0, 0, 0, 0) 58%); }
+.HomeIntro { max-width: 31rem; display: grid; gap: 18px; }
+.HomeIntro h1 { font-size: clamp(3.2rem, 7.4vw, 6.2rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.92; }
+.Pitch { font-size: 1.3rem; font-weight: 500; line-height: 1.3; max-width: 26rem; }
+.HomeActions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.HomeFoot { display: grid; gap: 22px; }
+.RankBadge { width: min(100%, 22rem); display: grid; gap: 6px; }
+.RankTitle { display: flex; gap: 10px; align-items: baseline; font-size: 1.15rem; font-weight: 600; }
+.RankNumber { color: var(--Foil); }
+.RankTrack { height: 4px; background: var(--Line); }
+.RankFill { height: 100%; background: var(--Foil); transition: width 600ms var(--Ease); }
+.RankNote, .RankPoints { font-size: 0.9rem; color: var(--Muted); }
+.RankPoints { color: var(--Text); }
+.Credits { display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 0.78rem; color: var(--Muted); }
