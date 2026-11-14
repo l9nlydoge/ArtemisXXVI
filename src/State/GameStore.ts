@@ -13,6 +13,7 @@ import { Translator } from '../I18n/Translator'
 import { RoomPhase } from '../Sync/RoomState'
 import { RoomSyncFactory } from '../Sync/RoomSyncFactory'
 import { TeamSession } from '../Sync/TeamSession'
+import { MissionArchive, type MissionRecord } from './MissionArchive'
 import { Screen } from './Screen'
 
 interface GameState {
@@ -23,6 +24,7 @@ interface GameState {
   design: MissionDesign
   seed: number
   result?: SimulationResult
+  patch?: MissionRecord
   focusField?: DesignField
   session?: TeamSession
   sessionTick: number
@@ -93,7 +95,8 @@ export const useGameStore = create<GameState>((set, get) => {
     finishFlight: () => {
       const session = get().session
       if (session?.isHost) void session.finishFlight()
-      set({ screen: Screen.Debrief })
+      const result = get().result
+      set({ screen: Screen.Debrief, patch: result ? MissionArchive.record(result) : undefined })
     },
 
     retry: (field) => {

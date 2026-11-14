@@ -3,11 +3,12 @@ import { useTranslator } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
 import { ComparisonTable } from '../Components/ComparisonTable'
 import { Criteria } from '../Components/Criteria'
+import { MissionPatch } from '../Components/MissionPatch'
 import { TraceView } from '../Components/TraceView'
 
 export function DebriefScreen() {
   const translator = useTranslator()
-  const { result, retry, backToMenu, session } = useGameStore()
+  const { result, patch, retry, backToMenu, session } = useGameStore()
   if (!result) return null
   const primary = result.primaryTrace
   const canRetry = !session || session.isHost
@@ -16,22 +17,30 @@ export function DebriefScreen() {
   return (
     <main className="DebriefScreen">
       <header className={`Verdict ${result.succeeded ? 'IsSuccess' : 'IsFailure'}`}>
-        <h1>{translator.t(`Verdict.${result.verdict}`)}</h1>
-        <Criteria rating={result.rating} />
-        <dl className="Outcome">
-          <div>
-            <dt>{translator.t('Outcome.Science')}</dt>
-            <dd>{translator.t('Outcome.ScienceValue', { score: Numbers.round(result.score), required: spec.requiredScience })}</dd>
-          </div>
-          <div>
-            <dt>{translator.t('Outcome.Cost')}</dt>
-            <dd>{translator.t('Outcome.CostValue', { cost: Numbers.round(result.costMusd), budget: spec.budgetMusd })}</dd>
-          </div>
-          <div>
-            <dt>{translator.t('Outcome.Life')}</dt>
-            <dd>{translator.t('Outcome.LifeValue', { life: Numbers.round(result.lifeYears, 1), target: spec.targetYears })}</dd>
-          </div>
-        </dl>
+        <div>
+          <h1>{translator.t(`Verdict.${result.verdict}`)}</h1>
+          <Criteria rating={result.rating} />
+          <dl className="Outcome">
+            <div>
+              <dt>{translator.t('Outcome.Science')}</dt>
+              <dd>{translator.t('Outcome.ScienceValue', { score: Numbers.round(result.score), required: spec.requiredScience })}</dd>
+            </div>
+            <div>
+              <dt>{translator.t('Outcome.Cost')}</dt>
+              <dd>{translator.t('Outcome.CostValue', { cost: Numbers.round(result.costMusd), budget: spec.budgetMusd })}</dd>
+            </div>
+            <div>
+              <dt>{translator.t('Outcome.Life')}</dt>
+              <dd>{translator.t('Outcome.LifeValue', { life: Numbers.round(result.lifeYears, 1), target: spec.targetYears })}</dd>
+            </div>
+          </dl>
+        </div>
+        {patch && result.succeeded && (
+          <figure className="PatchAward">
+            <MissionPatch record={patch} awarded />
+            <figcaption>{translator.t('Debrief.PatchEarned')}</figcaption>
+          </figure>
+        )}
       </header>
 
       {primary && (

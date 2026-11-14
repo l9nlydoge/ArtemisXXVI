@@ -180,5 +180,14 @@
   "Outcome.LifeValue": "{life} of {target} years",
   "Host.LocalOnly": "This room only syncs between tabs on this computer. Add Firebase settings to play across phones.",
   "Join.Connecting": "Looking for the room.",
-  "App.Colophon": "An entry for the 2026 NASA Space Apps Challenge. Not an official NASA product."
+  "App.Colophon": "An entry for the 2026 NASA Space Apps Challenge. Not an official NASA product.",
+  "Stage.Drag": "Drag to turn it.",
+  "Flight.Coverage": "{percent}% of the science goal collected",
+  "Flight.ViewWide": "Whole Earth view",
+  "Flight.ViewChase": "Follow the spacecraft",
+  "Patch.Mission": "Mission {number}",
+  "Wall.Title": "Mission patches",
+  "Wall.Empty": "Fly a successful mission to earn its patch. Three stars earns a gold one.",
+  "Wall.Result": "Science {score} for ${cost}M",
+  "Debrief.PatchEarned": "Patch earned. It is on your start screen."
 }

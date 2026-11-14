@@ -31,7 +31,18 @@ Read this before changing any UI. It exists so the game keeps one identity, whoe
 2. Show quantities, not just percentages: `1,456 of 2,300 kg`.
 3. Choices are visible rows with their trade-offs, not dropdowns.
 4. Status is always a shape plus a word plus a colour.
-5. Motion answers the player: gauges move when a choice changes. Two set pieces only: the ascent and the Failure Trace rewind.
+5. Motion answers the player: gauges move when a choice changes. The set pieces are the ascent, the flight and the Failure Trace rewind.
+
+## 3D and rewards
+
+The player has to get something back for the ten minutes they spend designing.
+
+- **The spacecraft is a 3D model** built from the same data as the flat drawing. It turns in the clean room and then flies in the mission.
+- **The flight is a 3D scene.** A chase camera follows the spacecraft over the Earth, then pulls back for the finale.
+- **Science is visible.** Every pass paints a gold track on the globe. A mission that meets its goal covers the Earth in gold; a weak one leaves it mostly bare.
+- **Success earns a mission patch** that is kept on the start screen. Three stars earns a gold border.
+- **The Earth is drawn, not photographed.** Blue ocean, off-white land, ink coastlines, in the same palette as the rest of the game. No photoreal textures, lens flares or bloom.
+- The 3D code is in `src/UI/Scene`. It loads only when needed, and the flat drawings in `src/UI/Visuals` are the fallback when WebGL is missing.
 
 ## Banned (the usual generated-UI tells)
 

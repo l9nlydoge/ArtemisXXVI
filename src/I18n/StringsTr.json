@@ -180,5 +180,14 @@
   "Outcome.LifeValue": "{target} yıldan {life}",
   "Host.LocalOnly": "Bu oda yalnızca bu bilgisayardaki sekmeler arasında eşitlenir. Telefonlarla oynamak için Firebase ayarlarını ekle.",
   "Join.Connecting": "Oda aranıyor.",
-  "App.Colophon": "2026 NASA Space Apps Challenge için hazırlanmış bir projedir. Resmî bir NASA ürünü değildir."
+  "App.Colophon": "2026 NASA Space Apps Challenge için hazırlanmış bir projedir. Resmî bir NASA ürünü değildir.",
+  "Stage.Drag": "Döndürmek için sürükle.",
+  "Flight.Coverage": "Bilim hedefinin %{percent} kadarı toplandı",
+  "Flight.ViewWide": "Tüm Dünya görünümü",
+  "Flight.ViewChase": "Uzay aracını izle",
+  "Patch.Mission": "Görev {number}",
+  "Wall.Title": "Görev armaları",
+  "Wall.Empty": "Armasını kazanmak için başarılı bir görev uçur. Üç yıldız altın arma kazandırır.",
+  "Wall.Result": "${cost}M karşılığı {score} bilim",
+  "Debrief.PatchEarned": "Arma kazanıldı. Başlangıç ekranında duruyor."
 }

@@ -24,25 +24,25 @@ export class Catalog {
 
   readonly orbits = new Registry<Orbit>([
     new Orbit('Leo450', 'Low Earth orbit, 450 km', {
-      orbitClass: OrbitClass.Leo, altitudeKm: 450, capacityClass: CapacityClass.Leo, periodMin: 93.4, eclipseMin: 36,
+      orbitClass: OrbitClass.Leo, altitudeKm: 450, inclinationDeg: 30, capacityClass: CapacityClass.Leo, periodMin: 93.4, eclipseMin: 36,
       contactMinPerStation: 50, continuousContact: false, rateFactor: 1, bandRateCapsMbps: {},
       insertionDvMs: 0, keepingDvMsPerYear: 25, radiationLifeYears: 15, shieldedRadiationLifeYears: 15,
       safeDepthOfDischarge: 0.25, dragEventsPossible: true,
     }, [Sources.OrbitTypes, Sources.GroundPasses, Sources.OrbitalDebris, Sources.BatteryDepth]),
     new Orbit('Sso705', 'Sun-synchronous, 705 km', {
-      orbitClass: OrbitClass.Sso, altitudeKm: 705, capacityClass: CapacityClass.Sso, periodMin: 98.8, eclipseMin: 35,
+      orbitClass: OrbitClass.Sso, altitudeKm: 705, inclinationDeg: 98.2, capacityClass: CapacityClass.Sso, periodMin: 98.8, eclipseMin: 35,
       contactMinPerStation: 60, continuousContact: false, rateFactor: 1, bandRateCapsMbps: {},
       insertionDvMs: 0, keepingDvMsPerYear: 5, radiationLifeYears: 15, shieldedRadiationLifeYears: 15,
       safeDepthOfDischarge: 0.25, dragEventsPossible: false,
     }, [Sources.Landsat8Orbit, Sources.OrbitTypes, Sources.Radiation]),
     new Orbit('Geo', 'Geostationary, 35,786 km', {
-      orbitClass: OrbitClass.Geo, altitudeKm: 35786, capacityClass: CapacityClass.Gto, periodMin: 1436, eclipseMin: 72,
+      orbitClass: OrbitClass.Geo, altitudeKm: 35786, inclinationDeg: 0, capacityClass: CapacityClass.Gto, periodMin: 1436, eclipseMin: 72,
       contactMinPerStation: 1440, continuousContact: true, rateFactor: 0.25, bandRateCapsMbps: {},
       insertionDvMs: 1500, keepingDvMsPerYear: 50, radiationLifeYears: 3, shieldedRadiationLifeYears: 12,
       safeDepthOfDischarge: 0.6, dragEventsPossible: false,
     }, [Sources.OrbitTypes, Sources.GeoEclipse, Sources.DeltaV, Sources.Radiation]),
     new Orbit('L2', 'Sun–Earth L2', {
-      orbitClass: OrbitClass.L2, altitudeKm: 1500000, capacityClass: CapacityClass.Escape, periodMin: 262980, eclipseMin: 0,
+      orbitClass: OrbitClass.L2, altitudeKm: 1500000, inclinationDeg: 0, capacityClass: CapacityClass.Escape, periodMin: 262980, eclipseMin: 0,
       contactMinPerStation: 160, continuousContact: false, rateFactor: 1,
       bandRateCapsMbps: { Uhf: 0, SBand: 0, XBand: 2, KaBand: 28, Laser: 0 },
       insertionDvMs: 0, keepingDvMsPerYear: 4, radiationLifeYears: 10, shieldedRadiationLifeYears: 12,

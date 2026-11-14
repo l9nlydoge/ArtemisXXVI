@@ -5,6 +5,7 @@ import { Language } from '../../I18n/Language'
 import { useTranslator } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
 import { RoomCode } from '../../Sync/RoomCode'
+import { MissionWall } from '../Components/MissionWall'
 import { ScenarioArt } from '../ScenarioArt'
 import { OrbitDiagram } from '../Visuals/OrbitDiagram'
 
@@ -67,6 +68,8 @@ export function MenuScreen() {
         <input id="RoomCodeInput" value={code} autoCapitalize="characters" autoComplete="off" maxLength={4} placeholder="ABCD" onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
         <button type="submit" disabled={!RoomCode.isValid(code)}>{translator.t('Menu.JoinTeam')}</button>
       </form>
+
+      <MissionWall />
 
       <p className="Colophon">{translator.t('App.Colophon')}</p>
     </main>
