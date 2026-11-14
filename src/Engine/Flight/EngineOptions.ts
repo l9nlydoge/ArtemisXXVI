@@ -1,6 +1,7 @@
+import type { Ownership } from '../Spacecraft/LoadoutIssue'
 import type { WeekCatalog } from '../Weeks/WeekCatalog'
 
 export interface EngineOptions {
-  cooldowns?: boolean
   weeks?: WeekCatalog
+  owner?: Ownership
 }

@@ -2,7 +2,7 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 170 passing tests and no screens yet. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
+**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 216 passing tests and no screens yet. It was reviewed independently against this document, and 19 deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
 
 **How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
 
@@ -197,6 +197,7 @@ Derived spacecraft values:
 ### 4.2 Flight structure
 
 - A flight has **6 legs**.
+- A flight will not start unless its loadout passes rule 4.1, its seed is a whole number from 0 to 2³²−1, and, when the setup carries a week signature, the week data still matches it. The engine checks the structural rules itself and the ownership rules when it is given the player's profile.
 - Starting state: `charge = capacity`, `hull = maxHull`, `burnsLeft = burns`, `repairUsed = false`.
 - Each leg runs: **Scan → (Encounter | Hold) → Cruise**.
 - **Cruise** (after every leg, including a held one): `charge = min(capacity, charge + 2 × generation)`.
@@ -209,7 +210,7 @@ For each leg the scanner deals contacts from the week's pool.
 1. Take the week's events that have not been dealt on an earlier leg of this flight.
 2. **Dated events** (asteroids, rare events) are eligible only on the leg whose date window contains their date. **Undated events** (exoplanets) are eligible on every leg.
 3. **Pinned events** (set in the week definition) are always dealt on their leg.
-4. Fill up to **2** contacts by weighted draw without replacement. Weights: Common 6, Notable 3, Headline 1.
+4. Fill up to **2** contacts by weighted draw without replacement. Weights: Common 6, Notable 3, Headline 1. The draw gives every eligible event its own random key for the leg, `roll^(1/weight)`, and takes the highest keys. Removing one event therefore never changes the order of the others.
 5. If the leg has no pinned event, the first contact is drawn from the dated events only, when there are any. This keeps a week's own events in front of the player; without it the always-eligible planets crowd them out.
 6. If the pool runs out, the leg has fewer contacts. A leg with none can only be held.
 7. An event pinned to one leg is never dealt on another.
@@ -221,7 +222,7 @@ For each leg the scanner deals contacts from the week's pool.
 - Notable events are dealt unidentified with probability 0.3.
 - An unidentified contact shows only "Unknown contact" and its number of turns.
 
-**Survey** (needs Radar): costs **3 charge**, once per leg. It identifies every contact on the leg and deals **1 more**. Available only if `charge ≥ 3`.
+**Survey** (needs Radar): costs **3 charge**, once per leg. It identifies every contact on the leg and deals **1 more**: the next event in the leg's draw order. Available only if `charge ≥ 3`. If nothing is left to find it still costs the charge.
 
 **Hold:** no encounter. `charge = capacity`. Not available on a storm leg.
 
@@ -258,7 +259,7 @@ The player may change the plan freely before committing. An empty plan is valid.
    - `recorded[channel] = min(capacity[channel], recorded[channel] + gain)`
    - An instrument fired at a channel the event lacks, or below `minMark`, still costs power and records nothing. The interface warns before commit.
 5. `incoming = max(0, turn.radiation − passiveShield)`. If Magnetic Shield is in the plan: `incoming = max(0, incoming − block)`.
-6. `hull -= incoming`. If `hull ≤ 0`, the flight is Lost and the encounter ends now. Data recorded this turn still counts.
+6. `hull = max(0, hull − incoming)`. If the hull reaches 0, the flight is Lost and the encounter ends now. Data recorded this turn still counts. The encounter stays on the fatal turn so the interface can show it.
 
 **Step 4.** If `t = T`, the encounter ends. Otherwise go to the next turn.
 
@@ -287,7 +288,10 @@ Each turn has `signal`, `radiation` and `inShadow`. A contact's conditions are f
 **Radiation** on a turn is the sum of:
 
 - the event's own radiation for that turn (only storms have any),
-- the leg's storm overlay, if the leg is a storm leg and the contact is not the storm itself: `storm.radiation[floor(i × storm.T / T)]` for turn index `i` from 0,
+- the leg's storm overlay, if the leg is a storm leg and the contact is not the storm itself. For turn index `i` from 0, with `T` the contact's turns and `S` the storm's:
+  - if `T ≥ S`, the storm is stretched: `storm.radiation[floor(i × S / T)]`;
+  - if `T < S`, the contact sits in the middle of the storm: `storm.radiation[floor((S − T) / 2) + i]`.
+  - Either way the contact meets the storm's peak. A short flyby takes less radiation in total, and cannot dodge the worst turn.
 - the South Atlantic Anomaly: on a leg with no storm, each turn has probability 0.15 of **2** radiation.
 
 ### 4.7 Scoring an encounter
@@ -330,13 +334,15 @@ Then: `profile.points += banked`, `profile.lifetimePoints += banked`, logbook up
 ### 4.10 Randomness
 
 - Every random draw comes from a `SeededRandom` (mulberry32) derived from `FlightSetup.seed`.
-- Each leg has its own stream for dealing, and its own for the survey's extra contact. Each contact has its own stream for shadow and anomaly rolls, keyed by leg and position. So using the survey, or the order contacts are played in, does not change the rolls of anything else.
+- Each event has its own streams on each leg, keyed by leg and event: one for its place in the draw order, one for whether it arrives unidentified, one for its shadow and anomaly rolls. So using the survey, or the order contacts are played in, changes nothing else: later legs differ only by the one event the survey took.
 - Shadow and anomaly rolls for a contact are drawn when it is dealt, for all its turns.
-- A flight is fully determined by `(FlightSetup, command log)`. `Flight.replay` rebuilds it. Tests and resume both depend on this.
+- A flight is fully determined by `(FlightSetup, command log)` and the week data. `Flight.replay` rebuilds it. Tests and resume both depend on this. The cooldown option travels inside the setup for that reason.
+- Commands are checked strictly. A command with a missing or wrongly typed field, as a damaged save could hold, is refused and changes nothing.
+- All dates must carry a time zone (a trailing `Z` or an offset). A date without one is refused, because browsers would read it as local time and deal differently in different countries.
 
 ### 4.11 Option kept off by default: cooldowns
 
-`EngineOptions.cooldowns = false`. If true, an active module used on turn `t` cannot be used on turn `t + 1`. Build the flag, leave it off, and decide after playtests.
+`FlightSetup.cooldowns = false`. If true, an active module used on turn `t` cannot be used on turn `t + 1`. Build the flag, leave it off, and decide after playtests.
 
 ---
 
@@ -404,7 +410,7 @@ All modules have `maxCopies = 1` except Solar Array and Battery.
 
 | Rank | Lifetime points | Title | Unlocks |
 |---|---|---|---|
-| 1 | 0 | Trainee | SmallSat, week July 2019 |
+| 1 | 0 | Trainee | SmallSat, week July 2019. In the lab from the start: Spectrometer, Radar, MagneticShield, FlightComputer |
 | 2 | 150 | Flight Controller | Week 2022, HighEnergyDetector, Thrusters, Mk II |
 | 3 | 400 | Mission Specialist | Explorer, Antenna, RepairDrone |
 | 4 | 900 | Flight Director | Week May 2024, Mk III |
@@ -479,7 +485,7 @@ A leg is a **storm leg** when any GST Kp reading of 5 or more falls inside the l
 | Radiation by turn | T=4: `round(P × [0.4, 1, 0.8, 0.4])`; T=5: `round(P × [0.3, 0.7, 1, 0.7, 0.3])` |
 | Signal by turn | `2 × radiation[t] / P` |
 | Particles capacity | `3 × P` |
-| HighEnergy capacity | 12 if flare class X; 8 if M; none if C |
+| HighEnergy capacity | 12 if flare class X; 8 if M; no channel if C, or if flare data exists and shows no flare in that time |
 | Rarity | `kp ≥ 8` → Headline; `kp = 7` → Notable; otherwise Common |
 
 Worked example, confirmed against DONKI on 14 November 2026: **the leg of 11 May 2024**. Kp reached 9.0 at 00:00 and 03:00 UT that day, and an SEP event began at 12:59 UT on 10 May, inside the 24 hours before. So `P = 12`, `T = 5`, radiation `[4, 8, 12, 8, 4]`, Particles 36, HighEnergy 12, Headline. The leg of 10 May reads Kp 8.67 at 21:00 UT, so `kp = 8`, `P = 10`.
@@ -501,7 +507,7 @@ Source record: one row of the Exoplanet Archive table `pscomppars`.
 | Turns | 5 |
 | Signal | `[1, 1, 1, 1, 1]` |
 | Channel | Transit → Visible 14. Radial Velocity → Spectrum 14. Imaging → Visible 20 with `minMark` 2. Microlensing → Visible 10 with signal `[0.5, 3, 0.5]` and 3 turns. Any other method → Visible 14. |
-| Faint star | if `V > 12`, multiply capacity by 1.25 and round |
+| Faint star | if `V > 12`, multiply each capacity amount by 1.25 and round, the atmosphere's 10 included |
 | Atmosphere | if the curated list marks the planet as having a measured atmosphere, add Spectrum 10 |
 | Rarity | Notable if on the curated "famous" list, otherwise Common |
 | Radiation | none |
@@ -709,8 +715,12 @@ class SeededRandom {
   pick<T>(items: readonly T[]): T
   weighted<T>(items: readonly T[], weight: (item: T) => number): T
   static derive(seed: number, ...salts: number[]): SeededRandom
+  static hashText(text: string): number
+  static isSeed(value: unknown): value is number      // a whole number from 0 to 2³²−1
   static randomSeed(): number
 }
+
+class UtcDate { static parse(text: string): number }  // throws unless the text carries a time zone
 
 class Numbers {
   static round(value: number, digits?: number): number
@@ -788,7 +798,7 @@ interface Ownership { readonly rank: number; owns(moduleId: string, mark: number
 class Loadout {                            // immutable; installed is kept in catalog order
   constructor(bus: Bus, installed: readonly InstalledModule[])
   static starter(): Loadout
-  static fromJson(json: LoadoutJson): Loadout     // unknown ids, marks and buses are dropped or defaulted
+  static fromJson(json: unknown): Loadout  // never throws: anything unreadable, unknown, duplicated or unobtainable is dropped
   toJson(): LoadoutJson                    // { busId, modules: { id, mark, copy }[] }
   get costMusd, bayUsed, budgetLeft, bayLeft
   copiesOf(cardId): InstalledModule[]
@@ -801,6 +811,7 @@ class Loadout {                            // immutable; installed is kept in ca
   withBus(bus): Loadout
   issues(owner: Ownership): LoadoutIssue[]
   isValid(owner: Ownership): boolean
+  get structuralIssues(): LoadoutIssue[]   // the rules that need no owner: budget, bay, copies, an instrument
 }
 
 class Spacecraft {
@@ -846,6 +857,7 @@ abstract class SpaceEvent {
 
 class AsteroidFlyby    { static fromRecord(record: AsteroidRecord, pinned?: boolean); static idFor(recordId) }
 class SolarStorm       { static forWindow(window: DateWindow, weather: SpaceWeather): SolarStorm | undefined; readonly reading; readonly peak }
+enum FlareClass { None, C, M, X }       // None: flare data exists and shows no flare before the storm
 class ExoplanetTransit { static fromRecord(record: ExoplanetRecord, note?: ExoplanetNote); static idFor(name) }
 class RareEvent        { /* constructed directly from EventDetails in Curated/RareEvents.ts */ }
 ```
@@ -864,6 +876,7 @@ class Week {
   constructor(id, minRank, legs: readonly Leg[], events: readonly SpaceEvent[])   // throws unless 6 legs and every pin exists
   readonly forecast: Forecast
   get storms, everything, startUtc, endUtc
+  get signature(): string                  // changes whenever the week's events, turns or legs change
   event(id): SpaceEvent | undefined
   stormOn(legIndex): SolarStorm | undefined
   pinnedOn(legIndex): SpaceEvent[]
@@ -877,6 +890,7 @@ class WeekBuilder {                        // applies sections 6.2 and 6.5 to ra
 
 class Forecast {
   readonly stormLegs, worstBand, asteroidCount, radarTargets, planetCount, unknownsExpected
+  planetsFor(channel): number
   channelDemand(channel): number           // total capacity × rarity
   demandShare(channel): number
   get channelsByDemand(): Channel[]
@@ -891,13 +905,17 @@ class WeekCatalog {
 ### 8.6 Flight
 
 ```ts
-interface FlightSetup { loadout: LoadoutJson; weekId: string; seed: number }
-interface EngineOptions { cooldowns?: boolean; weeks?: WeekCatalog }
+interface FlightSetup { loadout: LoadoutJson; weekId: string; seed: number; cooldowns?: boolean; weekSignature?: string }
+interface EngineOptions { weeks?: WeekCatalog; owner?: Ownership }     // owner: also check what the player has unlocked
 
 class CraftState { charge; hull; burnsLeft; repairUsed }
 
 interface TurnCondition { signal: number; radiation: number; inShadow: boolean; anomaly: boolean }
-class ConditionRoller { constructor(random); roll(event, overlay: SolarStorm | undefined, stormLeg: boolean): TurnCondition[] }
+class ConditionRoller {
+  constructor(random)
+  roll(event, overlay: SolarStorm | undefined, stormLeg: boolean): TurnCondition[]
+  static weather(storm, turnIndex, turnCount): number     // the storm overlay of section 4.6
+}
 
 class Contact {
   readonly event: SpaceEvent
@@ -906,12 +924,13 @@ class Contact {
   readonly conditions: readonly TurnCondition[]    // rolled when the contact is dealt
   readonly overlay?: SolarStorm
   get turnCount, peakRadiation, band, peakSignal
+  showsBandTo(craft): boolean              // identified, or a flight computer is fitted
 }
 
 class Scanner {
   constructor(week: Week, seed: number)
   deal(legIndex): Contact[]
-  dealExtra(legIndex, slot): Contact | undefined
+  dealExtra(legIndex): Contact | undefined
 }
 
 class Scoring {
@@ -945,9 +964,11 @@ interface TurnOutcome extends TurnPreview { encounterOver: boolean }
 
 class Encounter {                          // the first turn's charge step runs in the constructor
   constructor(contact, legIndex, craft: Spacecraft, state: CraftState, cooldowns?: boolean)
-  get event, turnIndex, turnCount, isOver, recorded, current
+  get event, turnIndex, turnCount, turnsPlayed, isOver, recorded, current
+  get history(): readonly TurnOutcome[]            // one entry per turn played
   get visible(): (TurnCondition | undefined)[]     // undefined = hidden by lookahead
   isCooling(key): boolean
+  problemWith(key, plan): PlanProblem | undefined  // why this module cannot be added to the plan
   yieldOf(key, boosted?): InstrumentYield | undefined   // what one instrument would record this turn
   preview(plan: TurnPlan): TurnPreview             // changes nothing
   commit(plan: TurnPlan): TurnOutcome              // throws if the plan is not valid
@@ -963,7 +984,8 @@ type FlightCommand = { type: Survey } | { type: Choose; contactIndex } | { type:
 class Commands { static survey, hold, proceed; static choose(index), chase(index), commit(keys) }
 
 class Flight {
-  static begin(setup: FlightSetup, options?: EngineOptions): Flight
+  static setup(loadout, week, seed, cooldowns?): FlightSetup      // fills in the week signature
+  static begin(setup: FlightSetup, options?: EngineOptions): Flight   // throws on a bad loadout, seed or week signature
   static replay(setup, log: readonly FlightCommand[], options?): Flight
   readonly setup, craft: Spacecraft, state: CraftState, week: Week
   get phase, legIndex, contacts, encounter, results, log, lastOutcome, pointsEarned, isOver, isStormLeg, hasSurveyed
@@ -993,7 +1015,9 @@ EncounterDone ──Chase────► Encounter
 EncounterDone ──Continue─► Scanning (next leg) | Completed
 ```
 
-The encounter stays readable through `flight.encounter` during `EncounterDone` and `Lost`, so the interface can show its result.
+The encounter stays readable through `flight.encounter` during `EncounterDone` and `Lost`, so the interface can show its result. After the last turn, or a fatal one, `turnIndex` and `current` stay on that turn.
+
+`EncounterResult.recorded` is a `Map`, so a `FlightReport` does not survive `JSON.stringify`. After a page reload the debrief is rebuilt by replaying the saved log.
 
 ### 8.7 Progress
 
@@ -1434,24 +1458,25 @@ Flown by the engine's test players, 300 flights per row, on the two sample weeks
 
 | Loadout | Week | Player | Mean points | Completed | Turns where power ran short |
 |---|---|---|---|---|---|
-| Starter | Quiet | Greedy | 142 | 100% | 0% |
-| Camera only, nothing else | Quiet | Greedy | 142 | 99% | — |
-| Camera and Radar, small spacecraft | Quiet | Greedy | 232 | 100% | 7% |
-| Camera, Spectrometer, Radar, one Solar Array | Quiet | Greedy | 272 | 100% | 59% |
-| Camera, Spectrometer, Radar, no power modules | Quiet | Greedy | 151 | 100% | 81% |
-| Camera, Spectrometer, Radar, large spacecraft's power | Quiet | Greedy | 409 | 100% | 0% |
-| Starter | Storm | Greedy | 31 | 0% | — |
-| Medium, Mk II shielding, no Magnetic Shield | Storm | Greedy | 67 | 0% | — |
-| Medium, Magnetic Shield Mk II, two instruments | Storm | Cautious | 184 | 100% | — |
-| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | Storm | Greedy | 259 | 63% | 9% |
-| The same | Storm | Cautious | 272 | 98% | 22% |
+| Starter | Quiet | Greedy | 143 | 100% | 0% |
+| Camera only, nothing else | Quiet | Greedy | 142 | 99% | 0% |
+| Camera and Radar, small spacecraft | Quiet | Greedy | 226 | 99% | 7% |
+| Camera, Spectrometer, Radar, one Solar Array | Quiet | Greedy | 268 | 100% | 59% |
+| Camera, Spectrometer, Radar, no power modules | Quiet | Greedy | 147 | 99% | 79% |
+| Camera, Spectrometer, Radar, large spacecraft's power | Quiet | Greedy | 402 | 100% | 0% |
+| Starter | Storm | Greedy | 31 | 0% | 0% |
+| Medium, Mk II shielding, no Magnetic Shield | Storm | Greedy | 65 | 0% | 0% |
+| Medium, Magnetic Shield Mk II, two instruments | Storm | Cautious | 185 | 100% | 0% |
+| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | Storm | Greedy | 253 | 62% | 9% |
+| The same | Storm | Cautious | 264 | 95% | 22% |
 
 What this says:
 
-- **Power is the real limit once you carry three instruments.** The same three instruments earn 151, 272 or 409 depending only on power. That is the trade-off between instruments and power modules.
+- **Power is the real limit once you carry three instruments.** The same three instruments earn 147, 268 or 402 depending only on power. That is the trade-off between instruments and power modules.
 - **The first flight is safe and is not a puzzle.** The starter never runs short of power. It earns enough for one or two unlocks, and three of its five modules do nothing on a quiet week. Swapping them out is the first design lesson.
 - **The storm cannot be survived without the Magnetic Shield.**
-- **How you fly matters.** On thin power in the storm, a player who saves charge for the shield survives 98% of the time. One who spends it all on instruments survives 63%.
+- **How you fly matters.** On thin power in the storm, a player who saves charge for the shield survives 95% of the time. One who spends it all on instruments survives 62%.
+- **A quiet week is not perfectly safe without shielding.** About one flight in a hundred with no Radiation Shielding is lost to the South Atlantic Anomaly alone. That is the price of the bay unit it frees.
 - **With plenty of power the storm is safe once you own the shield.** If real-data playtests find that too easy, raise the shield's power cost before touching anything else.
 
 ### 13.4 Manual checks before each merge

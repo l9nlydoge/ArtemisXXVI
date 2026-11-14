@@ -11,6 +11,7 @@ export class Forecast {
   readonly planetCount: number
   readonly unknownsExpected: boolean
   private readonly demand: ReadonlyMap<Channel, number>
+  private readonly planets: readonly SpaceEvent[]
 
   constructor(events: readonly SpaceEvent[], storms: readonly SolarStorm[]) {
     const asteroids = events.filter((event) => event.kind === EventKind.Asteroid)
@@ -18,9 +19,14 @@ export class Forecast {
     this.worstBand = RadiationBands.worst(storms.map((storm) => storm.band))
     this.asteroidCount = asteroids.length
     this.radarTargets = asteroids.filter((event) => event.channels.has(Channel.Radar)).length
-    this.planetCount = events.filter((event) => event.kind === EventKind.Exoplanet).length
+    this.planets = events.filter((event) => event.kind === EventKind.Exoplanet)
+    this.planetCount = this.planets.length
     this.unknownsExpected = events.some((event) => event.startsUnidentified)
     this.demand = new Map(AllChannels.map((channel) => [channel, [...events, ...storms].reduce((sum, event) => sum + event.capacity(channel) * event.rarity, 0)]))
+  }
+
+  planetsFor(channel: Channel): number {
+    return this.planets.filter((event) => event.channels.has(channel)).length
   }
 
   channelDemand(channel: Channel): number {

@@ -143,8 +143,15 @@ describe('Solar storm', () => {
     expect(withFlares(['M1.2', 'X2.2']).capacity(Channel.HighEnergy)).toBe(12)
     expect(withFlares(['M5.0']).capacity(Channel.HighEnergy)).toBe(8)
     expect(withFlares([]).channels.has(Channel.HighEnergy)).toBe(false)
-    expect(withFlares(['X5'], '2024-05-07T23:00:00Z').reading.flareClass).toBe(FlareClass.C)
+    expect(withFlares(['X5'], '2024-05-07T23:00:00Z').reading.flareClass).toBe(FlareClass.None)
+    expect(withFlares(['X5'], '2024-05-08T00:00:00Z').reading.flareClass).toBe(FlareClass.X)
+    expect(withFlares(['X5'], '2024-05-08T12:00:00Z').reading.flareClass).toBe(FlareClass.X)
+    expect(withFlares(['C3']).reading.flareClass).toBe(FlareClass.C)
+    expect(withFlares(['C3']).channels.has(Channel.HighEnergy)).toBe(false)
     expect(withFlares(['X5']).reading.flareObserved).toBe(true)
+    expect(withFlares(['X5']).facts[2].key).toBe('Fact.FlareObserved')
+    expect(withFlares([]).facts[2].key).toBe('Fact.FlareNone')
+    expect(SolarStorm.forWindow(day(11), weather)!.facts[2].key).toBe('Fact.FlareAssumed')
   })
 
   test('without flare data the class is inferred from strength', () => {

@@ -73,6 +73,23 @@ describe('Scanner', () => {
     expect(hidden / notable).toBeLessThan(0.4)
   })
 
+  test('each notable contact gets its own roll for arriving unidentified', () => {
+    let pairs = 0
+    let differ = 0
+    for (const seed of seeds) {
+      const scanner = new Scanner(calm, seed)
+      for (let leg = 0; leg < 6; leg++) {
+        const notable = scanner.deal(leg).filter((contact) => contact.event.rarity === Rarity.Notable)
+        if (notable.length < 2) continue
+        pairs += 1
+        if (notable[0].identified !== notable[1].identified) differ += 1
+      }
+    }
+    expect(pairs).toBeGreaterThan(50)
+    expect(differ / pairs).toBeGreaterThan(0.25)
+    expect(differ / pairs).toBeLessThan(0.6)
+  })
+
   test('no event is dealt twice in a flight, extras included', () => {
     for (const seed of seeds) {
       const scanner = new Scanner(calm, seed)
@@ -80,7 +97,7 @@ describe('Scanner', () => {
       for (let leg = 0; leg < 6; leg++) {
         const dealt = scanner.deal(leg)
         seen.push(...ids(dealt))
-        const extra = scanner.dealExtra(leg, dealt.length)
+        const extra = scanner.dealExtra(leg)
         if (extra) seen.push(extra.event.id)
       }
       expect(new Set(seen).size).toBe(seen.length)
@@ -90,20 +107,79 @@ describe('Scanner', () => {
   test('an extra contact is new and identified', () => {
     const scanner = new Scanner(calm, 9)
     const dealt = scanner.deal(0)
-    const extra = scanner.dealExtra(0, dealt.length)!
+    const extra = scanner.dealExtra(0)!
     expect(ids(dealt)).not.toContain(extra.event.id)
     expect(extra.identified).toBe(true)
   })
 
-  test('using the survey on one leg does not change which seed the next leg uses', () => {
-    const plain = new Scanner(calm, 31)
-    plain.deal(0)
-    const surveyed = new Scanner(calm, 31)
-    const first = surveyed.deal(0)
-    const extra = surveyed.dealExtra(0, first.length)!
-    const nextPlain = plain.deal(1)
-    const nextSurveyed = surveyed.deal(1)
-    if (!ids(nextPlain).includes(extra.event.id)) expect(ids(nextSurveyed)).toEqual(ids(nextPlain))
+  test('a survey changes later legs only by taking away the one event it revealed', () => {
+    let untouched = 0
+    let replaced = 0
+    for (const seed of seeds) {
+      const plain = new Scanner(calm, seed)
+      const surveyed = new Scanner(calm, seed)
+      plain.deal(0)
+      surveyed.deal(0)
+      const extra = surveyed.dealExtra(0)!
+      for (let leg = 1; leg < 6; leg++) {
+        const without = plain.deal(leg)
+        const withSurvey = surveyed.deal(leg)
+        if (!ids(without).includes(extra.event.id)) {
+          expect(ids(withSurvey)).toEqual(ids(without))
+          expect(withSurvey.map((contact) => contact.conditions)).toEqual(without.map((contact) => contact.conditions))
+          expect(withSurvey.map((contact) => contact.identified)).toEqual(without.map((contact) => contact.identified))
+          untouched += 1
+        } else {
+          expect(ids(withSurvey)).not.toContain(extra.event.id)
+          expect(ids(withSurvey).filter((id) => ids(without).includes(id))).toHaveLength(without.length - 1)
+          replaced += 1
+          break
+        }
+      }
+    }
+    expect(untouched).toBeGreaterThan(500)
+    expect(replaced).toBeGreaterThan(5)
+  })
+
+  test('a contact keeps the same conditions whichever position it is dealt in', () => {
+    for (const seed of seeds.slice(0, 60)) {
+      const scanner = new Scanner(calm, seed)
+      const dealt = scanner.deal(0)
+      const extra = scanner.dealExtra(0)!
+      const again = new Scanner(calm, seed)
+      again.deal(0)
+      expect(again.dealExtra(0)!.conditions).toEqual(extra.conditions)
+      expect(new Scanner(calm, seed).deal(0).map((contact) => contact.conditions)).toEqual(dealt.map((contact) => contact.conditions))
+    }
+  })
+
+  test('two contacts on the same leg roll their shadow and anomaly separately', () => {
+    let same = 0
+    let compared = 0
+    for (const seed of seeds) {
+      const [first, second] = new Scanner(calm, seed).deal(0)
+      if (first.turnCount !== second.turnCount) continue
+      compared += 1
+      const pattern = (contact: typeof first) => contact.conditions.map((condition) => `${condition.inShadow}${condition.anomaly}`).join()
+      if (pattern(first) === pattern(second)) same += 1
+    }
+    expect(compared).toBeGreaterThan(30)
+    expect(same / compared).toBeLessThan(0.5)
+  })
+
+  test('the same event rolls differently on different legs', () => {
+    const planet = Fixtures.planets[1]
+    const patterns = new Set<string>()
+    for (const seed of seeds) {
+      const scanner = new Scanner(calm, seed)
+      for (let leg = 0; leg < 6; leg++) {
+        const found = scanner.deal(leg).find((contact) => contact.event === planet)
+        if (found) patterns.add(`${leg}:${found.conditions.map((condition) => `${condition.inShadow}${condition.anomaly}`).join()}`)
+      }
+    }
+    const legs = new Set([...patterns].map((entry) => entry.split(':')[0]))
+    expect(legs.size).toBeGreaterThan(2)
+    expect(patterns.size).toBeGreaterThan(legs.size)
   })
 
   test('a storm leg leads with the storm and lays its radiation over the other contacts', () => {
@@ -122,18 +198,28 @@ describe('Scanner', () => {
       for (const contact of dealt.slice(1)) {
         expect(contact.overlay).toBe(weather)
         expect(contact.conditions.every((condition) => !condition.anomaly)).toBe(true)
-        const expected = contact.event.turns.map((_, index) => weather.turns[Math.floor((index * 5) / contact.turnCount)].radiation)
+        const expected = contact.event.turns.map((_, index) => ConditionRoller.weather(weather, index, contact.turnCount))
         expect(contact.conditions.map((condition) => condition.radiation)).toEqual(expected)
         expect(contact.band).toBe('Severe')
       }
     }
   })
 
-  test('a three-turn event under a five-turn storm takes turns one, two and four of it', () => {
-    const roller = new ConditionRoller(new SeededRandom(1))
-    const rolled = roller.roll(Fixtures.rareSample, storm.stormOn(3), true)
-    expect(rolled.map((condition) => condition.radiation)).toEqual([4, 8, 8])
+  test('a shorter event under a storm always meets the storm peak', () => {
+    const big = storm.stormOn(3)!
+    const along = (turnCount: number) => Array.from({ length: turnCount }, (_, index) => ConditionRoller.weather(big, index, turnCount))
+    expect(along(3)).toEqual([8, 12, 8])
+    expect(along(4)).toEqual([4, 8, 12, 8])
+    expect(along(5)).toEqual([4, 8, 12, 8, 4])
+    const rolled = new ConditionRoller(new SeededRandom(1)).roll(Fixtures.rareSample, big, true)
+    expect(rolled.map((condition) => condition.radiation)).toEqual([8, 12, 8])
     expect(rolled.map((condition) => condition.signal)).toEqual([1, 3, 1])
+  })
+
+  test('a longer event under a short storm stretches it and still meets the peak', () => {
+    const short = storm.stormOn(5)!
+    expect(short.turns.map((turn) => turn.radiation)).toEqual([2, 4, 3, 2])
+    expect(Array.from({ length: 5 }, (_, index) => ConditionRoller.weather(short, index, 5))).toEqual([2, 2, 4, 3, 2])
   })
 })
 

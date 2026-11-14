@@ -29,7 +29,7 @@ describe('Bots', () => {
       ['SmallSat', [['Camera', 1]]],
       ['SmallSat', [['SolarArray', 1], ['Battery', 1], ['Camera', 1], ['Radar', 1]]],
       ['Explorer', [['SolarArray', 2], ['Battery', 2], ['Spectrometer', 2], ['HighEnergyDetector', 1], ['MagneticShield', 1], ['FlightComputer', 1]]],
-      ['Flagship', [['SolarArray', 3], ['SolarArray', 3], ['Battery', 3], ['Camera', 3], ['Spectrometer', 3], ['Radar', 3], ['ParticleDetector', 3], ['HighEnergyDetector', 3], ['RadiationShielding', 3], ['MagneticShield', 3], ['FlightComputer', 3], ['Thrusters', 3], ['Antenna', 3], ['RepairDrone', 3]]],
+      ['Flagship', [['SolarArray', 3], ['Battery', 2], ['Camera', 2], ['Spectrometer', 1], ['ParticleDetector', 1], ['RadiationShielding', 1], ['MagneticShield', 1], ['FlightComputer', 1], ['Thrusters', 1], ['Antenna', 1], ['RepairDrone', 1]]],
     ]
     for (const [bus, modules] of loadouts) {
       for (const weekId of ['Calm', 'Storm']) {

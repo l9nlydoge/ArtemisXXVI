@@ -48,6 +48,16 @@ export class SeededRandom {
     return new SeededRandom(mixed)
   }
 
+  static hashText(text: string): number {
+    let value = 2166136261
+    for (let index = 0; index < text.length; index++) value = Math.imul(value ^ text.charCodeAt(index), 16777619) >>> 0
+    return value
+  }
+
+  static isSeed(value: unknown): value is number {
+    return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value < 2 ** 32
+  }
+
   static randomSeed(): number {
     return Math.floor(Math.random() * 2 ** 31)
   }

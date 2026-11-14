@@ -1,7 +1,7 @@
 import type { FlightReport } from '../Flight/FlightReport'
 import type { Mark } from '../Modules/MarkSpec'
 import { ModuleCatalog } from '../Modules/ModuleCatalog'
-import type { Loadout, LoadoutJson } from '../Spacecraft/Loadout'
+import { Loadout, type LoadoutJson } from '../Spacecraft/Loadout'
 import type { Ownership } from '../Spacecraft/LoadoutIssue'
 import { Rank } from './Rank'
 
@@ -60,7 +60,7 @@ export class Profile implements Ownership {
       ownedMarks,
       logbook,
       flights: count(json.flights),
-      lastLoadout: Profile.isRecord(json.lastLoadout) && Array.isArray(json.lastLoadout.modules) ? (json.lastLoadout as unknown as LoadoutJson) : undefined,
+      lastLoadout: Profile.isRecord(json.lastLoadout) && Array.isArray(json.lastLoadout.modules) ? Loadout.fromJson(json.lastLoadout, catalog).toJson() : undefined,
       hintsSeen: Array.isArray(json.hintsSeen) ? json.hintsSeen.filter((hint): hint is string => typeof hint === 'string') : [],
     })
   }

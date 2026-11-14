@@ -23,5 +23,6 @@
   "Learned.Method.Transit": "{name} dims its star a little each time it crosses in front. The depth of the dip gives the planet's size.",
   "Learned.Method.RadialVelocity": "{name} tugs its star back and forth. The size of the wobble gives the planet's mass.",
   "Learned.Method.Imaging": "{name} was photographed directly, which so far works only for large, young planets far from their stars.",
-  "Learned.Method.Microlensing": "{name} was found when its star's gravity briefly magnified the light of a more distant star."
+  "Learned.Method.Microlensing": "{name} was found when its star's gravity briefly magnified the light of a more distant star.",
+  "Fact.FlareNone": "No strong flare in the three days before"
 }

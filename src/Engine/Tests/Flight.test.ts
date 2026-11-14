@@ -296,7 +296,7 @@ describe('Determinism and reports', () => {
   })
 
   test('a loadout that records every channel misses nothing', () => {
-    const everything: [string, Mark][] = [['SolarArray', 3], ['Battery', 3], ['Camera', 3], ['Spectrometer', 3], ['Radar', 3], ['ParticleDetector', 3], ['HighEnergyDetector', 3]]
+    const everything: [string, Mark][] = [['SolarArray', 3], ['Battery', 2], ['Camera', 2], ['Spectrometer', 2], ['Radar', 2], ['ParticleDetector', 1], ['HighEnergyDetector', 2]]
     const { report } = bot.fly(Fixtures.setup(Fixtures.loadout('Flagship', everything), 'Calm', 4), options)
     expect(report.misses).toEqual([])
     expect(report.biggestMiss).toBeUndefined()

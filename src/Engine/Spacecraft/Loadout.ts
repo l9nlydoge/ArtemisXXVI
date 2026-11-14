@@ -16,18 +16,30 @@ export class Loadout {
   readonly installed: readonly InstalledModule[]
 
   constructor(readonly bus: Bus, installed: readonly InstalledModule[], private readonly catalog: ModuleCatalog = ModuleCatalog.shared) {
-    this.installed = [...installed].sort((a, b) => catalog.indexOf(a.card.id) - catalog.indexOf(b.card.id) || a.copy - b.copy)
+    const unique = new Map<string, InstalledModule>()
+    for (const module of installed) {
+      if (!unique.has(module.key)) unique.set(module.key, module)
+    }
+    this.installed = [...unique.values()].sort((a, b) => catalog.indexOf(a.card.id) - catalog.indexOf(b.card.id) || a.copy - b.copy)
   }
 
   static starter(modules: ModuleCatalog = ModuleCatalog.shared, buses: BusCatalog = BusCatalog.shared): Loadout {
     return new Loadout(buses.all[0], modules.starters.map((card) => new InstalledModule(card, 1, 1)), modules)
   }
 
-  static fromJson(json: LoadoutJson, modules: ModuleCatalog = ModuleCatalog.shared, buses: BusCatalog = BusCatalog.shared): Loadout {
-    const bus = buses.has(json.busId) ? buses.get(json.busId) : buses.all[0]
-    const installed = (json.modules ?? [])
-      .filter((entry) => modules.has(entry.id) && [1, 2, 3].includes(entry.mark) && Number.isInteger(entry.copy) && entry.copy >= 1)
-      .map((entry) => new InstalledModule(modules.get(entry.id), entry.mark, entry.copy))
+  static fromJson(json: unknown, modules: ModuleCatalog = ModuleCatalog.shared, buses: BusCatalog = BusCatalog.shared): Loadout {
+    const data = Loadout.isRecord(json) ? json : {}
+    const bus = typeof data.busId === 'string' && buses.has(data.busId) ? buses.get(data.busId) : buses.all[0]
+    const entries = Array.isArray(data.modules) ? data.modules : []
+    const installed: InstalledModule[] = []
+    for (const entry of entries) {
+      if (!Loadout.isRecord(entry) || typeof entry.id !== 'string' || !modules.has(entry.id)) continue
+      const { mark, copy } = entry
+      if (mark !== 1 && mark !== 2 && mark !== 3) continue
+      if (typeof copy !== 'number' || !Number.isInteger(copy) || copy < 1) continue
+      const card = modules.get(entry.id)
+      if (card.isObtainable) installed.push(new InstalledModule(card, mark, copy))
+    }
     return new Loadout(bus, installed, modules)
   }
 
@@ -92,7 +104,7 @@ export class Loadout {
     if (this.costMusd > this.bus.budgetMusd) found.push({ kind: LoadoutIssueKind.OverBudget, amount: this.costMusd - this.bus.budgetMusd })
     if (this.bayUsed > this.bus.bayUnits) found.push({ kind: LoadoutIssueKind.OverBay, amount: this.bayUsed - this.bus.bayUnits })
     for (const module of this.installed) {
-      if (!owner.owns(module.card.id, module.mark)) found.push({ kind: LoadoutIssueKind.NotOwned, moduleId: module.card.id, amount: module.mark })
+      if (!module.card.isObtainable || !owner.owns(module.card.id, module.mark)) found.push({ kind: LoadoutIssueKind.NotOwned, moduleId: module.card.id, amount: module.mark })
     }
     for (const cardId of new Set(this.installed.map((module) => module.card.id))) {
       const copies = this.copiesOf(cardId)
@@ -104,6 +116,14 @@ export class Loadout {
 
   isValid(owner: Ownership): boolean {
     return this.issues(owner).length === 0
+  }
+
+  get structuralIssues(): LoadoutIssue[] {
+    return this.issues({ rank: Number.POSITIVE_INFINITY, owns: () => true })
+  }
+
+  private static isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value)
   }
 
   private replace(installed: readonly InstalledModule[]): Loadout {

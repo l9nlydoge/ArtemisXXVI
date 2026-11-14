@@ -18,7 +18,7 @@ export class ConditionRoller {
     event.turns.forEach((turn, index) => {
       const inShadow = index > 0 && !conditions[index - 1].inShadow && this.random.chance(Rules.shadowChance)
       const anomaly = !stormLeg && this.random.chance(Rules.anomalyChance)
-      const weather = overlay ? overlay.turns[Math.floor((index * overlay.turnCount) / event.turnCount)].radiation : 0
+      const weather = overlay ? ConditionRoller.weather(overlay, index, event.turnCount) : 0
       conditions.push({
         signal: turn.signal,
         radiation: turn.radiation + weather + (anomaly ? Rules.anomalyRadiation : 0),
@@ -27,5 +27,11 @@ export class ConditionRoller {
       })
     })
     return conditions
+  }
+
+  static weather(storm: SolarStorm, turnIndex: number, turnCount: number): number {
+    const span = storm.turnCount
+    const stormTurn = turnCount >= span ? Math.floor((turnIndex * span) / turnCount) : Math.floor((span - turnCount) / 2) + turnIndex
+    return storm.turns[stormTurn].radiation
   }
 }

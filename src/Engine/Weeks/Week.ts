@@ -1,4 +1,5 @@
 import { Rules } from '../Core/Rules'
+import { SeededRandom } from '../Core/SeededRandom'
 import type { DateWindow } from '../Events/DateWindow'
 import type { SolarStorm } from '../Events/SolarStorm'
 import type { SpaceEvent } from '../Events/SpaceEvent'
@@ -36,6 +37,16 @@ export class Week {
 
   get everything(): SpaceEvent[] {
     return [...this.events, ...this.storms]
+  }
+
+  get signature(): string {
+    const parts = this.legs.flatMap((leg, index) => [`L${index}`, leg.window.startUtc, leg.window.endUtc, ...leg.pinnedEventIds, leg.storm?.id ?? '-'])
+    for (const event of this.everything) {
+      parts.push(event.id, String(event.rarity), event.dateUtc ?? '-')
+      for (const [channel, spec] of event.channels) parts.push(channel, String(spec.capacity), String(spec.minMark))
+      for (const turn of event.turns) parts.push(turn.signal.toFixed(4), String(turn.radiation))
+    }
+    return SeededRandom.hashText(parts.join('|')).toString(36)
   }
 
   get startUtc(): string {

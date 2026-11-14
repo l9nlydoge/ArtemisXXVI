@@ -14,7 +14,9 @@ import { PlanProblem, WasteReason, type InstrumentYield, type TurnOutcome, type 
 
 export class Encounter {
   private turn = 0
+  private played = 0
   private finished = false
+  private readonly outcomes: TurnOutcome[] = []
   private damage = 0
   private lastKeys: ReadonlySet<string> = new Set()
   private readonly tally = new Map<Channel, number>()
@@ -42,6 +44,14 @@ export class Encounter {
     return this.contact.turnCount
   }
 
+  get turnsPlayed(): number {
+    return this.played
+  }
+
+  get history(): readonly TurnOutcome[] {
+    return this.outcomes
+  }
+
   get isOver(): boolean {
     return this.finished
   }
@@ -51,7 +61,7 @@ export class Encounter {
   }
 
   get current(): TurnCondition {
-    return this.contact.conditions[Math.min(this.turn, this.turnCount - 1)]
+    return this.contact.conditions[this.turn]
   }
 
   get visible(): (TurnCondition | undefined)[] {
@@ -60,6 +70,11 @@ export class Encounter {
 
   isCooling(key: string): boolean {
     return this.cooldowns && this.lastKeys.has(key)
+  }
+
+  problemWith(key: string, plan: TurnPlan): PlanProblem | undefined {
+    if (plan.has(key)) return undefined
+    return this.preview(plan.with(key)).problem
   }
 
   yieldOf(key: string, boosted = false): InstrumentYield | undefined {
@@ -80,19 +95,15 @@ export class Encounter {
     const shielding = shield !== undefined && plan.has(shield.key)
     const condition = this.current
 
-    const problem = this.finished
-      ? PlanProblem.EncounterOver
-      : known.length !== modules.length
-        ? PlanProblem.UnknownModule
-        : known.some((module) => this.isCooling(module.key))
-          ? PlanProblem.CoolingDown
-          : burning && this.state.burnsLeft < 1
-            ? PlanProblem.NoBurnsLeft
-            : repairing && this.state.repairUsed
-              ? PlanProblem.RepairUsed
-              : powerCost > this.state.charge
-                ? PlanProblem.NotEnoughCharge
-                : undefined
+    const checks: [boolean, PlanProblem][] = [
+      [this.finished, PlanProblem.EncounterOver],
+      [known.length !== modules.length, PlanProblem.UnknownModule],
+      [known.some((module) => this.isCooling(module.key)), PlanProblem.CoolingDown],
+      [burning && this.state.burnsLeft < 1, PlanProblem.NoBurnsLeft],
+      [repairing && this.state.repairUsed, PlanProblem.RepairUsed],
+      [powerCost > this.state.charge, PlanProblem.NotEnoughCharge],
+    ]
+    const problem = checks.find(([failed]) => failed)?.[1]
 
     const signal = this.signal(burning)
     const running = new Map(this.tally)
@@ -113,7 +124,7 @@ export class Encounter {
     const afterPassive = Math.max(0, condition.radiation - this.craft.passiveShield)
     const blocked = shielding ? Math.min(afterPassive, shield.value) : 0
     const incoming = afterPassive - blocked
-    const hullAfter = this.state.hull + repaired - incoming
+    const hullAfter = Math.max(0, this.state.hull + repaired - incoming)
 
     return {
       valid: problem === undefined,
@@ -143,10 +154,15 @@ export class Encounter {
     this.damage += preview.incoming
     this.lastKeys = plan.keys
 
-    this.turn += 1
-    this.finished = preview.lost || this.turn >= this.turnCount
-    if (!this.finished) this.beginTurn()
-    return { ...preview, encounterOver: this.finished }
+    this.played += 1
+    this.finished = preview.lost || this.played >= this.turnCount
+    const outcome = { ...preview, encounterOver: this.finished }
+    this.outcomes.push(outcome)
+    if (!this.finished) {
+      this.turn += 1
+      this.beginTurn()
+    }
+    return outcome
   }
 
   result(): EncounterResult {
@@ -158,7 +174,7 @@ export class Encounter {
       complete: Scoring.isComplete(this.event, this.tally),
       anyRecorded: [...this.tally.values()].some((amount) => amount > 0),
       missed: Scoring.missed(this.event, this.craft),
-      turnsPlayed: this.turn,
+      turnsPlayed: this.played,
       damageTaken: this.damage,
     }
   }

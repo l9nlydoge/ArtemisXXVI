@@ -8,6 +8,7 @@ import type { SpaceWeather } from './Records'
 import { EventKind, SpaceEvent, type ChannelSpec } from './SpaceEvent'
 
 export enum FlareClass {
+  None = 'None',
   C = 'C',
   M = 'M',
   X = 'X',
@@ -46,7 +47,7 @@ export class SolarStorm extends SpaceEvent {
       facts: [
         new TextRef('Fact.Kp', { kp: reading.kp }),
         new TextRef(reading.particles ? 'Fact.ParticlesYes' : 'Fact.ParticlesNo'),
-        new TextRef(reading.flareObserved ? 'Fact.FlareObserved' : 'Fact.FlareAssumed', { flare: reading.flareClass }),
+        new TextRef(!reading.flareObserved ? 'Fact.FlareAssumed' : reading.flareClass === FlareClass.None ? 'Fact.FlareNone' : 'Fact.FlareObserved', { flare: reading.flareClass }),
       ],
       learned: new TextRef('Learned.Storm', { kp: reading.kp }),
       sourceUrl: reading.sourceUrl,
@@ -92,7 +93,9 @@ export class SolarStorm extends SpaceEvent {
   }
 
   private static strongest(classes: readonly FlareClass[]): FlareClass {
-    if (classes.includes(FlareClass.X)) return FlareClass.X
-    return classes.includes(FlareClass.M) ? FlareClass.M : FlareClass.C
+    for (const flare of [FlareClass.X, FlareClass.M, FlareClass.C]) {
+      if (classes.includes(flare)) return flare
+    }
+    return FlareClass.None
   }
 }

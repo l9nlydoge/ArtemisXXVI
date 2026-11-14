@@ -1,3 +1,4 @@
+import { SeededRandom } from '../Core/SeededRandom'
 import { TextRef } from '../Core/TextRef'
 import { Channel } from './Channel'
 import { Rarity } from './Rarity'
@@ -34,7 +35,7 @@ export class AsteroidFlyby extends SpaceEvent {
         lunar: Number(record.missLunar.toFixed(2)),
       }),
       sourceUrl: record.url,
-      imageId: AsteroidFlyby.images[AsteroidFlyby.hash(record.id) % AsteroidFlyby.images.length],
+      imageId: AsteroidFlyby.images[SeededRandom.hashText(record.id) % AsteroidFlyby.images.length],
     })
   }
 
@@ -76,11 +77,5 @@ export class AsteroidFlyby extends SpaceEvent {
   private static rarity(record: AsteroidRecord, diameter: number, pinned: boolean): Rarity {
     if (pinned) return Rarity.Headline
     return record.missLunar < 1 || record.hazardous || diameter >= 140 ? Rarity.Notable : Rarity.Common
-  }
-
-  private static hash(text: string): number {
-    let value = 0
-    for (const character of text) value = (Math.imul(value, 31) + character.charCodeAt(0)) >>> 0
-    return value
   }
 }

@@ -1,4 +1,5 @@
 import { Rules } from '../Core/Rules'
+import { SeededRandom } from '../Core/SeededRandom'
 import { Loadout } from '../Spacecraft/Loadout'
 import { Spacecraft } from '../Spacecraft/Spacecraft'
 import type { Week } from '../Weeks/Week'
@@ -41,12 +42,21 @@ export class Flight {
   private last?: TurnOutcome
 
   private constructor(readonly setup: FlightSetup, options: EngineOptions) {
+    if (!SeededRandom.isSeed(setup.seed)) throw new Error(`Not a usable seed: ${String(setup.seed)}`)
     this.week = (options.weeks ?? WeekCatalog.shared).get(setup.weekId)
-    this.craft = new Spacecraft(Loadout.fromJson(setup.loadout))
+    if (setup.weekSignature !== undefined && setup.weekSignature !== this.week.signature) throw new Error(`Week ${this.week.id} has changed since this flight was saved`)
+    const loadout = Loadout.fromJson(setup.loadout)
+    const issues = options.owner ? loadout.issues(options.owner) : loadout.structuralIssues
+    if (issues.length > 0) throw new Error(`The loadout cannot fly: ${issues.map((issue) => issue.kind).join(', ')}`)
+    this.craft = new Spacecraft(loadout)
     this.state = new CraftState(this.craft)
     this.scanner = new Scanner(this.week, setup.seed)
-    this.cooldowns = options.cooldowns ?? false
+    this.cooldowns = setup.cooldowns ?? false
     this.dealt = this.scanner.deal(0)
+  }
+
+  static setup(loadout: Loadout, week: Week, seed: number, cooldowns = false): FlightSetup {
+    return { loadout: loadout.toJson(), weekId: week.id, seed, cooldowns, weekSignature: week.signature }
   }
 
   static begin(setup: FlightSetup, options: EngineOptions = {}): Flight {
@@ -112,7 +122,7 @@ export class Flight {
       case CommandType.Hold:
         return this.currentPhase === FlightPhase.Scanning && !this.isStormLeg
       case CommandType.Commit:
-        return this.currentPhase === FlightPhase.Encounter && this.active!.preview(new TurnPlan(command.keys)).valid
+        return this.currentPhase === FlightPhase.Encounter && Flight.areKeys(command.keys) && this.active!.preview(new TurnPlan(command.keys)).valid
       case CommandType.Continue:
         return this.currentPhase === FlightPhase.EncounterDone
       case CommandType.Chase:
@@ -124,6 +134,8 @@ export class Flight {
           this.state.charge >= Rules.chaseCost &&
           this.isOpen(command.contactIndex)
         )
+      default:
+        return false
     }
   }
 
@@ -162,7 +174,12 @@ export class Flight {
     return new FlightReport(outcome, this.finished, Math.max(0, this.state.hull), this.leg + 1, this.loss)
   }
 
-  private isOpen(contactIndex: number): boolean {
+  private static areKeys(keys: unknown): keys is readonly string[] {
+    return Array.isArray(keys) && keys.every((key) => typeof key === 'string')
+  }
+
+  private isOpen(contactIndex: unknown): boolean {
+    if (typeof contactIndex !== 'number' || !Number.isInteger(contactIndex)) return false
     const contact = this.dealt[contactIndex]
     return contact !== undefined && !contact.played
   }
@@ -171,7 +188,7 @@ export class Flight {
     this.state.charge -= Rules.surveyCost
     this.surveyed = true
     for (const contact of this.dealt) contact.identified = true
-    const extra = this.scanner.dealExtra(this.leg, this.dealt.length)
+    const extra = this.scanner.dealExtra(this.leg)
     if (extra) this.dealt = [...this.dealt, extra]
   }
 
@@ -207,6 +224,7 @@ export class Flight {
 
   private advance(): void {
     this.active = undefined
+    this.last = undefined
     if (this.leg + 1 >= Rules.legsPerFlight) {
       this.currentPhase = FlightPhase.Completed
       return
