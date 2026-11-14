@@ -1,5 +1,5 @@
 {
-  "App.Title": "GO / NO-GO",
+  "App.Title": "Artemis 26",
   "App.Tagline": "Design a space mission, fly it, and find out exactly why it worked or failed.",
   "Menu.PlaySolo": "Play solo",
   "Menu.HostTeam": "Host a team",
@@ -179,5 +179,6 @@
   "Outcome.Life": "Lasted",
   "Outcome.LifeValue": "{life} of {target} years",
   "Host.LocalOnly": "This room only syncs between tabs on this computer. Add Firebase settings to play across phones.",
-  "Join.Connecting": "Looking for the room."
+  "Join.Connecting": "Looking for the room.",
+  "App.Colophon": "An entry for the 2026 NASA Space Apps Challenge. Not an official NASA product."
 }

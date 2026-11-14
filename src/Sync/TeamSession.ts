@@ -9,7 +9,7 @@ import type { RoomSync } from './RoomSync'
 import { RoomPhase, Vote, type Ballot, type RoomState } from './RoomState'
 
 export class TeamSession {
-  private static readonly storageKey = 'GoNoGo.Session'
+  private static readonly storageKey = 'Artemis26.Session'
   state: RoomState | null = null
 
   private constructor(

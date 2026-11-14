@@ -35,7 +35,7 @@ export function MenuScreen() {
       </div>
 
       <header className="Hero">
-        <h1>GO / NO-GO</h1>
+        <h1>{translator.t('App.Title')}</h1>
         <p>{translator.t('App.Tagline')}</p>
       </header>
 
@@ -67,6 +67,8 @@ export function MenuScreen() {
         <input id="RoomCodeInput" value={code} autoCapitalize="characters" autoComplete="off" maxLength={4} placeholder="ABCD" onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
         <button type="submit" disabled={!RoomCode.isValid(code)}>{translator.t('Menu.JoinTeam')}</button>
       </form>
+
+      <p className="Colophon">{translator.t('App.Colophon')}</p>
     </main>
   )
 }

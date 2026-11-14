@@ -1,5 +1,5 @@
 export class PlayerIdentity {
-  private static readonly storageKey = 'GoNoGo.PlayerId'
+  private static readonly storageKey = 'Artemis26.PlayerId'
   private static cached?: string
 
   static get id(): string {

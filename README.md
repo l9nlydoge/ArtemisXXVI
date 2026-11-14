@@ -1,6 +1,6 @@
-# GO / NO-GO
+# Artemis 26
 
-A space mission design game for NASA Space Apps 2026. Team Artemis 26, Ankara.
+A space mission design game for the 2026 NASA Space Apps Challenge, built in Ankara. It is a challenge entry, not an official NASA product.
 
 The design, data and scope plan are in [proposal.md](proposal.md). The visual direction, and the list of patterns to avoid, is in [DESIGN.md](DESIGN.md). Read it before changing any UI.
 

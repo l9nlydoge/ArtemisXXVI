@@ -1,4 +1,4 @@
-# GO / NO-GO visual direction
+# Artemis 26 visual direction
 
 Read this before changing any UI. It exists so the game keeps one identity, whoever (or whatever) writes the next screen.
 

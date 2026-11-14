@@ -1,4 +1,4 @@
-# GO / NO-GO — Space Apps 2026 proposal (Artemis 26, Ankara)
+# Artemis 26 — Space Apps 2026 proposal (Ankara)
 
 > **Pitch:** Design a NASA-style mission in ten minutes and fly it in thirty seconds. When it fails, the game traces the failure back to the exact decision that caused it. Then you negotiate your crew to a unanimous **GO** and try again.
 
@@ -13,13 +13,13 @@ Numbers in `[n]` refer to the source list at the end. **EST** marks a number we 
 - **Professional design teams have the right structure, but take days.** JPL Team X and ESA's Concurrent Design Facility have the multi-role structure we want: one expert per subsystem, all working on shared numbers. A design session there takes days.
 - **Nobody combines all of it.** No tool we found gives a 10-minute session, visible consequence chains, explained failure, role-based negotiation and real NASA numbers together.
 - **Past attempts fell short.** Space Apps 2021 projects on a similar theme (e.g. "Decks to Orbit") shipped with their game logic unfinished.
-- **This matches the challenge text.** It says existing tools cover single topics "without demonstrating how these elements interact as a complete system" [1]. GO / NO-GO is built around that sentence.
+- **This matches the challenge text.** It says existing tools cover single topics "without demonstrating how these elements interact as a complete system" [1]. Artemis 26 is built around that sentence.
 
 ---
 
 ## 1. Name + pitch
 
-**GO / NO-GO.** The name comes from the real flight-readiness poll, in which every console lead must say "GO" before launch.
+**Artemis 26.** Named for NASA's Artemis programme and for 2026: the year Artemis II carried a crew around the Moon, and the year of this challenge. The launch decision in the game keeps the name of the real flight-readiness poll, **GO / NO-GO**, in which every console lead must say "GO" before launch.
 
 ## 2. Core loop (≈10 min per mission)
 
@@ -349,7 +349,7 @@ onValue(ref(db, `rooms/${code}`), snap => store.setRoom(snap.val()))
 3. **20–30 s: "Teams negotiate. No single right answer."** Four hands, each holding a phone with a different role console, sit in front of the projector.
    - The Ops phone votes NO-GO with "downlink 60%". The Ops player adds a ground station on their phone, and all four tiles on the big screen flip to **GO**.
    - Three stars appear, with the "vs Landsat 9: $885M" card and the scatter plot showing the player's dot near the frontier.
-   - End title: *GO / NO-GO: Artemis 26.*
+   - End title: *Artemis 26.*
 
 ## 9. How it scores on the judging criteria, and the top risks
 

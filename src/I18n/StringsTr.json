@@ -1,5 +1,5 @@
 {
-  "App.Title": "GO / NO-GO",
+  "App.Title": "Artemis 26",
   "App.Tagline": "Bir uzay görevi tasarla, uçur ve neden başardığını ya da başaramadığını tam olarak öğren.",
   "Menu.PlaySolo": "Tek oyunculu",
   "Menu.HostTeam": "Takım kur",
@@ -179,5 +179,6 @@
   "Outcome.Life": "Dayandı",
   "Outcome.LifeValue": "{target} yıldan {life}",
   "Host.LocalOnly": "Bu oda yalnızca bu bilgisayardaki sekmeler arasında eşitlenir. Telefonlarla oynamak için Firebase ayarlarını ekle.",
-  "Join.Connecting": "Oda aranıyor."
+  "Join.Connecting": "Oda aranıyor.",
+  "App.Colophon": "2026 NASA Space Apps Challenge için hazırlanmış bir projedir. Resmî bir NASA ürünü değildir."
 }

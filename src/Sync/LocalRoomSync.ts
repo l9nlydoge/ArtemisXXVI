@@ -5,7 +5,7 @@ import type { RoomState } from './RoomState'
 
 export class LocalRoomSync extends RoomSync {
   readonly transport = 'Local'
-  private readonly channel = new BroadcastChannel('GoNoGo.Rooms')
+  private readonly channel = new BroadcastChannel('Artemis26.Rooms')
 
   protected async put(code: string, path: string, value: unknown): Promise<void> {
     this.mutate(code, (tree) => tree.put(path, value))
@@ -28,10 +28,10 @@ export class LocalRoomSync extends RoomSync {
     const local = (event: Event) => {
       if ((event as CustomEvent<string>).detail === code) listener(this.load(code))
     }
-    window.addEventListener('GoNoGo.LocalRoom', local)
+    window.addEventListener('Artemis26.LocalRoom', local)
     return () => {
       this.channel.removeEventListener('message', handler)
-      window.removeEventListener('GoNoGo.LocalRoom', local)
+      window.removeEventListener('Artemis26.LocalRoom', local)
     }
   }
 
@@ -44,7 +44,7 @@ export class LocalRoomSync extends RoomSync {
     change(tree)
     localStorage.setItem(this.key(code), JSON.stringify(tree.value))
     this.channel.postMessage(code)
-    window.dispatchEvent(new CustomEvent('GoNoGo.LocalRoom', { detail: code }))
+    window.dispatchEvent(new CustomEvent('Artemis26.LocalRoom', { detail: code }))
   }
 
   private load(code: string): RoomState | null {
@@ -53,6 +53,6 @@ export class LocalRoomSync extends RoomSync {
   }
 
   private key(code: string): string {
-    return `GoNoGo.Room.${code}`
+    return `Artemis26.Room.${code}`
   }
 }
