@@ -9,9 +9,11 @@ import { SpacecraftModel } from './SpacecraftModel'
 export function StudioLight() {
   return (
     <Environment resolution={128}>
-      <Lightformer form="rect" intensity={3} position={[0, 4, 2]} scale={[8, 3, 1]} />
-      <Lightformer form="rect" intensity={1.4} position={[-4, 1, 1]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 1]} />
-      <Lightformer form="rect" intensity={1} position={[4, 0, -2]} rotation={[0, -Math.PI / 2, 0]} scale={[6, 3, 1]} />
+      <Lightformer form="rect" intensity={5} position={[0, 4, 2]} rotation={[-Math.PI / 2, 0, 0]} scale={[9, 6, 1]} />
+      <Lightformer form="rect" intensity={2.2} position={[0, 0.5, 5]} scale={[10, 6, 1]} />
+      <Lightformer form="rect" intensity={1.6} position={[0, -3, 0]} rotation={[Math.PI / 2, 0, 0]} scale={[10, 10, 1]} />
+      <Lightformer form="rect" intensity={2.6} position={[-4, 1, 1]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 1]} />
+      <Lightformer form="rect" intensity={2.2} position={[4, 0, -2]} rotation={[0, -Math.PI / 2, 0]} scale={[6, 3, 1]} />
     </Environment>
   )
 }
@@ -21,8 +23,8 @@ export default function Workshop({ design, label }: { design: ResolvedDesign; la
   return (
     <Canvas className="Workshop" style={{ touchAction: 'pan-y' }} camera={{ position: [0.95, 0.55, 1.5], fov: 34 }} dpr={[1, 2]} aria-label={label} role="img">
       <color attach="background" args={['#ffffff']} />
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[3, 5, 4]} intensity={2.6} />
+      <ambientLight intensity={0.35} />
+      <directionalLight position={[3, 5, 4]} intensity={2.2} />
       <StudioLight />
       <SpacecraftModel blueprint={blueprint} />
       <ContactShadows position={[0, -0.52, 0]} opacity={0.32} blur={2.6} scale={3.4} far={1.4} resolution={512} />

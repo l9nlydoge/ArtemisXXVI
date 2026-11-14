@@ -3,9 +3,9 @@ import type { OrbitPath } from './OrbitPath'
 import { Palette } from './Palette'
 
 export class CoveragePainter {
-  private static readonly orbitsToFill = 110
+  private static readonly orbitsToFill = 150
   private static readonly stepsPerOrbit = 90
-  private static readonly swathDegrees = 3.4
+  private static readonly swathDegrees = 0.9
   private static readonly uploadEvery = 24
 
   readonly texture: CanvasTexture

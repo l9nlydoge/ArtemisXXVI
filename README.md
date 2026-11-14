@@ -39,3 +39,7 @@ To make rooms work across phones:
 | `src/UI` | Screens and components |
 
 The engine is pure TypeScript with no React or browser dependencies. `MissionSimulator.run({ scenario, design, seed })` is deterministic, so every device in a room computes the same flight.
+
+## Credits
+
+Earth day, night and cloud images in `public/Textures` are from [Solar System Scope](https://www.solarsystemscope.com/textures/), based on NASA imagery, licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The files were taken from the three.js examples, where they were resized and merged.

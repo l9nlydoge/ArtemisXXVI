@@ -180,7 +180,7 @@
   "Outcome.LifeValue": "{life} of {target} years",
   "Host.LocalOnly": "This room only syncs between tabs on this computer. Add Firebase settings to play across phones.",
   "Join.Connecting": "Looking for the room.",
-  "App.Colophon": "An entry for the 2026 NASA Space Apps Challenge. Not an official NASA product.",
+  "App.Colophon": "An entry for the 2026 NASA Space Apps Challenge. Not an official NASA product. Earth imagery by Solar System Scope (CC BY 4.0), based on NASA data.",
   "Stage.Drag": "Drag to turn it.",
   "Flight.Coverage": "{percent}% of the science goal collected",
   "Flight.ViewWide": "Whole Earth view",

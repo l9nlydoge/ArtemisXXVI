@@ -35,14 +35,17 @@ Read this before changing any UI. It exists so the game keeps one identity, whoe
 
 ## 3D and rewards
 
-The player has to get something back for the ten minutes they spend designing.
+The player has to get something back for the ten minutes they spend designing. The reference is real photography from orbit: a detailed spacecraft in the foreground, the Earth and its clouds below, a thin blue line of atmosphere on the horizon.
 
-- **The spacecraft is a 3D model** built from the same data as the flat drawing. It turns in the clean room and then flies in the mission.
-- **The flight is a 3D scene.** A chase camera follows the spacecraft over the Earth, then pulls back for the finale.
-- **Science is visible.** Every pass paints a gold track on the globe. A mission that meets its goal covers the Earth in gold; a weak one leaves it mostly bare.
+- **The interface stays drawn; space is photographic.** Menus, controls and gauges keep the clean-room look above. The spacecraft and the flight are rendered to look real.
+- **The spacecraft is a 3D model** built from the design: crinkled gold foil, glossy solar cells, mirror radiators, struts and dishes. It turns in the clean room and then flies the mission.
+- **The Earth uses real imagery:** day, night with city lights, and clouds, with a sunlit glint on the ocean and a blue atmosphere at the limb.
+- **Reflections are live.** The spacecraft mirrors the actual Earth and Sun around it, and goes dark in the Earth's shadow.
+- **The camera sells it.** The chase view frames the spacecraft to one side with the horizon behind it. The whole-Earth view is for the finale.
+- **Science is visible.** Each pass leaves a faint gold track on the globe. Keep it faint, so it never hides the Earth.
 - **Success earns a mission patch** that is kept on the start screen. Three stars earns a gold border.
-- **The Earth is drawn, not photographed.** Blue ocean, off-white land, ink coastlines, in the same palette as the rest of the game. No photoreal textures, lens flares or bloom.
-- The 3D code is in `src/UI/Scene`. It loads only when needed, and the flat drawings in `src/UI/Visuals` are the fallback when WebGL is missing.
+- Glow is only for things that really are bright (the Sun, glints). No lens-flare sprites, no coloured fog, no glow on UI.
+- The 3D code is in `src/UI/Scene` and loads only when needed. The flat drawings in `src/UI/Visuals` are the fallback when WebGL is missing. Images are in `public/Textures`.
 
 ## Banned (the usual generated-UI tells)
 
