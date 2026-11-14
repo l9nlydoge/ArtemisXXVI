@@ -53,6 +53,7 @@ function Scene({ detailed }: { detailed: boolean }) {
   const reflectionEvery = detailed ? 4 : 24
 
   useEffect(() => dock.attach(gl.domElement), [dock, gl])
+  useEffect(() => dock.frame(path.dockPitch), [dock, path])
   useEffect(() => () => painter.dispose(), [painter])
   useEffect(() => {
     state.current.painted = 0
@@ -163,7 +164,7 @@ function Scene({ detailed }: { detailed: boolean }) {
         shadow-camera-bottom={-path.craftSize * 1.3}
         shadow-camera-near={path.craftSize * 0.5}
         shadow-camera-far={path.craftSize * 16}
-        shadow-bias={-0.00012}
+        shadow-bias={-0.0024 * path.craftSize}
         shadow-normalBias={path.craftSize * 0.012}
       />
       <directionalLight ref={fill} intensity={0} />

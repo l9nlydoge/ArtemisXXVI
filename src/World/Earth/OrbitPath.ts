@@ -39,6 +39,11 @@ export class OrbitPath {
     return !this.isHalo && this.radius < 3
   }
 
+  get dockPitch(): number {
+    if (this.isHalo) return -1.3
+    return this.radius > 3 ? 1.38 : 0.34
+  }
+
   get viewDistance(): number {
     return this.radius * 2.5 + 1.4
   }

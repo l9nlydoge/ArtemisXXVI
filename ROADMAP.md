@@ -19,9 +19,9 @@ The engine is sound and the flight looks good. Almost everything around them is 
 
 | Area | What is wrong |
 |---|---|
-| Theme | The start, build, host and phone screens are white "clean room". The flight and report are black space. It reads as two different sites, and the white half does not say "Artemis". |
-| Start screen | A title and a list. No space imagery, no explanation of how to play, no loading state. |
-| Build screen | The 3D spacecraft sits in a small white box. The orbit picture next to it is still a flat diagram. Nothing teaches a first-time player what to do. |
+| Theme | Fixed in Phase 1. One space scene sits behind every screen. |
+| Start screen | Space imagery and a loading state were added in Phase 1. There is still no explanation of how to play (Phase 2). |
+| Build screen | The spacecraft is now the foreground of the scene (Phase 1). Nothing yet teaches a first-time player what to do (Phase 2). |
 | Launch | A flat rocket outline sliding up a colour fade. It is the weakest moment between two strong ones. |
 | Flight | Events are only text. A solar storm, a micrometeoroid hit or a dead battery look the same on screen. A lost spacecraft just tumbles. A destroyed instrument stays on the model. |
 | Mission report | A long page of text. The Failure Trace, the game's signature idea, is a plain list. |
@@ -75,19 +75,21 @@ This replaces the "clean room, then space" idea in `DESIGN.md`.
 | Ask the Local Lead about local judging times | You know the real deadline |
 | Request a FortiGuard web-filter classification for the deployed link (the guide recommends it) | Request sent |
 
-### Phase 1: One space theme (done Saturday 14 November)
+### Phase 1: One space theme (done, Saturday 14 November)
 
-The interface was rebuilt from scratch on top of one persistent 3D scene. The engine, team sync and 3D models were kept.
+The interface was rebuilt from scratch on top of one persistent 3D scene. The engine, team sync and 3D models were kept. Every task below is finished and was checked in the browser.
 
-| Task | Hours | Done when |
+| Task | Status | How it was checked |
 |---|---|---|
-| Rewrite `DESIGN.md` for the single space theme | 0.5 | Old clean-room rules are gone |
-| Keep one 3D scene alive behind every screen | 1.5 | No white screen and no scene reload between pages |
-| Start screen over the live Earth | 0.5 | Title, missions and patches sit over the orbit view |
-| Build screen with the spacecraft in the foreground and a side panel | 1 | The spacecraft fills at least half the screen |
-| Dark panels, buttons, tables and gauges | 0.5 | Every screen uses the same tokens |
-| Loading screen while the Earth images arrive | 0.25 | No blank or popping globe |
-| Browser tab icon and link-preview image | 0.25 | The link looks right when pasted in chat |
+| Rewrite `DESIGN.md` for the single space theme | Done | The clean-room rules are gone; the file describes the one-world theme |
+| Keep one 3D scene alive behind every screen | Done | Start, build, flight, report, host and phone screens all sit on the same scene with no white screen and no reload |
+| Start screen over the live Earth | Done | Title, missions and patches over a low-orbit view of the horizon |
+| Build screen with the spacecraft in the foreground and a side panel | Done | The spacecraft fills about half the screen height in sunlight; dragging turns it; checked in low, sun-synchronous, geostationary and L2 orbits |
+| Dark panels, buttons, tables and gauges | Done | One stylesheet, `src/Styles/Space.css`, used by every screen |
+| Loading screen while the Earth images arrive | Done | Shown on every fresh load until the imagery is ready |
+| Browser tab icon and link-preview image | Done | `public/Icon.svg` and `public/Preview.jpg`. The preview needs the full public address once the site is deployed (Phase 0). |
+
+Also checked: a full team round (host, join from a second tab at phone size, vote, launch, both fly), and no sideways scrolling at phone width.
 
 ### Phase 2: Finish the core loop (Saturday 20:00 to 24:00, build)
 

@@ -43,6 +43,8 @@ export class CameraDirector {
   private readonly current = new Pose()
   private readonly forward = new Vector3()
   private readonly right = new Vector3()
+  private readonly facing = new Vector3()
+  private readonly screenUp = new Vector3()
   private readonly offset = new Vector3()
   private readonly sideways = new Vector3().crossVectors(OrbitPath.sunDirection, new Vector3(0, 1, 0)).normalize()
   private readonly startRadial = new Vector3()
@@ -86,18 +88,20 @@ export class CameraDirector {
         return
       }
       case Shot.Dock: {
-        const distance = size * (portrait ? 3.2 : 2.05)
+        const distance = size * (portrait ? 3 : 1.6)
         this.offset
           .copy(craft.normal).multiplyScalar(Math.sin(dock.yaw) * Math.cos(dock.pitch))
           .addScaledVector(craft.radial, Math.sin(dock.pitch))
           .addScaledVector(craft.tangent, -Math.cos(dock.yaw) * Math.cos(dock.pitch))
         position.copy(craft.position).addScaledVector(this.offset, distance)
         this.forward.copy(this.offset).negate()
-        this.right.crossVectors(this.forward, craft.radial).normalize()
+        this.facing.copy(craft.tangent).multiplyScalar(Math.cos(dock.yaw)).addScaledVector(craft.normal, -Math.sin(dock.yaw))
+        up.copy(craft.radial).multiplyScalar(Math.cos(dock.pitch)).addScaledVector(this.facing, Math.sin(dock.pitch)).normalize()
+        this.right.crossVectors(this.forward, up).normalize()
+        this.screenUp.crossVectors(this.right, this.forward).normalize()
         look.copy(craft.position)
-        if (portrait) look.addScaledVector(craft.radial, -size * 0.55)
-        else look.addScaledVector(this.right, size * 0.7).addScaledVector(craft.radial, size * 0.08)
-        up.copy(craft.radial)
+        if (portrait) look.addScaledVector(this.screenUp, -size * 0.55)
+        else look.addScaledVector(this.right, size * 0.52).addScaledVector(this.screenUp, -size * 0.08)
         return
       }
       case Shot.Chase:

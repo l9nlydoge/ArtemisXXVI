@@ -19,7 +19,7 @@ export class DockControls {
     const move = (event: PointerEvent) => {
       if (!this.dragging) return
       this.yaw -= (event.clientX - this.lastX) * 0.006
-      this.pitch = Math.min(1.1, Math.max(-0.45, this.pitch + (event.clientY - this.lastY) * 0.004))
+      this.pitch = Math.min(1.45, Math.max(-1.45, this.pitch + (event.clientY - this.lastY) * 0.004))
       this.lastX = event.clientX
       this.lastY = event.clientY
       this.idleSeconds = 0
@@ -37,6 +37,10 @@ export class DockControls {
       window.removeEventListener('pointerup', up)
       window.removeEventListener('pointercancel', up)
     }
+  }
+
+  frame(pitch: number): void {
+    this.pitch = pitch
   }
 
   advance(delta: number): void {
