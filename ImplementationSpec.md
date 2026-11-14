@@ -2,7 +2,7 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 237 passing tests and no screens yet. It was reviewed independently against this document twice, and after each review deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
+**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. Step 3 (data) is done except for the storm download, which is waiting for NASA's demo key to reset. The engine has 237 passing tests and no screens yet. It was reviewed independently against this document twice, and after each review deliberate bugs were planted in a copy to confirm the tests catch them. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
 
 **How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
 
@@ -445,16 +445,20 @@ Each event kind is a subclass of `SpaceEvent` with a static factory that turns a
 
 ### 6.1 Asteroid flyby
 
-Source record: one close approach from NeoWs.
+Source record: one close approach from NASA/JPL's close-approach data service (the SBDB Close-Approach Data API, fed by the Center for Near-Earth Object Studies). It needs no key. NASA's NeoWs feed serves the same JPL data and was the first choice, but its demo key ran out during the download (section 7.2).
 
-| Input | Field |
+| Input | Field of the close-approach record |
 |---|---|
-| Speed `v` (km/s) | `close_approach_data[0].relative_velocity.kilometers_per_second` |
-| Miss distance `d` (lunar distances) | `close_approach_data[0].miss_distance.lunar` |
-| Diameter `D` (m) | mean of `estimated_diameter.meters.estimated_diameter_min` and `_max` |
-| Hazard flag | `is_potentially_hazardous_asteroid` |
-| Date | `close_approach_data[0].close_approach_date_full` |
-| Link | `nasa_jpl_url` |
+| Speed `v` (km/s) | `v_rel` |
+| Miss distance `d` (lunar distances) | `dist` in astronomical units × 389.17 |
+| Diameter `D` (m) | mean of the smallest and largest estimate. The estimates come from brightness `h`: `1329 / √albedo × 10^(−h/5)` km, with albedo 0.25 for the smallest and 0.05 for the largest. NeoWs publishes the same two figures. A measured `diameter` is used when the record has one. |
+| Hazard flag | whether the object is in the same query repeated with `pha=true` |
+| Date | `jd`, the Julian date, converted to UTC and rounded to the minute |
+| Link | the JPL Small-Body Database page for the designation |
+
+An asteroid's id is its designation without spaces, for example `2019OK`.
+
+**Found later.** Some asteroids in the data passed before anyone had seen them: their designation year is later than the year of the pass. Their card says "Not discovered until 2023", and their "what was learned" line says the pass went unseen.
 
 | Derived | Rule |
 |---|---|
@@ -527,14 +531,16 @@ Hand-written in `Data/Curated/RareEvents.ts`. Each needs a date, a NASA page lin
 |---|---|---|---|---|---|
 | DartImpact | 26 Sep 2022 | 3 | `[1, 3, 1]` | Visible 12, Spectrum 8 | Headline |
 | Grb221009A | 9 Oct 2022 | 3 | `[3, 1, 0.5]` | HighEnergy 18, Visible 8 | Headline |
-| Oumuamua (candidate week) | Oct 2017 | 4 | `[0.5, 1, 1.5, 1]` | Visible 12, Spectrum 12 | Headline |
-| Chelyabinsk (candidate week) | 15 Feb 2013 | 3 | `[0.5, 3, 0.5]` | Visible 10, HighEnergy 6 | Headline |
+| Oumuamua (candidate week, not built) | Oct 2017 | 4 | `[0.5, 1, 1.5, 1]` | Visible 12, Spectrum 12 | Headline |
+| Chelyabinsk (candidate week, not built) | 15 Feb 2013 | 3 | `[0.5, 3, 0.5]` | Visible 10, HighEnergy 6 | Headline |
+
+The two built events were checked on 14 November 2026 against NASA's DART mission page and NASA's article on GRB 221009A. `Data/Curated/LearnedSources.ts` records the page behind every hand-written line.
 
 ### 6.5 Weeks
 
 A week definition lists six legs, each with a date window, and any pinned events.
 
-**JulyNineteen — "The one nobody saw coming"** (rank 1)
+**JulyNineteen — "A fifth of the way to the Moon"** (rank 1)
 
 | Leg | Window (UT) | Pinned |
 |---|---|---|
@@ -546,6 +552,8 @@ A week definition lists six legs, each with a date window, and any pinned events
 | 6 | 25 Jul 2019 | 2019 OK |
 
 Expected storms: none. If DONKI shows a storm in these dates, it becomes a storm leg like any other.
+
+The real data gives 14 asteroids within 20 lunar distances: 1, 1, 2, 2, 4 and 4 per leg. The early legs are thin, so they offer one asteroid and one planet. The earlier title, "The one nobody saw coming", was dropped because no NASA page was found in this session to confirm how late 2019 OK was discovered. Its designation shows only that it was found in the second half of July 2019.
 
 **AutumnTwentyTwo — "Impact and burst"** (rank 2)
 
@@ -587,42 +595,45 @@ Storm legs: from DONKI. Legs 3 and 4 are expected to be Severe.
 
 Reasons: no rate limit or outage can break the game in front of a judge, no key is shipped to the browser, and two of the sources do not allow browser calls at all.
 
-### 7.2 Sources, as tested on 14 November 2026
+### 7.2 Sources, as used on 14 November 2026
 
 | Source | Request | Result |
 |---|---|---|
-| NeoWs feed | `GET https://api.nasa.gov/neo/rest/v1/feed?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&api_key=KEY` | Works. At most 7 days per request. |
-| DONKI GST | `GET https://api.nasa.gov/DONKI/GST?startDate=…&endDate=…&api_key=KEY` | Works. |
-| DONKI SEP | `GET https://api.nasa.gov/DONKI/SEP?startDate=…&endDate=…&api_key=KEY` | Works. |
-| DONKI CME | `GET https://api.nasa.gov/DONKI/CME?…` | Works. Not needed by the rules; kept as a fallback for dating storms. |
-| DONKI FLR | `GET https://api.nasa.gov/DONKI/FLR?…` | **Returned 404 today.** The direct host `kauai.ccmc.gsfc.nasa.gov` timed out. Treat flares as optional; section 6.2 has the fallback. |
-| Exoplanet Archive | `GET https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=<ADQL>&format=json` | Works. No browser access header, so script only. |
-| Image library | `GET https://images-api.nasa.gov/search?q=…&media_type=image` | Works. No key. |
-| JPL close-approach data | `GET https://ssd-api.jpl.nasa.gov/cad.api?…` | Works. A cross-check for asteroid figures; not required. |
+| JPL close-approach data | `GET https://ssd-api.jpl.nasa.gov/cad.api?date-min=…&date-max=…&dist-max=20LD&fullname=true&diameter=true`, and the same with `&pha=true` | **Used for asteroids.** No key, no limit met. |
+| DONKI GST | `GET https://api.nasa.gov/DONKI/GST?startDate=…&endDate=…&api_key=KEY` | Used for storms. Needs the key. |
+| DONKI SEP | `GET https://api.nasa.gov/DONKI/SEP?startDate=…&endDate=…&api_key=KEY` | Used for particle events. Needs the key. |
+| DONKI FLR | `GET https://api.nasa.gov/DONKI/FLR?…` | Returned 404 on first test. Optional; section 6.2 has the fallback. |
+| Exoplanet Archive | `GET https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=<ADQL>&format=json` | **Used for planets.** No key. No browser access header, so script only. |
+| Image library | `GET https://images-api.nasa.gov/search?q=…&media_type=image` and `/asset/<nasa_id>` | **Used for images.** No key. The file server is slow: allow minutes per image. |
+| NeoWs feed | `GET https://api.nasa.gov/neo/rest/v1/feed?…&api_key=KEY` | Works, at most 7 days per request. Not used: see the key note. |
+| DONKI direct host | `kauai.ccmc.gsfc.nasa.gov/DONKI/WS/get/…` | Does not answer from the team's network. |
 
-**Key:** `DEMO_KEY` works but allowed only 10 requests an hour in today's test. The script needs about 15 requests in total. Either run it across two hours, or have a team member get a free key at api.nasa.gov and pass it as `NASA_API_KEY` in the environment. The key is never committed.
+**Key:** `DEMO_KEY` allows 10 requests, and the count takes about ten hours to clear, not one. It ran out after two NeoWs requests on top of the morning's tests. So the script now needs the key for three requests only (GST, SEP, FLR over the whole span of all weeks) and takes asteroids from the keyless JPL service. A personal key from api.nasa.gov, passed as `NASA_API_KEY`, removes the wait. The key is never committed.
 
 ### 7.3 The script
 
 ```
-node Tools/FetchNasaData.mjs [--week JulyNineteen] [--dry]
+node Tools/FetchNasaData.mjs [--dry] [--offline]
 ```
 
-1. Read week definitions (date windows) from a small JSON copy of `WeekDefinitions`.
-2. For each week: request NeoWs in chunks of at most 7 days; request GST and SEP for the whole span; try FLR and continue if it fails.
-3. Request the exoplanet rows by name in one ADQL query.
-4. Filter and trim to the fields in section 7.4.
-5. Write the three snapshot files, each with a header: `retrievedAt`, `source`, `request`.
-6. Print a report: counts per week and leg, storm legs found, names not found, any request that failed.
+1. Read the week definitions and the planet list from `src/Data/Curated/`.
+2. For each week: two close-approach requests (all objects, and hazardous ones).
+3. One GST, one SEP and one FLR request covering every week, with 72 hours of lead. FLR may fail without stopping the run.
+4. One exoplanet request by name.
+5. Trim to the fields in section 7.4, keeping at most six asteroids per leg, and write each snapshot file that downloaded in full, with `retrievedAt`, `source` and `requests`.
+6. Print a report: asteroids per week and leg, storm legs found, names not found, any request that failed.
 
-The script fails loudly if a week ends up with fewer than 8 events or a pinned asteroid is missing.
+- **Every response is cached** in `Tools/.cache` (not committed), so a rerun repeats no request that already worked.
+- **A part that fails does not stop the others.** The script writes what it has, lists the problem and exits with an error.
+- **It also reports** a week with fewer than 8 events or a missing pinned asteroid.
+- **`SpaceWeather.json` carries `pending: true` until the storm download succeeds,** and a data test fails while it does.
 
 ### 7.4 Snapshot shapes
 
 ```ts
 interface AsteroidRecord {
-  id: string                 // NeoWs id
-  name: string               // "(2019 OK)" with brackets removed
+  id: string                 // designation without spaces, "2019OK"
+  name: string               // "2019 OK"
   dateUtc: string            // ISO
   speedKmS: number
   missLunar: number
@@ -630,7 +641,7 @@ interface AsteroidRecord {
   diameterMinM: number
   diameterMaxM: number
   hazardous: boolean
-  url: string                // nasa_jpl_url
+  url: string                // JPL Small-Body Database page
   weekId: string
 }
 
@@ -687,12 +698,25 @@ interface SnapshotFile<T> {
 
 ### 7.5 Images
 
-- **Event cards use real NASA photographs,** stored in `public/Images/Events/` at the library's "medium" size (about 1280 px wide, roughly 100–300 KB each).
-- **Most small asteroids have no photograph.** Their cards use one of four representative asteroid images, and the caption says so: "Representative image: asteroid Bennu."
-- **About 14 files in total:** 4 asteroids, 2 Sun or aurora, 4 exoplanet illustrations, DART, the gamma-ray burst, 2 spare.
-- **Each file is listed in `Data/Curated/Images.ts`** with its `nasa_id`, title, credit line and page link. The Sources screen reads from that file.
-- **Downloading needs the team's go-ahead.** The list of exact files and sizes is shown for approval before anything is fetched.
-- **Exoplanet images are artist's concepts** and are labelled as such on the card.
+Ten images from NASA's Image and Video Library are in `public/Images/Events/`, 916 KB in all. Each was resized to at most 1280 px and looked at before it went in: none carries a logo, insignia or mission patch.
+
+| File | NASA id | What it shows | Credit | Kind |
+|---|---|---|---|---|
+| AsteroidA | PIA00136 | Asteroid Ida and its moon Dactyl | NASA/JPL | Photograph |
+| AsteroidB | PIA00119 | Asteroid Gaspra | NASA/JPL/USGS | Photograph |
+| AsteroidC | PIA02900 | The saddle of asteroid Eros | NASA/JPL/JHUAPL | Photograph |
+| AsteroidD | PIA00333 | Asteroid Ida in enhanced colour | NASA/JPL/USGS | Photograph |
+| Storm | iss074e0150531 | Aurora from a geomagnetic storm, seen from the ISS, January 2026 | NASA | Photograph |
+| StormSevere | PIA21949 | The X9.3 solar flare of 6 September 2017 | NASA/GSFC/Solar Dynamics Observatory | Photograph |
+| ExoplanetVisible | PIA21429 | The TRAPPIST-1 planets crossing their star | NASA/JPL-Caltech | Illustration |
+| ExoplanetSpectrum | PIA20687 | A hot Jupiter whose clouds hide its water | NASA/JPL-Caltech | Illustration |
+| DartImpact | PIA25329 | The DART spacecraft approaching Dimorphos | NASA/Johns Hopkins APL/Steve Gribben | Illustration |
+| Grb221009A | GSFC_20171208_Archive_e001889 | A different burst, GRB 110328A, seen by Swift | NASA/Swift/Stefan Immler | Photograph |
+
+- **Most are representative, and say so.** No photograph exists of a 30 m asteroid passing Earth, or of these particular storms. Each image has a caption such as "Representative image: asteroid Gaspra, from NASA's Galileo spacecraft", and the card must show it.
+- **Illustrations are labelled as illustrations.**
+- **`Data/Curated/Images.ts` lists each file** with its NASA id, title, credit, kind, caption key and library page link. The Sources screen reads from it. A test fails if an event wants an image that is not listed, or a file is on disk without a credit.
+- **The first gamma-ray image considered was dropped** because it carried a mission logo.
 
 ### 7.6 Credit and use
 
@@ -867,7 +891,7 @@ class ExoplanetTransit { static fromRecord(record: ExoplanetRecord, note?: Exopl
 class RareEvent        { /* constructed directly from EventDetails in Curated/RareEvents.ts */ }
 ```
 
-Event ids: `Asteroid.<NeoWs id>`, `Storm.<YYYY-MM-DD of the leg>`, `Exoplanet.<name without spaces or punctuation>`, and whatever a rare event is given.
+Event ids: `Asteroid.<designation without spaces>`, `Storm.<YYYY-MM-DD of the leg>`, `Exoplanet.<name without spaces or punctuation>`, and whatever a rare event is given.
 
 "What was learned" keys: a pinned asteroid, a famous planet and every rare event use `Learned.<event id>`, written by hand in step 3. Everything else uses a shared template: `Learned.Asteroid`, `Learned.Storm`, `Learned.Method.<Transit | RadialVelocity | Imaging | Microlensing>`.
 
@@ -1186,7 +1210,7 @@ Selecting an unlocked card goes to the Hangar.
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│ ‹ Weeks      20–25 July 2019 · The one nobody saw coming                  │
+│ ‹ Weeks      20–25 July 2019 · A fifth of the way to the Moon             │
 │                                                                           │
 │ ┌ Forecast ─────────┐                            ┌ Your modules ────────┐ │
 │ │ No storms         │                            │ Power                │ │
@@ -1523,7 +1547,7 @@ It is Saturday evening, 14 November. Submission closes Sunday 15 November at 23:
 - [ ] No NASA logo, insignia, flag or mission patch anywhere. Non-affiliation line in the footer.
 - [ ] Any AI-generated image or video is watermarked. The plan uses none: card art is real photographs and our own line drawings.
 - [ ] Demo: one video of 30 seconds or less, at a public link.
-- [ ] Project description names the NASA data used: NeoWs, DONKI, Exoplanet Archive, Image and Video Library.
+- [ ] Project description names the NASA data used: JPL/CNEOS close-approach data, DONKI, Exoplanet Archive, Image and Video Library.
 
 ---
 

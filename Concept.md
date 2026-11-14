@@ -25,7 +25,7 @@ You run a small space observatory programme. Before each flight you build a spac
 | A game about designing a space mission | The hangar is mission design: choose instruments, power and protection under a budget and a volume limit. |
 | Trade-offs, with no single right answer | Each week needs different hardware. A storm week rewards shields and a particle detector. An asteroid week rewards a camera and a radar. You cannot fit everything. |
 | Showing how the parts work together as a system | Power is shared. Running the shield means not running the radar. A bigger battery takes the bay space of an instrument. |
-| NASA data | Every event is a real record: NASA's near-Earth object feed, its space weather database and its exoplanet archive. |
+| NASA data | Every event is a real record: NASA/JPL's asteroid close-approach data, NASA's space weather database and its exoplanet archive. |
 | Something people want to play again | A flight takes about five minutes, and each one unlocks hardware that changes the next. |
 
 ## 4. The loop
@@ -163,7 +163,7 @@ Every event card is a real record. Its real numbers set how it plays.
 
 | Event | NASA source | Real numbers used | What they change in play |
 |---|---|---|---|
-| **Asteroid flyby** | Near-Earth object feed (NeoWs) | Size, speed, miss distance, date | Fast means fewer turns. Close means a stronger signal and a radar channel. Large means more to record. |
+| **Asteroid flyby** | NASA/JPL close-approach data (Center for Near-Earth Object Studies) | Size, speed, miss distance, date | Fast means fewer turns. Close means a stronger signal and a radar channel. Large means more to record. |
 | **Solar storm** | Space weather database (DONKI): geomagnetic storms, particle events, flares | Storm strength on the Kp scale, dates | Strength sets the radiation each turn. Dates set which legs it covers. |
 | **Planet crossing its star** | NASA Exoplanet Archive | How the planet was found, star brightness, planet size | The discovery method decides the instrument: a camera for a transit, a spectrometer for a star's wobble. |
 | **Rare event** | Hand-picked, each with a NASA page | Date, type | High-value contacts: a gamma-ray burst, a visitor from another star, a spacecraft hitting an asteroid on purpose. |
@@ -177,7 +177,7 @@ Each week is a real span of dates chosen because something happened in it. Three
 
 | Week | What happened | Plays as | Unlocks at |
 |---|---|---|---|
-| **July 2019** | Asteroid 2019 OK passed at about a fifth of the Moon's distance and was spotted only a day before. The Sun was quiet. | A calm first flight about asteroids. | Start |
+| **July 2019** | Asteroid 2019 OK, up to 130 m across, passed at less than a fifth of the Moon's distance. Its name shows it was found that same fortnight. | A calm first flight about asteroids. | Start |
 | **September–October 2022** | NASA's DART spacecraft struck the asteroid moonlet Dimorphos. Two weeks later came the brightest gamma-ray burst on record. | Rare events and timing. | Rank 2 |
 | **May 2024** | The strongest geomagnetic storm in two decades. | The hard week. Shields decide it. | Rank 4 |
 

@@ -1,0 +1,10 @@
+{
+ "retrievedAt": null,
+ "pending": true,
+ "source": "NASA Space Weather Database Of Notifications, Knowledge, Information (DONKI)",
+ "requests": [],
+ "storms": [],
+ "particleEvents": [],
+ "flares": [],
+ "flaresAvailable": false
+}

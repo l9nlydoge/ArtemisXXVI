@@ -1,0 +1,153 @@
+{
+ "retrievedAt": "2026-11-14T20:03:13.844Z",
+ "source": "NASA Exoplanet Archive, Planetary Systems Composite Parameters",
+ "requests": [
+  "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select%20pl_name%2Chostname%2Cdiscoverymethod%2Cdisc_year%2Cdisc_facility%2Cpl_rade%2Cpl_orbper%2Csy_dist%2Csy_vmag%20from%20pscomppars%20where%20pl_name%20in%20('TRAPPIST-1%20e'%2C'Kepler-452%20b'%2C'51%20Peg%20b'%2C'Proxima%20Cen%20b'%2C'WASP-39%20b'%2C'HD%20209458%20b'%2C'Kepler-186%20f'%2C'K2-18%20b'%2C'TOI-700%20d'%2C'55%20Cnc%20e'%2C'HR%208799%20b'%2C'OGLE-2005-BLG-390L%20b')&format=json"
+ ],
+ "records": [
+  {
+   "name": "51 Peg b",
+   "host": "51 Peg",
+   "method": "Radial Velocity",
+   "year": 1995,
+   "facility": "Haute-Provence Observatory",
+   "radiusEarth": 14.1,
+   "periodDays": 4.2307966,
+   "distanceParsec": 15.4614,
+   "starVmag": 5.45309,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/51%20Peg%20b"
+  },
+  {
+   "name": "55 Cnc e",
+   "host": "55 Cnc",
+   "method": "Radial Velocity",
+   "year": 2004,
+   "facility": "McDonald Observatory",
+   "radiusEarth": 1.875,
+   "periodDays": 0.7365474,
+   "distanceParsec": 12.5855,
+   "starVmag": 5.95084,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/55%20Cnc%20e"
+  },
+  {
+   "name": "HD 209458 b",
+   "host": "HD 209458",
+   "method": "Radial Velocity",
+   "year": 1999,
+   "facility": "W. M. Keck Observatory",
+   "radiusEarth": 15.58051,
+   "periodDays": 3.52474859,
+   "distanceParsec": 48.3016,
+   "starVmag": 7.65,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/HD%20209458%20b"
+  },
+  {
+   "name": "HR 8799 b",
+   "host": "HR 8799",
+   "method": "Imaging",
+   "year": 2008,
+   "facility": "Gemini Observatory",
+   "radiusEarth": 13,
+   "periodDays": 170000,
+   "distanceParsec": 41.2441,
+   "starVmag": 5.98,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/HR%208799%20b"
+  },
+  {
+   "name": "K2-18 b",
+   "host": "K2-18",
+   "method": "Transit",
+   "year": 2015,
+   "facility": "K2",
+   "radiusEarth": 2.37,
+   "periodDays": 32.939623,
+   "distanceParsec": 38.0266,
+   "starVmag": 13.477,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/K2-18%20b"
+  },
+  {
+   "name": "Kepler-186 f",
+   "host": "Kepler-186",
+   "method": "Transit",
+   "year": 2014,
+   "facility": "Kepler",
+   "radiusEarth": 1.17,
+   "periodDays": 129.9441,
+   "distanceParsec": 177.594,
+   "starVmag": 15.138,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/Kepler-186%20f"
+  },
+  {
+   "name": "Kepler-452 b",
+   "host": "Kepler-452",
+   "method": "Transit",
+   "year": 2015,
+   "facility": "Kepler",
+   "radiusEarth": 1.63,
+   "periodDays": 384.843,
+   "distanceParsec": 551.727,
+   "starVmag": 13.54,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/Kepler-452%20b"
+  },
+  {
+   "name": "OGLE-2005-BLG-390L b",
+   "host": "OGLE-2005-BLG-390L",
+   "method": "Microlensing",
+   "year": 2005,
+   "facility": "OGLE",
+   "radiusEarth": 2.21,
+   "periodDays": 3285,
+   "distanceParsec": 6600,
+   "starVmag": null,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/OGLE-2005-BLG-390L%20b"
+  },
+  {
+   "name": "Proxima Cen b",
+   "host": "Proxima Cen",
+   "method": "Radial Velocity",
+   "year": 2016,
+   "facility": "European Southern Observatory",
+   "radiusEarth": 1.02,
+   "periodDays": 11.18465,
+   "distanceParsec": 1.30119,
+   "starVmag": 11.01,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/Proxima%20Cen%20b"
+  },
+  {
+   "name": "TOI-700 d",
+   "host": "TOI-700",
+   "method": "Transit",
+   "year": 2020,
+   "facility": "Transiting Exoplanet Survey Satellite (TESS)",
+   "radiusEarth": 1.145,
+   "periodDays": 37.423457,
+   "distanceParsec": 31.1265,
+   "starVmag": 13.151,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/TOI-700%20d"
+  },
+  {
+   "name": "TRAPPIST-1 e",
+   "host": "TRAPPIST-1",
+   "method": "Transit",
+   "year": 2017,
+   "facility": "Multiple Observatories",
+   "radiusEarth": 0.92,
+   "periodDays": 6.101013,
+   "distanceParsec": 12.42988881,
+   "starVmag": 17.02,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/TRAPPIST-1%20e"
+  },
+  {
+   "name": "WASP-39 b",
+   "host": "WASP-39",
+   "method": "Transit",
+   "year": 2011,
+   "facility": "SuperWASP",
+   "radiusEarth": 14.336311,
+   "periodDays": 4.0552941,
+   "distanceParsec": 213.982,
+   "starVmag": 12.095,
+   "url": "https://exoplanetarchive.ipac.caltech.edu/overview/WASP-39%20b"
+  }
+ ]
+}

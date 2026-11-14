@@ -1,5 +1,6 @@
 import { SeededRandom } from '../Core/SeededRandom'
 import { TextRef } from '../Core/TextRef'
+import { UtcDate } from '../Core/UtcDate'
 import { Channel } from './Channel'
 import { Rarity } from './Rarity'
 import type { AsteroidRecord } from './Records'
@@ -11,6 +12,7 @@ export class AsteroidFlyby extends SpaceEvent {
 
   private constructor(readonly record: AsteroidRecord, pinned: boolean) {
     const diameter = AsteroidFlyby.diameterM(record)
+    const foundLater = AsteroidFlyby.foundAfterPassing(record)
     const size = AsteroidFlyby.sizeStep(diameter)
     const channels = new Map<Channel, ChannelSpec>([
       [Channel.Visible, { capacity: 6 + size, minMark: 1 }],
@@ -28,11 +30,13 @@ export class AsteroidFlyby extends SpaceEvent {
         new TextRef('Fact.Speed', { speed: Number(record.speedKmS.toFixed(1)) }),
         new TextRef('Fact.MissDistance', { km: Math.round(record.missKm), lunar: Number(record.missLunar.toFixed(2)) }),
         new TextRef('Fact.Diameter', { min: Math.round(record.diameterMinM), max: Math.round(record.diameterMaxM) }),
+        ...(foundLater ? [new TextRef('Fact.FoundLater', { year: String(foundLater) })] : []),
       ],
-      learned: new TextRef(pinned ? `Learned.${AsteroidFlyby.idFor(record.id)}` : 'Learned.Asteroid', {
+      learned: new TextRef(pinned ? `Learned.${AsteroidFlyby.idFor(record.id)}` : foundLater ? 'Learned.AsteroidUnseen' : 'Learned.Asteroid', {
         name: record.name,
         km: Math.round(record.missKm),
         lunar: Number(record.missLunar.toFixed(2)),
+        year: String(foundLater ?? ''),
       }),
       sourceUrl: record.url,
       imageId: AsteroidFlyby.images[SeededRandom.hashText(record.id) % AsteroidFlyby.images.length],
@@ -49,6 +53,13 @@ export class AsteroidFlyby extends SpaceEvent {
 
   override get startsUnidentified(): boolean {
     return this.rarity === Rarity.Headline
+  }
+
+  private static foundAfterPassing(record: AsteroidRecord): number | undefined {
+    const named = /^(\d{4}) [A-Z]{2}/.exec(record.name)
+    if (!named) return undefined
+    const found = Number(named[1])
+    return found > new Date(UtcDate.parse(record.dateUtc)).getUTCFullYear() ? found : undefined
   }
 
   private static diameterM(record: AsteroidRecord): number {
