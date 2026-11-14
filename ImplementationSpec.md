@@ -2,9 +2,9 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** nothing is built. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what to reuse from it.
+**Status:** steps 1 (setup) and 2 (engine) of the build plan are done. The engine has 170 passing tests and no screens yet. The first build is on the branch `Archive/FirstBuild`; section 11.4 lists what was reused from it.
 
-**How the numbers were checked:** the tables in section 5 were run through a throwaway script that flew 400 flights per loadout with a simple "fire the most efficient instrument, shield when hit hard" player. Results are in section 13.3. They show the shape is right. They are starting values, and the balance tests in section 13.2 are what tune them.
+**How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
 
 ---
 
@@ -178,6 +178,7 @@ A loadout is valid when all of these hold:
 3. Every installed mark is owned (unlocked in the lab).
 4. No module is installed more often than its `maxCopies`.
 5. At least one instrument is installed.
+6. The player's rank is at least the bus's minimum rank.
 
 The Hangar lets the player build an invalid loadout and shows what is wrong. The Launch button is disabled until it is valid.
 
@@ -209,7 +210,9 @@ For each leg the scanner deals contacts from the week's pool.
 2. **Dated events** (asteroids, rare events) are eligible only on the leg whose date window contains their date. **Undated events** (exoplanets) are eligible on every leg.
 3. **Pinned events** (set in the week definition) are always dealt on their leg.
 4. Fill up to **2** contacts by weighted draw without replacement. Weights: Common 6, Notable 3, Headline 1.
-5. If fewer than 2 are eligible, fill from undated events. If the pool is empty, the leg has fewer contacts.
+5. If the leg has no pinned event, the first contact is drawn from the dated events only, when there are any. This keeps a week's own events in front of the player; without it the always-eligible planets crowd them out.
+6. If the pool runs out, the leg has fewer contacts. A leg with none can only be held.
+7. An event pinned to one leg is never dealt on another.
 
 **Identification:**
 
@@ -275,7 +278,7 @@ The flight track always shows which legs are storm legs and each storm's band. S
 
 ### 4.6 Turn conditions
 
-Each turn has `signal`, `radiation` and `inShadow`.
+Each turn has `signal`, `radiation` and `inShadow`. A contact's conditions are fixed when it is dealt, so the contact card can show its true radiation band.
 
 **Signal** comes from the event (section 6).
 
@@ -326,9 +329,9 @@ Then: `profile.points += banked`, `profile.lifetimePoints += banked`, logbook up
 
 ### 4.10 Randomness
 
-- One `SeededRandom` (mulberry32) per flight, created from `FlightSetup.seed`.
-- Two streams, so that player choices do not change later deals: `dealStream = seed`, `conditionStream = seed XOR 0x9E3779B9`.
-- Shadow and anomaly rolls for an encounter are drawn when the encounter starts, for all its turns.
+- Every random draw comes from a `SeededRandom` (mulberry32) derived from `FlightSetup.seed`.
+- Each leg has its own stream for dealing, and its own for the survey's extra contact. Each contact has its own stream for shadow and anomaly rolls, keyed by leg and position. So using the survey, or the order contacts are played in, does not change the rolls of anything else.
+- Shadow and anomaly rolls for a contact are drawn when it is dealt, for all its turns.
 - A flight is fully determined by `(FlightSetup, command log)`. `Flight.replay` rebuilds it. Tests and resume both depend on this.
 
 ### 4.11 Option kept off by default: cooldowns
@@ -467,7 +470,7 @@ A leg is a **storm leg** when any GST Kp reading of 5 or more falls inside the l
 |---|---|
 | `kp` | highest `allKpIndex[].kpIndex` inside the window, rounded down to a whole number, capped at 9 |
 | `sep` | true if any SEP `eventTime` falls in the window or the 24 hours before it |
-| `flareClass` | strongest flare class letter in the window (X, M, C), if flare data is available; otherwise inferred: `kp ≥ 8` → X, otherwise M |
+| `flareClass` | strongest flare class letter (X, M, C) in the window or the 72 hours before it, if flare data is available; otherwise inferred: `kp ≥ 8` → X, otherwise M. The lead is 72 hours because a flare's eruption takes one to three days to reach Earth. |
 
 | Derived | Rule |
 |---|---|
@@ -626,9 +629,29 @@ interface StormRecord {
   weekId: string
   startUtc: string
   kpReadings: { timeUtc: string; kp: number }[]
-  sepTimesUtc: string[]
-  flareClasses: string[]     // empty when flare data was unavailable
   url: string                // DONKI link
+}
+
+interface ParticleEventRecord {
+  id: string                 // DONKI sepID
+  weekId: string
+  timeUtc: string
+  url: string
+}
+
+interface FlareRecord {
+  id: string                 // DONKI flrID
+  weekId: string
+  peakUtc: string
+  classType: string          // for example "X2.2"
+  url: string
+}
+
+interface SpaceWeather {     // what the engine reads for one week
+  storms: StormRecord[]
+  particleEvents: ParticleEventRecord[]
+  flares: FlareRecord[]
+  flaresAvailable: boolean   // false when the flare endpoint could not be reached
 }
 
 interface ExoplanetRecord {
@@ -672,7 +695,7 @@ interface SnapshotFile<T> {
 
 ## 8. Engine design
 
-All classes below live under `src/Engine`. Signatures are the contract; bodies follow section 4.
+All classes below live under `src/Engine`. This section describes the engine as built in step 2. Bodies follow section 4.
 
 ### 8.1 Core
 
@@ -681,19 +704,28 @@ class SeededRandom {
   constructor(seed: number)
   next(): number
   chance(probability: number): boolean
+  between(min: number, max: number): number
   integer(min: number, max: number): number
   pick<T>(items: readonly T[]): T
   weighted<T>(items: readonly T[], weight: (item: T) => number): T
+  static derive(seed: number, ...salts: number[]): SeededRandom
   static randomSeed(): number
 }
 
 class Numbers {
+  static round(value: number, digits?: number): number
   static roundHalfUp(value: number): number
   static clamp(value: number, low: number, high: number): number
+  static percent(fraction: number): number
 }
-```
 
-`SeededRandom` and `Numbers` can be taken from the first build and extended.
+class TextRef {                       // a text key plus its parameters; the engine never builds sentences
+  constructor(key: string, params?: Record<string, string | number>)
+  static literal(text: string): TextRef     // key 'Text.Literal', for names taken from NASA data
+}
+
+class Rules { /* every flight constant of section 4 as a static readonly number */ }
+```
 
 ### 8.2 Modules
 
@@ -701,46 +733,37 @@ class Numbers {
 enum ModuleFamily { Power, Instrument, Protection, Mobility, Utility, Crew }
 type Mark = 1 | 2 | 3
 
-interface MarkSpec {
-  costMusd: number
-  bayUnits: number
-  unlockPoints: number
-  value: number                // the mark's main number; meaning depends on the subclass
-}
+interface MarkSpec { costMusd: number; bayUnits: number; unlockPoints: number; value: number }
+interface ModuleTraits { minRank: number; marks: [MarkSpec, MarkSpec, MarkSpec]; maxCopies?: number }
 
 abstract class ModuleCard {
-  constructor(
-    readonly id: string,
-    readonly family: ModuleFamily,
-    readonly minRank: number,
-    readonly marks: readonly [MarkSpec, MarkSpec, MarkSpec],
-    readonly maxCopies = 1,
-  )
+  constructor(id: string, traits: ModuleTraits)
+  abstract readonly family: ModuleFamily
   mark(mark: Mark): MarkSpec
   minRankFor(mark: Mark): number          // max(minRank, 1 / 2 / 4)
-  abstract readonly isActive: boolean
   get powerCost(): number                  // 0 for passive
+  get isActive(): boolean                  // powerCost > 0
+  get isObtainable(): boolean              // false only for CrewCapsule
+  get isStarter(): boolean                 // Mk I costs 0 points
 }
 
-class SolarArray extends ModuleCard          // value = generation
-class Battery extends ModuleCard             // value = capacity
-class Instrument extends ModuleCard {        // value = data per use
-  readonly channel: Channel
-}
-class Radar extends Instrument               // enables Survey
-class RadiationShielding extends ModuleCard  // value = reduction per turn
-class MagneticShield extends ModuleCard      // value = block
-class FlightComputer extends ModuleCard      // value = lookahead (3rd mark = Infinity)
-class Thrusters extends ModuleCard           // value = burns
-class Antenna extends ModuleCard             // value = multiplier
-class RepairDrone extends ModuleCard         // value = heal
-class CrewCapsule extends ModuleCard         // locked placeholder
+class SolarArray, Battery                    // value = generation, capacity
+class Instrument { readonly channel: Channel; get canSurvey(): boolean }   // value = data per use
+class Radar extends Instrument               // canSurvey is true
+class RadiationShielding, MagneticShield     // value = reduction per turn, block
+class FlightComputer, Antenna                // value = lookahead (Mk III is Infinity), multiplier
+class Thrusters, RepairDrone                 // value = burns, heal
+class CrewCapsule                            // not obtainable
 
 class ModuleCatalog {
   static readonly shared: ModuleCatalog
   readonly all: readonly ModuleCard[]
-  get(id: string): ModuleCard
-  ofFamily(family: ModuleFamily): ModuleCard[]
+  has(id): boolean
+  get(id): ModuleCard                        // throws on an unknown id
+  ofFamily(family): ModuleCard[]
+  get starters(): ModuleCard[]
+  instrumentFor(channel): Instrument | undefined
+  indexOf(id): number
 }
 ```
 
@@ -748,49 +771,49 @@ class ModuleCatalog {
 
 ```ts
 class Bus { id; minRank; budgetMusd; bayUnits; hull; baseGeneration; baseCapacity }
-class BusCatalog { static readonly shared; all; get(id); largestFor(rank): Bus }
+class BusCatalog { static readonly shared; all; has(id); get(id); availableAt(rank); largestFor(rank) }
 
 class InstalledModule {
-  constructor(readonly card: ModuleCard, readonly mark: Mark, readonly copy: number)
+  constructor(card: ModuleCard, mark: Mark, copy: number)
   get key(): string                        // `${card.id}#${copy}`
   get spec(): MarkSpec
+  get value(): number
+  withMark(mark): InstalledModule
 }
 
-enum LoadoutIssueKind { OverBudget, OverBay, NotOwned, TooManyCopies, NoInstrument }
+enum LoadoutIssueKind { OverBudget, OverBay, NotOwned, TooManyCopies, NoInstrument, BusLocked }
 interface LoadoutIssue { kind: LoadoutIssueKind; moduleId?: string; amount?: number }
+interface Ownership { readonly rank: number; owns(moduleId: string, mark: number): boolean }   // Profile implements this
 
-class Loadout {
-  constructor(readonly bus: Bus, readonly installed: readonly InstalledModule[])
-  get costMusd(): number
-  get bayUsed(): number
-  install(card: ModuleCard, mark: Mark): Loadout
-  remove(key: string): Loadout
-  setMark(key: string, mark: Mark): Loadout
-  withBus(bus: Bus): Loadout
-  issues(profile: Profile): LoadoutIssue[]
-  isValid(profile: Profile): boolean
-  toJson(): LoadoutJson
-  static fromJson(json: LoadoutJson): Loadout
+class Loadout {                            // immutable; installed is kept in catalog order
+  constructor(bus: Bus, installed: readonly InstalledModule[])
   static starter(): Loadout
+  static fromJson(json: LoadoutJson): Loadout     // unknown ids, marks and buses are dropped or defaulted
+  toJson(): LoadoutJson                    // { busId, modules: { id, mark, copy }[] }
+  get costMusd, bayUsed, budgetLeft, bayLeft
+  copiesOf(cardId): InstalledModule[]
+  find(key): InstalledModule | undefined
+  has(cardId): boolean
+  canAdd(card): boolean
+  install(card, mark): Loadout             // takes the lowest free copy number
+  remove(key): Loadout
+  setMark(key, mark): Loadout
+  withBus(bus): Loadout
+  issues(owner: Ownership): LoadoutIssue[]
+  isValid(owner: Ownership): boolean
 }
 
 class Spacecraft {
-  constructor(readonly loadout: Loadout)
-  readonly generation: number
-  readonly capacity: number
-  readonly maxHull: number
-  readonly passiveShield: number
-  readonly lookahead: number
-  readonly pointsMultiplier: number
-  readonly burns: number
+  constructor(loadout: Loadout)
+  readonly generation, capacity, maxHull, passiveShield, lookahead, pointsMultiplier, burns
   readonly actives: readonly InstalledModule[]
-  readonly hasRadar: boolean
-  instrumentFor(channel: Channel): InstalledModule | undefined
-  canRecord(channel: Channel, minMark: Mark): boolean
+  readonly instruments: readonly InstalledModule[]
+  get hasRadar, magneticShield, thrusters, repairDrone, channels
+  active(key): InstalledModule | undefined
+  instrumentFor(channel): InstalledModule | undefined
+  canRecord(channel, minMark?): boolean
 }
 ```
-
-`Loadout` is immutable: every change returns a new one.
 
 ### 8.4 Events
 
@@ -798,65 +821,70 @@ class Spacecraft {
 enum Channel { Visible, Spectrum, Radar, Particles, HighEnergy }
 enum Rarity { Common = 1, Notable = 2, Headline = 3 }
 enum EventKind { Asteroid, Storm, Exoplanet, Rare }
+enum RadiationBand { None, Low, High, Severe }
+
+class DateWindow { constructor(startUtc, endUtc); contains(dateUtc); withLead(hours); get days }
 
 interface ChannelSpec { capacity: number; minMark: Mark }
 interface EventTurn { signal: number; radiation: number }
-interface EventFact { key: string; params: Record<string, string | number> }
 
 abstract class SpaceEvent {
   abstract readonly kind: EventKind
   readonly id: string
-  readonly name: string
+  readonly label: TextRef
   readonly dateUtc?: string
   readonly rarity: Rarity
   readonly channels: ReadonlyMap<Channel, ChannelSpec>
   readonly turns: readonly EventTurn[]
-  readonly facts: readonly EventFact[]      // shown on the card, from real numbers
-  readonly learnedKey: string               // text key for "what was learned"
+  readonly facts: readonly TextRef[]
+  readonly learned: TextRef
   readonly sourceUrl: string
   readonly imageId: string
-  get peakSignal(): number
-  get peakRadiation(): number
-  get totalCapacity(): number
+  get isDated, startsUnidentified, turnCount, peakSignal, peakRadiation, band, totalCapacity
+  capacity(channel): number
 }
 
-class AsteroidFlyby extends SpaceEvent { static fromRecord(record: AsteroidRecord, pinnedHeadline: boolean): AsteroidFlyby }
-class SolarStorm extends SpaceEvent    { static fromRecords(storm: StormRecord, window: DateWindow): SolarStorm }
-class ExoplanetTransit extends SpaceEvent { static fromRecord(record: ExoplanetRecord, curated: ExoplanetNote): ExoplanetTransit }
-class RareEvent extends SpaceEvent     { /* constructed directly in Curated/RareEvents.ts */ }
+class AsteroidFlyby    { static fromRecord(record: AsteroidRecord, pinned?: boolean); static idFor(recordId) }
+class SolarStorm       { static forWindow(window: DateWindow, weather: SpaceWeather): SolarStorm | undefined; readonly reading; readonly peak }
+class ExoplanetTransit { static fromRecord(record: ExoplanetRecord, note?: ExoplanetNote); static idFor(name) }
+class RareEvent        { /* constructed directly from EventDetails in Curated/RareEvents.ts */ }
 ```
+
+Event ids: `Asteroid.<NeoWs id>`, `Storm.<YYYY-MM-DD of the leg>`, `Exoplanet.<name without spaces or punctuation>`, and whatever a rare event is given.
+
+"What was learned" keys: a pinned asteroid, a famous planet and every rare event use `Learned.<event id>`, written by hand in step 3. Everything else uses a shared template: `Learned.Asteroid`, `Learned.Storm`, `Learned.Method.<Transit | RadialVelocity | Imaging | Microlensing>`.
 
 ### 8.5 Weeks
 
 ```ts
-interface DateWindow { startUtc: string; endUtc: string }
-interface LegSpec { window: DateWindow; pinnedEventIds: readonly string[] }
+interface WeekDefinition { id: string; minRank: number; legs: { startUtc; endUtc; pinned?: string[] }[] }
+interface Leg { window: DateWindow; pinnedEventIds: readonly string[]; storm?: SolarStorm }
 
 class Week {
-  readonly id: string
-  readonly minRank: number
-  readonly legs: readonly LegSpec[]           // exactly 6
-  readonly events: readonly SpaceEvent[]      // pool, storms excluded
-  readonly storms: ReadonlyMap<number, SolarStorm>   // leg index → storm
-  eligible(legIndex: number, alreadyDealt: ReadonlySet<string>): SpaceEvent[]
-  get forecast(): Forecast
+  constructor(id, minRank, legs: readonly Leg[], events: readonly SpaceEvent[])   // throws unless 6 legs and every pin exists
+  readonly forecast: Forecast
+  get storms, everything, startUtc, endUtc
+  event(id): SpaceEvent | undefined
+  stormOn(legIndex): SolarStorm | undefined
+  pinnedOn(legIndex): SpaceEvent[]
+  eligible(legIndex, alreadyDealt: ReadonlySet<string>): SpaceEvent[]
+}
+
+class WeekBuilder {                        // applies sections 6.2 and 6.5 to raw records
+  constructor(sources: { asteroids: AsteroidRecord[]; weather: SpaceWeather; undated: SpaceEvent[]; rare: SpaceEvent[] })
+  build(definition: WeekDefinition): Week
 }
 
 class Forecast {
-  readonly stormLegs: number
-  readonly worstBand: RadiationBand
-  readonly asteroidCount: number
-  readonly radarTargets: number
-  readonly planetsByChannel: ReadonlyMap<Channel, number>
-  readonly unknownsExpected: boolean
-  channelDemand(): ReadonlyMap<Channel, number>      // total capacity × rarity per channel
+  readonly stormLegs, worstBand, asteroidCount, radarTargets, planetCount, unknownsExpected
+  channelDemand(channel): number           // total capacity × rarity
+  demandShare(channel): number
+  get channelsByDemand(): Channel[]
 }
 
 class WeekCatalog {
-  static readonly shared: WeekCatalog          // built from Snapshot + Curated at load
-  all: readonly Week[]
-  get(id: string): Week
-  availableAt(rank: number): Week[]
+  static shared: WeekCatalog               // empty until step 3 fills it from the snapshots
+  all; has(id); get(id); availableAt(rank)
 }
 ```
 
@@ -864,105 +892,93 @@ class WeekCatalog {
 
 ```ts
 interface FlightSetup { loadout: LoadoutJson; weekId: string; seed: number }
+interface EngineOptions { cooldowns?: boolean; weeks?: WeekCatalog }
 
-class CraftState {
-  charge: number
-  hull: number
-  burnsLeft: number
-  repairUsed: boolean
-}
+class CraftState { charge; hull; burnsLeft; repairUsed }
+
+interface TurnCondition { signal: number; radiation: number; inShadow: boolean; anomaly: boolean }
+class ConditionRoller { constructor(random); roll(event, overlay: SolarStorm | undefined, stormLeg: boolean): TurnCondition[] }
 
 class Contact {
   readonly event: SpaceEvent
   identified: boolean
-  readonly overlay?: SolarStorm
   played: boolean
-  turnConditions?: TurnCondition[]            // fixed when the encounter starts
+  readonly conditions: readonly TurnCondition[]    // rolled when the contact is dealt
+  readonly overlay?: SolarStorm
+  get turnCount, peakRadiation, band, peakSignal
 }
-
-interface TurnCondition { signal: number; radiation: number; inShadow: boolean }
 
 class Scanner {
-  constructor(week: Week, random: SeededRandom)
-  deal(legIndex: number): Contact[]
-  dealExtra(legIndex: number, contacts: Contact[]): Contact
+  constructor(week: Week, seed: number)
+  deal(legIndex): Contact[]
+  dealExtra(legIndex, slot): Contact | undefined
 }
 
-class TurnPlan {
-  constructor(readonly keys: ReadonlySet<string>)
-  toggle(key: string): TurnPlan
-  powerCost(craft: Spacecraft): number
+class Scoring {
+  static points(event, recorded: ReadonlyMap<Channel, number>, multiplier?): number
+  static isComplete(event, recorded): boolean
+  static potential(event, craft): { reachable: number; total: number }
+  static missed(event, craft): { channel; moduleId; neededMark; points }[]
 }
+
+class TurnPlan { static readonly empty; constructor(keys); has(key); toggle(key); with(key); get list, isEmpty }
+
+enum PlanProblem { UnknownModule, NotEnoughCharge, NoBurnsLeft, RepairUsed, CoolingDown, EncounterOver }
+enum WasteReason { NoChannel, ChannelFull, NeedsMark }
+interface InstrumentYield { channel: Channel; gain: number; waste?: WasteReason; neededMark?: Mark }
 
 interface TurnPreview {
   valid: boolean
-  problem?: PlanProblem                       // NotEnoughCharge, NoBurnsLeft, RepairUsed
+  problem?: PlanProblem
+  powerCost: number
   chargeAfter: number
+  signal: number
   gains: ReadonlyMap<Channel, number>
-  wasted: readonly string[]                   // module keys that would record nothing
+  wasted: readonly string[]                // keys of instruments that would record nothing
+  repaired: number
+  blocked: number
   incoming: number
   hullAfter: number
+  lost: boolean
 }
+interface TurnOutcome extends TurnPreview { encounterOver: boolean }
 
-interface TurnOutcome extends TurnPreview { lost: boolean; encounterOver: boolean }
-
-class Encounter {
-  constructor(contact: Contact, craft: Spacecraft, state: CraftState, conditions: TurnCondition[])
-  readonly turnIndex: number
-  readonly recorded: ReadonlyMap<Channel, number>
-  current(): TurnCondition
-  visible(): (TurnCondition | undefined)[]    // undefined = hidden by lookahead
-  beginTurn(): void                           // step 1
-  preview(plan: TurnPlan): TurnPreview
-  commit(plan: TurnPlan): TurnOutcome
+class Encounter {                          // the first turn's charge step runs in the constructor
+  constructor(contact, legIndex, craft: Spacecraft, state: CraftState, cooldowns?: boolean)
+  get event, turnIndex, turnCount, isOver, recorded, current
+  get visible(): (TurnCondition | undefined)[]     // undefined = hidden by lookahead
+  isCooling(key): boolean
+  yieldOf(key, boosted?): InstrumentYield | undefined   // what one instrument would record this turn
+  preview(plan: TurnPlan): TurnPreview             // changes nothing
+  commit(plan: TurnPlan): TurnOutcome              // throws if the plan is not valid
   result(): EncounterResult
 }
 
-interface EncounterResult {
-  eventId: string
-  recorded: Record<string, number>
-  points: number
-  complete: boolean
-  missed: { channel: Channel; points: number }[]
-}
+interface EncounterResult { legIndex; eventId; recorded; points; complete; anyRecorded; missed; turnsPlayed; damageTaken }
 
 enum FlightPhase { Scanning, Encounter, EncounterDone, Completed, Lost }
-
-type FlightCommand =
-  | { type: 'Survey' }
-  | { type: 'Choose'; contactIndex: number }
-  | { type: 'Hold' }
-  | { type: 'Commit'; keys: string[] }
-  | { type: 'Continue' }
-  | { type: 'Chase'; contactIndex: number }
+enum CommandType { Survey, Choose, Hold, Commit, Continue, Chase }
+type FlightCommand = { type: Survey } | { type: Choose; contactIndex } | { type: Hold }
+                   | { type: Commit; keys: string[] } | { type: Continue } | { type: Chase; contactIndex }
+class Commands { static survey, hold, proceed; static choose(index), chase(index), commit(keys) }
 
 class Flight {
   static begin(setup: FlightSetup, options?: EngineOptions): Flight
-  static replay(setup: FlightSetup, log: readonly FlightCommand[], options?: EngineOptions): Flight
-  readonly setup: FlightSetup
-  readonly craft: Spacecraft
-  readonly state: CraftState
-  readonly week: Week
-  readonly phase: FlightPhase
-  readonly legIndex: number
-  readonly contacts: readonly Contact[]
-  readonly encounter?: Encounter
-  readonly results: readonly EncounterResult[]
-  readonly log: readonly FlightCommand[]
-  readonly pointsEarned: number
-  can(command: FlightCommand): boolean
-  apply(command: FlightCommand): void         // throws if !can
-  report(): FlightReport                      // valid in Completed or Lost
+  static replay(setup, log: readonly FlightCommand[], options?): Flight
+  readonly setup, craft: Spacecraft, state: CraftState, week: Week
+  get phase, legIndex, contacts, encounter, results, log, lastOutcome, pointsEarned, isOver, isStormLeg, hasSurveyed
+  can(command): boolean
+  apply(command): void                     // throws if !can; the flight is unchanged when it throws
+  report(): FlightReport                   // throws while the flight is in progress
 }
 
 class FlightReport {
-  readonly outcome: FlightPhase.Completed | FlightPhase.Lost
-  readonly pointsEarned: number
-  readonly pointsBanked: number
+  readonly outcome: FlightOutcome          // Completed | Lost
   readonly encounters: readonly EncounterResult[]
-  readonly missedByModule: ReadonlyMap<string, number>   // module id → points
-  readonly biggestMiss?: { moduleId: string; points: number; count: number }
-  readonly hullLeft: number
+  readonly pointsEarned, pointsBanked, hullLeft, legsFlown
+  readonly misses: readonly { moduleId; points; count }[]      // largest first
+  readonly loss?: { legIndex; eventId; radiation; shielding; hadActiveShield }
+  get survived, biggestMiss, pointsMissed, completeCount
 }
 ```
 
@@ -976,6 +992,8 @@ Encounter ──Commit─► Encounter | EncounterDone | Lost
 EncounterDone ──Chase────► Encounter
 EncounterDone ──Continue─► Scanning (next leg) | Completed
 ```
+
+The encounter stays readable through `flight.encounter` during `EncounterDone` and `Lost`, so the interface can show its result.
 
 ### 8.7 Progress
 
@@ -991,34 +1009,49 @@ interface ProfileJson {
   hintsSeen: string[]
 }
 
-class Profile {
+class Profile implements Ownership {       // immutable
   static starter(): Profile
-  static fromJson(json: unknown): Profile     // returns starter() if unreadable or wrong version
+  static fromJson(json: unknown): Profile  // a fresh profile if unreadable or the wrong version; damaged fields are repaired
   toJson(): ProfileJson
-  get rank(): number
-  owns(moduleId: string, mark: Mark): boolean
+  get points, lifetimePoints, rank, flights, lastLoadout
+  ownedMark(moduleId): 0 | 1 | 2 | 3
+  owns(moduleId, mark?): boolean
+  logged(eventId): { recorded; complete; bestPoints }
+  hasSeen(hint): boolean
+  withHintSeen(hint): Profile
+  withLoadout(loadout): Profile
   afterFlight(report: FlightReport, loadout: Loadout): Profile
-  afterPurchase(moduleId: string): Profile
+  afterUnlock(moduleId, mark, cost): Profile      // used by Lab; throws if points are short
 }
+```
 
+Spendable points can never exceed lifetime points; `fromJson` enforces it.
+
+```ts
 class Rank {
-  static of(lifetimePoints: number): number
-  static threshold(rank: number): number
-  static progress(lifetimePoints: number): { rank: number; into: number; span: number }
-  static unlocksAt(rank: number): RankUnlock[]
+  static readonly thresholds: readonly number[]
+  static get top(): number
+  static of(lifetimePoints): number
+  static threshold(rank): number
+  static progress(lifetimePoints): { rank; into; span; toNext; isTop }
+  static unlocksAt(rank, weeks?): { kind: Bus | Week | Module | Mark | Teaser; id: string }[]
 }
 
-enum OfferState { Owned, Available, TooExpensive, RankLocked, Maxed }
-interface LabOffer { card: ModuleCard; mark: Mark; cost: number; state: OfferState; needsRank?: number }
+enum OfferState { Available, TooExpensive, RankLocked, Maxed, InDevelopment }
+interface LabOffer { card; ownedMark; mark?; cost; state; needsRank?; shortBy? }
 
 class Lab {
-  static offers(profile: Profile): LabOffer[]
-  static canBuy(profile: Profile, moduleId: string): boolean
+  offers(profile): LabOffer[]              // one per module, in catalog order
+  offer(profile, card): LabOffer
+  canBuy(profile, moduleId): boolean
+  buy(profile, moduleId): Profile          // throws if the offer is not Available
 }
 
 class Logbook {
-  static entries(profile: Profile): LogbookEntry[]      // every event in every unlocked week
-  static completion(profile: Profile): { recorded: number; complete: number; total: number }
+  constructor(profile: Profile, weeks?: WeekCatalog)
+  readonly entries: readonly { event; weekIds; recorded; complete; bestPoints }[]   // every event of every week the rank can fly, each once
+  get totals(): { recorded; complete; total }
+  inWeek(weekId): entries
 }
 ```
 
@@ -1028,11 +1061,11 @@ Used only by tests.
 
 ```ts
 abstract class FlightBot {
-  abstract next(flight: Flight): FlightCommand
-  fly(setup: FlightSetup): FlightReport
+  next(flight: Flight): FlightCommand
+  fly(setup: FlightSetup, options?): { flight: Flight; report: FlightReport }
 }
-class GreedyBot extends FlightBot      // picks the contact with most recordable points; fires by data per charge; shields when incoming ≥ 3
-class CautiousBot extends FlightBot    // keeps 4 charge in reserve when a storm turn is known to be coming
+class GreedyBot      // picks the contact worth most to this loadout; shields when 3 or more would get through; fires instruments by data per charge
+class CautiousBot    // the same, and keeps enough charge for the magnetic shield while a storm or a known dangerous turn is still to come
 ```
 
 ---
@@ -1395,24 +1428,31 @@ Run with bots, 300 seeds each. These are the targets the numbers are tuned to.
 | B7 | A player following GreedyBot reaches rank 2 within 2 flights and rank 3 within 5 | True. |
 | B8 | No module is absent from every week's top five loadouts | True. No dead cards. |
 
-### 13.3 What the throwaway check showed
+### 13.3 What the engine shows so far
 
-400 flights per row, simplified event generation, greedy player.
+Flown by the engine's test players, 300 flights per row, on the two sample weeks used by the tests. The quiet sample week is 21 asteroids, 5 planets and one rare event. The storm sample week uses the real May 2024 storm readings.
 
-| Loadout | Week | Mean points | Completed |
-|---|---|---|---|
-| Starter | Calm | 131 | 100% |
-| Starter, with a Spectrometer in place of the Particle Detector | Calm | 210 | 100% |
-| Starter, with a Radar in place of the Particle Detector | Calm | 225 | 100% |
-| Starter | Mixed, one moderate storm | 211 | 100% |
-| Camera + High-Energy Detector | Mixed | 370 | 100% |
-| Starter, small spacecraft | Severe storm | 11 | 0% |
-| Medium, Mk II shielding, no Magnetic Shield | Severe storm | 32 | 0% |
-| Medium, Magnetic Shield Mk I | Severe storm | 235 | 100% |
-| Medium, Magnetic Shield Mk II + more instruments | Severe storm | 362 | 93% |
-| Large, Mk III throughout | Severe storm | 552 | 100% |
+| Loadout | Week | Player | Mean points | Completed | Turns where power ran short |
+|---|---|---|---|---|---|
+| Starter | Quiet | Greedy | 142 | 100% | 0% |
+| Camera only, nothing else | Quiet | Greedy | 142 | 99% | — |
+| Camera and Radar, small spacecraft | Quiet | Greedy | 232 | 100% | 7% |
+| Camera, Spectrometer, Radar, one Solar Array | Quiet | Greedy | 272 | 100% | 59% |
+| Camera, Spectrometer, Radar, no power modules | Quiet | Greedy | 151 | 100% | 81% |
+| Camera, Spectrometer, Radar, large spacecraft's power | Quiet | Greedy | 409 | 100% | 0% |
+| Starter | Storm | Greedy | 31 | 0% | — |
+| Medium, Mk II shielding, no Magnetic Shield | Storm | Greedy | 67 | 0% | — |
+| Medium, Magnetic Shield Mk II, two instruments | Storm | Cautious | 184 | 100% | — |
+| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | Storm | Greedy | 259 | 63% | 9% |
+| The same | Storm | Cautious | 272 | 98% | 22% |
 
-Reading: the first flight is safe and pays for one or two unlocks; the storm week cannot be survived without the active shield; adding instruments to a storm loadout lowers survival because they compete with the shield for power. That last result is the trade-off the game is built on. The script used rarity value 4 for headline events; the spec uses 3, so the mixed-week figures will come down.
+What this says:
+
+- **Power is the real limit once you carry three instruments.** The same three instruments earn 151, 272 or 409 depending only on power. That is the trade-off between instruments and power modules.
+- **The first flight is safe and is not a puzzle.** The starter never runs short of power. It earns enough for one or two unlocks, and three of its five modules do nothing on a quiet week. Swapping them out is the first design lesson.
+- **The storm cannot be survived without the Magnetic Shield.**
+- **How you fly matters.** On thin power in the storm, a player who saves charge for the shield survives 98% of the time. One who spends it all on instruments survives 63%.
+- **With plenty of power the storm is safe once you own the shield.** If real-data playtests find that too easy, raise the shield's power cost before touching anything else.
 
 ### 13.4 Manual checks before each merge
 

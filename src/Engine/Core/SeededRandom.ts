@@ -29,6 +29,25 @@ export class SeededRandom {
     return items[Math.floor(this.next() * items.length)]
   }
 
+  weighted<T>(items: readonly T[], weight: (item: T) => number): T {
+    const total = items.reduce((sum, item) => sum + weight(item), 0)
+    let remaining = this.next() * total
+    for (const item of items) {
+      remaining -= weight(item)
+      if (remaining < 0) return item
+    }
+    return items[items.length - 1]
+  }
+
+  static derive(seed: number, ...salts: number[]): SeededRandom {
+    let mixed = seed >>> 0
+    for (const salt of salts) {
+      mixed = Math.imul(mixed ^ (salt + 0x9e3779b9), 0x85ebca6b) >>> 0
+      mixed = (mixed ^ (mixed >>> 13)) >>> 0
+    }
+    return new SeededRandom(mixed)
+  }
+
   static randomSeed(): number {
     return Math.floor(Math.random() * 2 ** 31)
   }
