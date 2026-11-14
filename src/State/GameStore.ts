@@ -13,8 +13,15 @@ import { Translator } from '../I18n/Translator'
 import { RoomPhase } from '../Sync/RoomState'
 import { RoomSyncFactory } from '../Sync/RoomSyncFactory'
 import { TeamSession } from '../Sync/TeamSession'
+import { CameraView } from '../World/CameraView'
 import { MissionArchive, type MissionRecord } from './MissionArchive'
 import { Screen } from './Screen'
+
+export interface FlightTelemetry {
+  coverage: number
+  lost: boolean
+  view: CameraView
+}
 
 interface GameState {
   screen: Screen
@@ -28,6 +35,10 @@ interface GameState {
   focusField?: DesignField
   session?: TeamSession
   sessionTick: number
+  flight: FlightTelemetry
+  worldReady: boolean
+  reportFlight(telemetry: FlightTelemetry): void
+  markWorldReady(): void
   setLanguage(language: Language): void
   setDifficulty(difficulty: Difficulty): void
   startSolo(scenarioId: string): void
@@ -71,6 +82,11 @@ export const useGameStore = create<GameState>((set, get) => {
     design: MissionDesign.starter(),
     seed: SeededRandom.randomSeed(),
     sessionTick: 0,
+    flight: { coverage: 0, lost: false, view: CameraView.Wide },
+    worldReady: false,
+
+    reportFlight: (flight) => set({ flight }),
+    markWorldReady: () => set({ worldReady: true }),
 
     setLanguage: (language) => set({ language }),
     setDifficulty: (difficulty) => set({ difficulty }),

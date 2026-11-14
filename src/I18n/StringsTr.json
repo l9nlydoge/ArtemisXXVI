@@ -189,5 +189,6 @@
   "Wall.Title": "Görev armaları",
   "Wall.Empty": "Armasını kazanmak için başarılı bir görev uçur. Üç yıldız altın arma kazandırır.",
   "Wall.Result": "${cost}M karşılığı {score} bilim",
-  "Debrief.PatchEarned": "Arma kazanıldı. Başlangıç ekranında duruyor."
+  "Debrief.PatchEarned": "Arma kazanıldı. Başlangıç ekranında duruyor.",
+  "Veil.Loading": "Yörüngeye çıkılıyor"
 }

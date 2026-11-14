@@ -32,11 +32,10 @@ To make rooms work across phones:
 | `src/Engine/Models` | Mass, power, data, cost and lifetime budgets |
 | `src/Engine/Simulation` | `MissionSimulator`, seeded random events, `FailureTracer`, star rating, design sampler |
 | `src/Sync` | `RoomSync` with Firebase and local implementations, plus `TeamSession` |
-| `src/State` | Zustand game store |
+| `src/State` | Zustand game store and saved mission patches |
 | `src/I18n` | English and Turkish strings |
-| `src/UI/Visuals` | The flat spacecraft, orbit and rocket drawings, generated from the design |
-| `src/UI/Scene` | The 3D spacecraft, Earth and flight scene (three.js), loaded on demand |
-| `src/UI` | Screens and components |
+| `src/World` | The persistent 3D scene behind every screen (three.js), loaded on demand |
+| `src/Interface` | Screens, controls, readouts and team panels drawn over the scene |
 
 The engine is pure TypeScript with no React or browser dependencies. `MissionSimulator.run({ scenario, design, seed })` is deterministic, so every device in a room computes the same flight.
 

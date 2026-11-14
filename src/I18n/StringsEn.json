@@ -189,5 +189,6 @@
   "Wall.Title": "Mission patches",
   "Wall.Empty": "Fly a successful mission to earn its patch. Three stars earns a gold one.",
   "Wall.Result": "Science {score} for ${cost}M",
-  "Debrief.PatchEarned": "Patch earned. It is on your start screen."
+  "Debrief.PatchEarned": "Patch earned. It is on your start screen.",
+  "Veil.Loading": "Reaching orbit"
 }

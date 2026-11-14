@@ -2,22 +2,31 @@
 
 Read this before changing any UI. It exists so the game keeps one identity, whoever (or whatever) writes the next screen.
 
-## The idea: clean room, then space
+## The idea: you are in orbit the whole time
 
-- **You build in the clean room.** Spacecraft are assembled in bright white rooms, so the menu, build, host and phone screens are light: cool white, ink text, hairline rules.
-- **You fly in space.** Launch plays an ascent from sky blue to black. The flight and mission report screens are true black.
-- **The spacecraft is the hero.** A drawing of the player's actual design sits at the centre of the build screen and changes with every choice. The interface around it stays quiet.
+- **One world behind everything.** A single 3D scene (the Earth, the stars, your spacecraft) stays on screen from the start page to the mission report. It never reloads and the page never cuts to a blank colour.
+- **Screens are camera shots plus panels.** Changing screen moves the camera and swaps the panels on top.
 
-## Palette (every colour comes from the subject)
+| Screen | Shot |
+|---|---|
+| Start | Low orbit, looking along the horizon |
+| Build, host, phone console | The spacecraft in the foreground in sunlight, the Earth behind it. Drag to turn it. |
+| Flight | Chase view behind the spacecraft, then the whole Earth for the finale |
+| Report | The whole Earth held to one side, dimmed behind the report |
 
-| Token | Hex | Role |
+- **Space is photographic; the interface is quiet.** The Earth uses real day, night and cloud imagery. The spacecraft is a detailed model built from the player's design. Panels are plain and dark so the scene carries the look.
+- **The player gets something back.** Science shows as faint gold ground tracks on the globe, and a successful mission earns a mission patch.
+
+## Palette
+
+| Token | Value | Role |
 |---|---|---|
-| `--CleanRoom` | `#F3F5F6` | Light background |
-| `--Ink` | `#12161B` | Text and primary buttons on light |
-| `--Foil` | `#C8962E` | Gold thermal blanket: spacecraft body, sunlit orbit, selection marks |
-| `--Cell` | `#27307E` | Solar-cell indigo: arrays only |
-| `--Earth` | `#3B7DD8` | Earth's day side, links |
-| `--Go` / `--Caution` / `--NoGo` | `#1E9E5A` / `#D98A00` / `#D62839` | Budget status and votes, never decoration |
+| `--Space` | `#000000` | Page background. True black, never tinted. |
+| `--Panel` | black at 86% | Panels over the scene. No blur. |
+| `--Line` | white at 15% | Hairline borders and dividers |
+| `--Text` / `--Muted` | `#F3F5F6` / `#A6B0BB` | Text |
+| `--Foil` | `#E8A838` | Gold thermal foil. The one accent: selection marks, the launch button, "you chose" in the Failure Trace. |
+| `--Go` / `--Caution` / `--NoGo` | `#3ECF85` / `#F5AE2B` / `#FF5263` | Budget status and votes only, never decoration |
 
 ## Type
 
@@ -27,31 +36,30 @@ Read this before changing any UI. It exists so the game keeps one identity, whoe
 
 ## Rules
 
-1. Every picture is data. The spacecraft, the orbit diagram and the rockets are drawn from the design and the catalog, to scale. Nothing is decorative.
+1. Every picture is data. The spacecraft, its orbit, the rockets and the ground tracks are drawn from the design and the catalog.
 2. Show quantities, not just percentages: `1,456 of 2,300 kg`.
 3. Choices are visible rows with their trade-offs, not dropdowns.
 4. Status is always a shape plus a word plus a colour.
-5. Motion answers the player: gauges move when a choice changes. The set pieces are the ascent, the flight and the Failure Trace rewind.
-
-## 3D and rewards
-
-The player has to get something back for the ten minutes they spend designing. The reference is real photography from orbit: a detailed spacecraft in the foreground, the Earth and its clouds below, a thin blue line of atmosphere on the horizon.
-
-- **The interface stays drawn; space is photographic.** Menus, controls and gauges keep the clean-room look above. The spacecraft and the flight are rendered to look real.
-- **The spacecraft is a 3D model** built from the design: crinkled gold foil, glossy solar cells, mirror radiators, struts and dishes. It turns in the clean room and then flies the mission.
-- **The Earth uses real imagery:** day, night with city lights, and clouds, with a sunlit glint on the ocean and a blue atmosphere at the limb.
-- **Reflections are live.** The spacecraft mirrors the actual Earth and Sun around it, and goes dark in the Earth's shadow.
-- **The camera sells it.** The chase view frames the spacecraft to one side with the horizon behind it. The whole-Earth view is for the finale.
-- **Science is visible.** Each pass leaves a faint gold track on the globe. Keep it faint, so it never hides the Earth.
-- **Success earns a mission patch** that is kept on the start screen. Three stars earns a gold border.
-- Glow is only for things that really are bright (the Sun, glints). No lens-flare sprites, no coloured fog, no glow on UI.
-- The 3D code is in `src/UI/Scene` and loads only when needed. The flat drawings in `src/UI/Visuals` are the fallback when WebGL is missing. Images are in `public/Textures`.
+5. Panels sit at the edges. Keep the middle of the screen clear for the spacecraft.
+6. Motion answers the player. The set pieces are camera moves: the pull-in to the spacecraft, the launch, the flight and the Failure Trace.
+7. Glow is only for things that really are bright (the Sun, glints off metal).
 
 ## Banned (the usual generated-UI tells)
 
-- Dark navy with one neon accent, purple or blue gradients, gradient text, glow, glass blur.
-- Grids of identical rounded cards, the same radius and shadow on everything, cards inside cards.
+- Tinted "space navy" backgrounds, neon accents, purple or blue gradients, gradient text.
+- Glow, glass blur or drop shadows on panels and controls.
+- Grids of identical rounded cards, cards inside cards.
 - All-caps tracked labels above headings, `A · B · C` meta strings, arrows glued to button text, monospace for small labels.
 - Fade-and-slide-up on every element, count-up numbers, bounce easing.
 - Pills around static text, emoji as icons, invented statistics.
-- Inter, Roboto, Orbitron or any "sci-fi" display face.
+- Sci-fi display faces such as Orbitron. HUD brackets, scan lines and hexagons.
+- Lens-flare sprites and coloured fog.
+
+## Where things live
+
+| Path | Contents |
+|---|---|
+| `src/World` | The persistent 3D scene: camera shots, Earth, spacecraft model. Loaded on demand. |
+| `src/Interface` | Screens, controls, readouts, team panels and the flat diagrams used as a fallback without WebGL |
+| `src/Styles/Space.css` | All styling and the tokens above |
+| `public/Textures` | Earth imagery (see the README for credits) |

@@ -75,7 +75,9 @@ This replaces the "clean room, then space" idea in `DESIGN.md`.
 | Ask the Local Lead about local judging times | You know the real deadline |
 | Request a FortiGuard web-filter classification for the deployed link (the guide recommends it) | Request sent |
 
-### Phase 1: One space theme (Saturday 16:00 to 20:00, build)
+### Phase 1: One space theme (done Saturday 14 November)
+
+The interface was rebuilt from scratch on top of one persistent 3D scene. The engine, team sync and 3D models were kept.
 
 | Task | Hours | Done when |
 |---|---|---|
