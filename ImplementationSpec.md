@@ -1602,10 +1602,12 @@ It is Saturday evening, 14 November. Submission closes Sunday 15 November at 23:
 | 1. Setup | Restore project files and reusable code from the archive; empty app builds and deploys. | 0.5 | `npm run build` passes; the Earth renders. |
 | 2. Engine | Sections 4, 5 and 8, with the unit tests. Hand-written sample events stand in for data. | 3.5 | Unit tests pass; GreedyBot completes a flight. |
 | 3. Data | Section 7. Script, snapshots for two weeks, curated files. | 1.5 | Data tests pass; the script's report shows ≥ 8 events per week. |
-| 4. Playable | Hangar, scanner, encounter, debrief, lab, home, saving. Plain styling. | 4 | A full loop can be played by hand. |
-| 5. Look | Card designs, meters, world camera, motion, images. | 3 | Matches section 11 at both desktop sizes. |
+| 4. Screens | Every screen built once, in its final design, in the order a judge meets them: Home, Hangar, Encounter, Scanner, Debrief, Lab, Week. Card designs, meters, images and saving included. | 5.5 | A full loop can be played by hand, and every screen matches section 11 at 1440 × 900 and 1280 × 720. |
+| 5. Polish | A pass over the finished screens: motion, the camera move between screens, fixes from an independent design review, then the spacecraft model (S5) and storm visuals (S3) if time allows. | 1.5 | The review's serious findings are fixed; each screen has its one orchestrated moment. |
 | 6. Finish | Logbook, Sources, hints, balance pass against B1–B8. | 1.5 | Balance tests pass or their targets are adjusted with a note. |
 | 7. Ship | Deploy, README with AI declaration, 30-second video, submission text. | 1 | Public link opens without login; video recorded. |
+
+**Why steps 4 and 5 changed.** They were "build everything plain, then restyle everything". The team decided on 15 November that these two steps decide what a judge sees, so each screen is now built finished, most important first. If time runs out, the screens that exist are complete ones. Step 5 remains as a separate polish pass.
 
 **Order to cut if late:** S8, S7, S6, S5, S4, S3, S2, then the Logbook's photographs, then the second week. The game is still submittable with one week and ten modules.
 
