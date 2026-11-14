@@ -1,0 +1,191 @@
+:root {
+  --Background: #070b16;
+  --Surface: #0e1526;
+  --SurfaceRaised: #141d33;
+  --Border: #243052;
+  --Text: #e7ecf7;
+  --TextMuted: #8f9bb8;
+  --Accent: #5cc8ff;
+  --Go: #3ddc97;
+  --Caution: #ffb020;
+  --NoGo: #ff5a5f;
+  --Radius: 10px;
+  --FontSans: 'IBM Plex Sans', system-ui, sans-serif;
+  --FontMono: 'IBM Plex Mono', ui-monospace, monospace;
+  --Ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(1200px 600px at 80% -10%, #12204a 0%, transparent 60%), var(--Background);
+  color: var(--Text);
+  font-family: var(--FontSans);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+main { max-width: 1240px; margin: 0 auto; padding: 24px 16px 64px; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 8px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); letter-spacing: -0.02em; }
+h2 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--TextMuted); }
+a { color: var(--Accent); }
+.Numeric { font-family: var(--FontMono); font-variant-numeric: tabular-nums; }
+.Eyebrow { margin: 0; font-family: var(--FontMono); font-size: 0.75rem; letter-spacing: 0.2em; color: var(--Accent); text-transform: uppercase; }
+.Hint { color: var(--TextMuted); font-size: 0.9rem; }
+
+button {
+  font: inherit;
+  color: var(--Text);
+  background: var(--SurfaceRaised);
+  border: 1px solid var(--Border);
+  border-radius: var(--Radius);
+  padding: 10px 16px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: border-color 150ms var(--Ease), background 150ms var(--Ease), transform 150ms var(--Ease);
+}
+button:hover:not(:disabled) { border-color: var(--Accent); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--Accent); outline-offset: 2px; }
+button.Primary { background: var(--Accent); border-color: var(--Accent); color: #04121c; font-weight: 600; }
+.ButtonRow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+
+.Segmented { display: inline-flex; border: 1px solid var(--Border); border-radius: var(--Radius); overflow: hidden; margin: 8px 8px 8px 0; }
+.Segmented button { border: 0; border-radius: 0; background: transparent; }
+.Segmented button[aria-pressed='true'] { background: var(--SurfaceRaised); color: var(--Accent); }
+
+.Field { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-bottom: 1px solid var(--Border); border-radius: 6px; transition: background 300ms var(--Ease); }
+.Field:last-child { border-bottom: 0; }
+.FieldLabel { display: flex; justify-content: space-between; gap: 12px; font-size: 0.85rem; color: var(--TextMuted); }
+.FieldLabel output { color: var(--Text); }
+.Field.IsHighlighted { background: color-mix(in srgb, var(--Caution) 14%, transparent); box-shadow: 0 0 0 2px var(--Caution); padding-inline: 8px; animation: Pulse 1.2s var(--Ease) 3; }
+select, input:not([type]), input[type='text'] {
+  font: inherit; color: var(--Text); background: var(--Background); border: 1px solid var(--Border); border-radius: 8px; padding: 10px 12px; min-height: 44px; width: 100%;
+}
+input[type='range'] { width: 100%; accent-color: var(--Accent); min-height: 32px; }
+.ToggleField { flex-direction: row; align-items: center; }
+.ToggleField input { width: 22px; height: 22px; accent-color: var(--Accent); }
+fieldset { border: 0; margin: 0; padding: 12px 0; }
+.InstrumentPicker { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+.InstrumentPicker legend { margin-bottom: 8px; }
+.Chip { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; }
+.Chip small { color: var(--TextMuted); font-size: 0.75rem; }
+.Chip.IsSelected { border-color: var(--Accent); background: color-mix(in srgb, var(--Accent) 14%, var(--SurfaceRaised)); }
+
+.Hero { margin-bottom: 16px; }
+.Hero h1 { font-family: var(--FontMono); font-size: clamp(2.4rem, 8vw, 4.5rem); letter-spacing: -0.04em; }
+.Hero p { color: var(--TextMuted); font-size: 1.1rem; margin: 0 0 8px; }
+.ScenarioGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: 16px 0 24px; }
+.ScenarioCard, .RolePanel, .BudgetBar, .ReferenceCard, .TraceView, .JoinCard {
+  background: var(--Surface); border: 1px solid var(--Border); border-radius: var(--Radius); padding: 16px;
+}
+.ScenarioCard p { color: var(--TextMuted); }
+.JoinForm { display: flex; gap: 12px; align-items: flex-end; max-width: 420px; }
+.JoinForm .Field { flex: 1; border: 0; }
+.JoinForm input { font-family: var(--FontMono); letter-spacing: 0.3em; text-transform: uppercase; }
+
+.ScenarioHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.ScenarioHeader p { margin: 0; color: var(--TextMuted); }
+.BudgetChip { border: 1px solid var(--Border); border-radius: 999px; padding: 6px 14px; color: var(--Text) !important; }
+.BuildLayout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; align-items: start; }
+.Panels { display: grid; gap: 16px; }
+.Sidebar { position: sticky; top: 16px; display: grid; gap: 12px; }
+.BudgetBoard { display: grid; gap: 10px; }
+
+.BudgetBar { padding: 12px 14px; transition: border-color 250ms var(--Ease); }
+.BudgetBar header { display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 8px; }
+.BudgetStatus { font-size: 0.85rem; font-weight: 500; }
+.Meter { position: relative; height: 10px; background: var(--Background); border-radius: 999px; overflow: hidden; }
+.MeterFill { height: 100%; border-radius: inherit; background: var(--Go); transition: width 450ms var(--Ease), background 250ms var(--Ease); }
+.MeterLimit { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--Text); opacity: 0.6; }
+.BudgetBar.IsYellow { border-color: color-mix(in srgb, var(--Caution) 60%, var(--Border)); }
+.BudgetBar.IsYellow .MeterFill { background: var(--Caution); }
+.BudgetBar.IsRed { border-color: var(--NoGo); animation: Shake 380ms var(--Ease); }
+.BudgetBar.IsRed .MeterFill { background: var(--NoGo); }
+.BudgetMargin { margin: 8px 0 4px; font-size: 0.85rem; color: var(--TextMuted); }
+.BudgetLines { list-style: none; margin: 0; padding: 0; font-size: 0.8rem; color: var(--TextMuted); }
+.BudgetLines li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; }
+.StatusIcon.IsGreen { color: var(--Go); }
+.StatusIcon.IsYellow { color: var(--Caution); }
+.StatusIcon.IsRed { color: var(--NoGo); }
+.LaunchButton { width: 100%; min-height: 56px; font-size: 1.1rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.FlightScreen { display: grid; gap: 20px; }
+.Timeline { position: relative; height: 14px; background: var(--Surface); border: 1px solid var(--Border); border-radius: 999px; }
+.TimelineFill { height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--Accent), var(--Go)); transition: width 650ms var(--Ease); }
+.TimelineTick { position: absolute; top: -6px; width: 4px; height: 24px; margin-left: -2px; border-radius: 2px; background: var(--Text); }
+.TimelineTick.IsFatal { background: var(--NoGo); }
+.EventLog { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.EventLog li { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 10px 14px; background: var(--Surface); border: 1px solid var(--Border); border-radius: var(--Radius); animation: Rise 350ms var(--Ease); }
+.EventLog li.IsFatal { border-color: var(--NoGo); color: var(--NoGo); }
+.SkipButton { justify-self: end; }
+
+.DebriefScreen { display: grid; gap: 20px; }
+.VerdictBanner { padding: 20px; border-radius: var(--Radius); border: 1px solid var(--Border); background: var(--Surface); }
+.VerdictBanner.IsSuccess { border-color: var(--Go); }
+.VerdictBanner.IsSuccess h1 { color: var(--Go); }
+.VerdictBanner:not(.IsSuccess) h1 { color: var(--NoGo); }
+.StarRow { list-style: none; padding: 0; margin: 12px 0 0; display: flex; gap: 16px; flex-wrap: wrap; color: var(--TextMuted); }
+.StarRow li { display: flex; gap: 6px; align-items: center; }
+.StarRow .Star { font-size: 1.4rem; }
+.StarRow li.IsEarned { color: var(--Caution); }
+.TraceView.IsFatal { border-color: var(--NoGo); }
+.TraceView h3 { color: var(--NoGo); }
+.TraceView.IsDegraded h3 { color: var(--Caution); }
+.TraceChain { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.TraceChain li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 12px; border-left: 2px solid color-mix(in srgb, var(--NoGo) 60%, transparent); opacity: 0; animation: Rise 400ms var(--Ease) forwards; }
+.TraceChain li.IsDecision { border-left-color: var(--Caution); background: color-mix(in srgb, var(--Caution) 10%, transparent); font-weight: 600; }
+.TraceArrow { color: var(--NoGo); font-family: var(--FontMono); }
+.FixButton { margin-left: auto; min-height: 36px; padding: 6px 12px; border-color: var(--Caution); color: var(--Caution); }
+.Warnings { display: grid; gap: 12px; }
+.ReferenceCard dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 16px; margin: 8px 0; }
+.ReferenceCard dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--TextMuted); }
+.ReferenceCard dd { margin: 0; }
+.Lesson { color: var(--Accent); margin: 0; }
+
+.HostLayout { display: grid; grid-template-columns: 280px minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.JoinCard { text-align: center; display: grid; justify-items: center; gap: 8px; }
+.QrCode { width: 220px; height: 220px; border-radius: 8px; background: var(--SurfaceRaised); }
+.RoomCode { font-size: 2.6rem; letter-spacing: 0.3em; margin: 0; color: var(--Accent); }
+.JoinCard small { color: var(--TextMuted); }
+.BallotBoard { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.Ballot { display: grid; gap: 4px; padding: 14px; border-radius: var(--Radius); background: var(--Surface); border: 1px solid var(--Border); transition: border-color 250ms var(--Ease), background 250ms var(--Ease); }
+.BallotRole { font-size: 0.8rem; color: var(--TextMuted); }
+.BallotVote { font-family: var(--FontMono); font-size: 1.6rem; }
+.Ballot.IsGo { border-color: var(--Go); background: color-mix(in srgb, var(--Go) 12%, var(--Surface)); }
+.Ballot.IsGo .BallotVote { color: var(--Go); }
+.Ballot.IsNoGo { border-color: var(--NoGo); background: color-mix(in srgb, var(--NoGo) 12%, var(--Surface)); }
+.Ballot.IsNoGo .BallotVote { color: var(--NoGo); }
+.Ballot.IsEmpty { opacity: 0.5; }
+.Ballot small { color: var(--TextMuted); }
+
+.JoinScreen { max-width: 520px; display: grid; gap: 16px; }
+.RoleGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.RoleGrid button { min-height: 88px; display: grid; place-content: center; gap: 4px; }
+.RoleGrid small { color: var(--TextMuted); }
+.VotePanel { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.VoteButton { min-height: 72px; font-family: var(--FontMono); font-size: 1.4rem; font-weight: 600; }
+.VoteButton.IsGo.IsChosen { background: var(--Go); border-color: var(--Go); color: #03140c; }
+.VoteButton.IsNoGo.IsChosen { background: var(--NoGo); border-color: var(--NoGo); color: #1c0405; }
+
+@keyframes Shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@keyframes Pulse { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--Caution) 30%, transparent); } }
+@keyframes Rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 1024px) {
+  .HostLayout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 860px) {
+  .BuildLayout { grid-template-columns: 1fr; }
+  .Sidebar { position: static; order: -1; }
+  .BudgetBoard { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
+}
