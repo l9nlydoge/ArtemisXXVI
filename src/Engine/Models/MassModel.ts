@@ -42,6 +42,14 @@ export class MassBudget extends Budget {
     return Math.max(0, this.launchMassKg - this.capacityKg)
   }
 
+  get used(): number {
+    return this.launchMassKg * Math.max(1, this.spacecraftPerLaunch)
+  }
+
+  get limit(): number {
+    return this.capacityKg
+  }
+
   get margin(): number {
     if (!this.reachable) return -1
     const loaded = this.launchMassKg * Math.max(1, this.spacecraftPerLaunch)

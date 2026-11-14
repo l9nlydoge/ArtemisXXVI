@@ -21,6 +21,14 @@ export class DataBudget extends Budget {
     return this.generatedGbPerDay === 0 ? 1 : Math.min(1, this.downlinkGbPerDay / this.generatedGbPerDay)
   }
 
+  get used(): number {
+    return this.generatedGbPerDay
+  }
+
+  get limit(): number {
+    return this.downlinkGbPerDay
+  }
+
   get margin(): number {
     return this.generatedGbPerDay === 0 ? Number.POSITIVE_INFINITY : this.downlinkGbPerDay / this.generatedGbPerDay - 1
   }

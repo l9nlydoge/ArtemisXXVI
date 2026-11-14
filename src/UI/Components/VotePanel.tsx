@@ -14,15 +14,11 @@ export function VotePanel({ ownBudgets, current, onVote }: VotePanelProps) {
   const problems = ownBudgets.filter((budget) => budget.status !== BudgetStatus.Green)
   const reason = problems.map((budget) => `${translator.t(`Budget.${budget.kind}`)}: ${translator.t(`Status.${budget.status}`)}`).join(', ')
   return (
-    <div className="VotePanel">
-      <button type="button" className={`VoteButton IsGo ${current?.vote === Vote.Go ? 'IsChosen' : ''}`} onClick={() => onVote({ vote: Vote.Go })}>
+    <div className="VotePanel" role="group" aria-label={translator.t('Vote.Board')}>
+      <button type="button" className="VoteButton IsGo" aria-pressed={current?.vote === Vote.Go} onClick={() => onVote({ vote: Vote.Go })}>
         {translator.t('Vote.Go')}
       </button>
-      <button
-        type="button"
-        className={`VoteButton IsNoGo ${current?.vote === Vote.NoGo ? 'IsChosen' : ''}`}
-        onClick={() => onVote(reason ? { vote: Vote.NoGo, reason } : { vote: Vote.NoGo })}
-      >
+      <button type="button" className="VoteButton IsNoGo" aria-pressed={current?.vote === Vote.NoGo} onClick={() => onVote(reason ? { vote: Vote.NoGo, reason } : { vote: Vote.NoGo })}>
         {translator.t('Vote.NoGo')}
       </button>
     </div>

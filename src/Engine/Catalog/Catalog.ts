@@ -5,7 +5,7 @@ import { DedicatedPricing, RidesharePricing } from './LaunchPricing'
 import { LaunchVehicle } from './LaunchVehicle'
 import { Orbit } from './Orbit'
 import { CapacityClass, OrbitClass } from './OrbitClass'
-import { ReferenceMission } from './ReferenceMission'
+import { ReferenceFactKey, ReferenceMission } from './ReferenceMission'
 import { Registry } from './Registry'
 import { Scenario } from './Scenario'
 import { SolarArrayType } from './SolarArrayType'
@@ -23,26 +23,26 @@ export class Catalog {
   ])
 
   readonly orbits = new Registry<Orbit>([
-    new Orbit('Leo450', 'Low Earth Orbit · 450 km', {
-      orbitClass: OrbitClass.Leo, capacityClass: CapacityClass.Leo, periodMin: 93.4, eclipseMin: 36,
+    new Orbit('Leo450', 'Low Earth orbit, 450 km', {
+      orbitClass: OrbitClass.Leo, altitudeKm: 450, capacityClass: CapacityClass.Leo, periodMin: 93.4, eclipseMin: 36,
       contactMinPerStation: 50, continuousContact: false, rateFactor: 1, bandRateCapsMbps: {},
       insertionDvMs: 0, keepingDvMsPerYear: 25, radiationLifeYears: 15, shieldedRadiationLifeYears: 15,
       safeDepthOfDischarge: 0.25, dragEventsPossible: true,
     }, [Sources.OrbitTypes, Sources.GroundPasses, Sources.OrbitalDebris, Sources.BatteryDepth]),
-    new Orbit('Sso705', 'Sun-Synchronous · 705 km', {
-      orbitClass: OrbitClass.Sso, capacityClass: CapacityClass.Sso, periodMin: 98.8, eclipseMin: 35,
+    new Orbit('Sso705', 'Sun-synchronous, 705 km', {
+      orbitClass: OrbitClass.Sso, altitudeKm: 705, capacityClass: CapacityClass.Sso, periodMin: 98.8, eclipseMin: 35,
       contactMinPerStation: 60, continuousContact: false, rateFactor: 1, bandRateCapsMbps: {},
       insertionDvMs: 0, keepingDvMsPerYear: 5, radiationLifeYears: 15, shieldedRadiationLifeYears: 15,
       safeDepthOfDischarge: 0.25, dragEventsPossible: false,
     }, [Sources.Landsat8Orbit, Sources.OrbitTypes, Sources.Radiation]),
-    new Orbit('Geo', 'Geostationary · 35,786 km', {
-      orbitClass: OrbitClass.Geo, capacityClass: CapacityClass.Gto, periodMin: 1436, eclipseMin: 72,
+    new Orbit('Geo', 'Geostationary, 35,786 km', {
+      orbitClass: OrbitClass.Geo, altitudeKm: 35786, capacityClass: CapacityClass.Gto, periodMin: 1436, eclipseMin: 72,
       contactMinPerStation: 1440, continuousContact: true, rateFactor: 0.25, bandRateCapsMbps: {},
       insertionDvMs: 1500, keepingDvMsPerYear: 50, radiationLifeYears: 3, shieldedRadiationLifeYears: 12,
       safeDepthOfDischarge: 0.6, dragEventsPossible: false,
     }, [Sources.OrbitTypes, Sources.GeoEclipse, Sources.DeltaV, Sources.Radiation]),
     new Orbit('L2', 'Sun–Earth L2', {
-      orbitClass: OrbitClass.L2, capacityClass: CapacityClass.Escape, periodMin: 262980, eclipseMin: 0,
+      orbitClass: OrbitClass.L2, altitudeKm: 1500000, capacityClass: CapacityClass.Escape, periodMin: 262980, eclipseMin: 0,
       contactMinPerStation: 160, continuousContact: false, rateFactor: 1,
       bandRateCapsMbps: { Uhf: 0, SBand: 0, XBand: 2, KaBand: 28, Laser: 0 },
       insertionDvMs: 0, keepingDvMsPerYear: 4, radiationLifeYears: 10, shieldedRadiationLifeYears: 12,
@@ -86,13 +86,13 @@ export class Catalog {
       orbitFit: { [OrbitClass.Sso]: 1, [OrbitClass.Leo]: 0.7, [OrbitClass.Geo]: 0.1, [OrbitClass.L2]: 0 },
       orbitRevisitHours: { [OrbitClass.Sso]: 384, [OrbitClass.Leo]: 384, [OrbitClass.Geo]: 1, [OrbitClass.L2]: Number.POSITIVE_INFINITY },
     }, new ReferenceMission('Landsat 9', [
-      { label: 'Mass', value: '2,710 kg', source: Sources.Landsat9Facts },
-      { label: 'Orbit', value: '705 km sun-synchronous, 8-day revisit with Landsat 8', source: Sources.Landsat9 },
-      { label: 'Instruments', value: 'OLI-2 + TIRS-2', source: Sources.Landsat9 },
-      { label: 'Downlink', value: 'X-band 384 Mbps', source: Sources.Landsat8 },
-      { label: 'Design life', value: '5 years, consumables for 10', source: Sources.Landsat9 },
-      { label: 'Launch', value: 'Atlas V 401, $153.8M', source: Sources.Landsat9Launch },
-      { label: 'Total cost', value: '$885M life-cycle', source: Sources.Landsat9Cost },
+      { key: ReferenceFactKey.Mass, value: '2,710 kg', source: Sources.Landsat9Facts },
+      { key: ReferenceFactKey.Orbit, value: '705 km sun-synchronous, 8-day revisit with Landsat 8', source: Sources.Landsat9 },
+      { key: ReferenceFactKey.Instruments, value: 'OLI-2 + TIRS-2', source: Sources.Landsat9 },
+      { key: ReferenceFactKey.Downlink, value: 'X-band 384 Mbps', source: Sources.Landsat8 },
+      { key: ReferenceFactKey.DesignLife, value: '5 years, consumables for 10', source: Sources.Landsat9 },
+      { key: ReferenceFactKey.Launch, value: 'Atlas V 401, $153.8M', source: Sources.Landsat9Launch },
+      { key: ReferenceFactKey.Cost, value: '$885M life-cycle', source: Sources.Landsat9Cost },
     ], 'One big, capable, long-lived satellite.')),
     new Scenario('StormChaser', 'Storm Chaser', 'Look inside tropical storms at least every 2 hours for 2 years.', {
       budgetMusd: 60, targetYears: 2, requiredScience: 120, requiredRevisitHours: 2, maxCopies: 12,
@@ -100,11 +100,11 @@ export class Catalog {
       orbitFit: { [OrbitClass.Leo]: 1, [OrbitClass.Sso]: 0.8, [OrbitClass.Geo]: 0.4, [OrbitClass.L2]: 0 },
       orbitRevisitHours: { [OrbitClass.Leo]: 8, [OrbitClass.Sso]: 10, [OrbitClass.Geo]: 0.5, [OrbitClass.L2]: Number.POSITIVE_INFINITY },
     }, new ReferenceMission('NASA TROPICS', [
-      { label: 'Mass', value: '~5.4 kg each', source: Sources.Tropics },
-      { label: 'Orbit', value: '550 km, ~30° inclination', source: Sources.Tropics },
-      { label: 'Instrument', value: 'One microwave radiometer, 90–205 GHz', source: Sources.Tropics },
-      { label: 'Launch', value: 'Rocket Lab Electron', source: Sources.Tropics },
-      { label: 'Total cost', value: '~$30M', source: Sources.TropicsCost },
+      { key: ReferenceFactKey.Mass, value: '~5.4 kg each', source: Sources.Tropics },
+      { key: ReferenceFactKey.Orbit, value: '550 km, ~30° inclination', source: Sources.Tropics },
+      { key: ReferenceFactKey.Instruments, value: 'One microwave radiometer, 90–205 GHz', source: Sources.Tropics },
+      { key: ReferenceFactKey.Launch, value: 'Rocket Lab Electron', source: Sources.Tropics },
+      { key: ReferenceFactKey.Cost, value: '~$30M', source: Sources.TropicsCost },
     ], 'Many tiny satellites beat one big one when revisit matters.')),
   ])
 }

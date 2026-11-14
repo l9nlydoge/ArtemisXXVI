@@ -5,6 +5,8 @@ import { Language } from '../../I18n/Language'
 import { useTranslator } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
 import { RoomCode } from '../../Sync/RoomCode'
+import { ScenarioArt } from '../ScenarioArt'
+import { OrbitDiagram } from '../Visuals/OrbitDiagram'
 
 export function MenuScreen() {
   const translator = useTranslator()
@@ -20,41 +22,49 @@ export function MenuScreen() {
 
   return (
     <main className="MenuScreen">
-      <header className="Hero">
-        <h1>{translator.t('App.Title')}</h1>
-        <p>{translator.t('App.Tagline')}</p>
-        <div className="Segmented" role="group" aria-label="Language">
-          {Object.values(Language).map((option) => (
-            <button key={option} type="button" aria-pressed={language === option} onClick={() => setLanguage(option)}>{option.toUpperCase()}</button>
+      <div className="Settings">
+        <div className="Segmented" role="group" aria-label={translator.t('Menu.Difficulty')}>
+          {Object.values(Difficulty).map((option) => (
+            <button key={option} type="button" aria-pressed={difficulty === option} onClick={() => setDifficulty(option)}>{translator.t(`Difficulty.${option}`)}</button>
           ))}
         </div>
+        <div className="Segmented" role="group" aria-label={translator.t('Menu.Language')}>
+          <button type="button" aria-pressed={language === Language.English} onClick={() => setLanguage(Language.English)}>English</button>
+          <button type="button" aria-pressed={language === Language.Turkish} onClick={() => setLanguage(Language.Turkish)}>Türkçe</button>
+        </div>
+      </div>
+
+      <header className="Hero">
+        <h1>GO / NO-GO</h1>
+        <p>{translator.t('App.Tagline')}</p>
       </header>
 
-      <div className="Segmented" role="group" aria-label={translator.t('Menu.Difficulty')}>
-        {Object.values(Difficulty).map((option) => (
-          <button key={option} type="button" aria-pressed={difficulty === option} onClick={() => setDifficulty(option)}>{translator.t(`Difficulty.${option}`)}</button>
-        ))}
-      </div>
-
-      <div className="ScenarioGrid">
-        {Catalog.shared.scenarios.items.map((scenario) => (
-          <article key={scenario.id} className="ScenarioCard">
-            <h2>{scenario.name}</h2>
-            <p>{scenario.briefing}</p>
-            <p className="Numeric">{translator.t('Menu.Budget', { budget: scenario.spec.budgetMusd, years: scenario.spec.targetYears })}</p>
-            <div className="ButtonRow">
-              <button type="button" className="Primary" onClick={() => startSolo(scenario.id)}>{translator.t('Menu.PlaySolo')}</button>
-              <button type="button" onClick={() => void hostTeam(scenario.id)}>{translator.t('Menu.HostTeam')}</button>
-            </div>
-          </article>
-        ))}
-      </div>
+      <ul className="MissionList">
+        {Catalog.shared.scenarios.items.map((scenario) => {
+          const art = ScenarioArt.of(scenario.id)
+          return (
+            <li key={scenario.id} className="MissionRow">
+              <OrbitDiagram orbit={art.orbit} copies={art.copies} stations={art.stations} label={art.orbit.name} />
+              <div className="MissionText">
+                <h2>{scenario.name}</h2>
+                <p>{translator.t(`Scenario.${scenario.id}.Briefing`)}</p>
+                <dl>
+                  <div><dt>{translator.t('Brief.Budget')}</dt><dd>{translator.t('Fact.Cost', { cost: scenario.spec.budgetMusd })}</dd></div>
+                  <div><dt>{translator.t('Brief.Duration')}</dt><dd>{translator.t('Brief.Years', { years: scenario.spec.targetYears })}</dd></div>
+                </dl>
+              </div>
+              <div className="MissionActions">
+                <button type="button" className="Primary" onClick={() => startSolo(scenario.id)}>{translator.t('Menu.PlaySolo')}</button>
+                <button type="button" onClick={() => void hostTeam(scenario.id)}>{translator.t('Menu.HostTeam')}</button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
 
       <form className="JoinForm" onSubmit={(event) => { event.preventDefault(); if (RoomCode.isValid(code)) void joinTeam(code) }}>
-        <label className="Field">
-          <span className="FieldLabel">{translator.t('Menu.RoomCode')}</span>
-          <input value={code} inputMode="text" autoCapitalize="characters" maxLength={4} onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
-        </label>
+        <label htmlFor="RoomCodeInput">{translator.t('Menu.JoinPrompt')}</label>
+        <input id="RoomCodeInput" value={code} autoCapitalize="characters" autoComplete="off" maxLength={4} placeholder="ABCD" onChange={(event) => setCode(RoomCode.normalize(event.target.value))} />
         <button type="submit" disabled={!RoomCode.isValid(code)}>{translator.t('Menu.JoinTeam')}</button>
       </form>
     </main>

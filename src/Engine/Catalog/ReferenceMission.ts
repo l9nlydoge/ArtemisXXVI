@@ -1,5 +1,15 @@
+export enum ReferenceFactKey {
+  Mass = 'Mass',
+  Orbit = 'Orbit',
+  Instruments = 'Instruments',
+  Downlink = 'Downlink',
+  DesignLife = 'DesignLife',
+  Launch = 'Launch',
+  Cost = 'Cost',
+}
+
 export interface ReferenceFact {
-  label: string
+  key: ReferenceFactKey
   value: string
   source?: string
 }

@@ -2,7 +2,7 @@
 
 A space mission design game for NASA Space Apps 2026. Team Artemis 26, Ankara.
 
-The design, data and scope plan are in [proposal.md](proposal.md).
+The design, data and scope plan are in [proposal.md](proposal.md). The visual direction, and the list of patterns to avoid, is in [DESIGN.md](DESIGN.md). Read it before changing any UI.
 
 ## Run
 
@@ -34,6 +34,7 @@ To make rooms work across phones:
 | `src/Sync` | `RoomSync` with Firebase and local implementations, plus `TeamSession` |
 | `src/State` | Zustand game store |
 | `src/I18n` | English and Turkish strings |
+| `src/UI/Visuals` | The spacecraft, orbit and rocket drawings, generated from the design |
 | `src/UI` | Screens and components |
 
 The engine is pure TypeScript with no React or browser dependencies. `MissionSimulator.run({ scenario, design, seed })` is deterministic, so every device in a room computes the same flight.

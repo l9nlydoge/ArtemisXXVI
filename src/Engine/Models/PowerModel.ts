@@ -21,6 +21,14 @@ export class PowerBudget extends Budget {
     super()
   }
 
+  get used(): number {
+    return this.loadW
+  }
+
+  get limit(): number {
+    return this.availableW
+  }
+
   get margin(): number {
     return this.loadW === 0 ? Number.POSITIVE_INFINITY : this.availableW / this.loadW - 1
   }

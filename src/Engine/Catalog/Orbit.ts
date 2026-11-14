@@ -3,6 +3,7 @@ import { CapacityClass, OrbitClass } from './OrbitClass'
 
 export interface OrbitSpec {
   orbitClass: OrbitClass
+  altitudeKm: number
   capacityClass: CapacityClass
   periodMin: number
   eclipseMin: number

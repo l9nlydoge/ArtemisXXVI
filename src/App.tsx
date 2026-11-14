@@ -17,6 +17,10 @@ export function App() {
     document.documentElement.lang = language
   }, [language])
 
+  useEffect(() => {
+    document.body.dataset.theme = screen === Screen.Flight || screen === Screen.Debrief ? 'Space' : 'CleanRoom'
+  }, [screen])
+
   switch (screen) {
     case Screen.Menu:
       return <MenuScreen />

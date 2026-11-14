@@ -26,15 +26,16 @@ export abstract class Budget {
   abstract readonly margin: number
   abstract readonly lines: readonly BudgetLine[]
   abstract readonly unit: string
+  abstract readonly used: number
+  abstract readonly limit: number
 
   get higherIsBetter(): boolean {
     return false
   }
 
   get fill(): number {
-    if (!Number.isFinite(this.margin)) return this.margin > 0 ? 0 : 1.5
-    if (this.margin <= -1) return 1.5
-    return Math.min(1.5, 1 / (1 + this.margin))
+    if (this.limit <= 0) return this.used > 0 ? 1.5 : 0
+    return Math.min(1.5, this.used / this.limit)
   }
 
   get requiredMargin(): number {

@@ -40,8 +40,13 @@ export class LifetimeBudget extends Budget {
     return true
   }
 
-  get fill(): number {
-    return Math.min(1.5, this.expectedYears / this.targetYears)
+
+  get used(): number {
+    return this.expectedYears
+  }
+
+  get limit(): number {
+    return this.targetYears
   }
 
   get margin(): number {

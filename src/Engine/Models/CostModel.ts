@@ -21,8 +21,13 @@ export class CostBudget extends Budget {
     return EngineConstants.reserveForStar
   }
 
-  get fill(): number {
-    return Math.min(1.5, this.totalMusd / this.budgetMusd)
+
+  get used(): number {
+    return this.totalMusd
+  }
+
+  get limit(): number {
+    return this.budgetMusd
   }
 
   get margin(): number {
