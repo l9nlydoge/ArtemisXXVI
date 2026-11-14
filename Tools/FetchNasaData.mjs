@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -20,6 +20,7 @@ class Api {
     this.cacheDir = cacheDir
     this.offline = offline
     this.requests = []
+    this.fetchedAt = new Map()
     this.failures = []
   }
 
@@ -30,6 +31,7 @@ class Api {
     try {
       const cached = JSON.parse(await readFile(cacheFile, 'utf8'))
       this.requests.push(shown)
+      this.fetchedAt.set(shown, (await stat(cacheFile)).mtime)
       return cached
     } catch {
       if (this.offline) throw new Error(`Not in the cache and --offline was given: ${shown}`)
@@ -41,6 +43,7 @@ class Api {
       await mkdir(this.cacheDir, { recursive: true })
       await writeFile(cacheFile, JSON.stringify(body))
       this.requests.push(shown)
+      this.fetchedAt.set(shown, new Date())
       return body
     } catch (error) {
       this.failures.push(`${shown}: ${error.message}`)
@@ -234,15 +237,18 @@ async function main() {
   for (const failure of api.failures) console.log(`Failed request: ${failure}`)
 
   if (!dry) {
-    const retrievedAt = new Date().toISOString()
-    const requests = (host) => api.requests.filter((url) => url.includes(host))
+    const header = (source, host) => {
+      const requests = api.requests.filter((url) => url.includes(host))
+      const latest = Math.max(...requests.map((url) => api.fetchedAt.get(url).getTime()))
+      return { retrievedAt: new Date(latest).toISOString(), source, requests }
+    }
     const write = async (name, body) => {
       await writeFile(join(Root, 'src/Data/Snapshot', name), `${JSON.stringify(body, null, 1)}\n`)
       console.log(`Wrote src/Data/Snapshot/${name}`)
     }
-    if (asteroids) await write('Asteroids.json', { retrievedAt, source: 'NASA/JPL Center for Near-Earth Object Studies, SBDB Close-Approach Data API', requests: requests('cad.api'), records: asteroids })
-    if (exoplanets) await write('Exoplanets.json', { retrievedAt, source: 'NASA Exoplanet Archive, Planetary Systems Composite Parameters', requests: requests('exoplanetarchive'), records: exoplanets })
-    if (weather) await write('SpaceWeather.json', { retrievedAt, pending: false, source: 'NASA Space Weather Database Of Notifications, Knowledge, Information (DONKI)', requests: requests('/DONKI/'), ...weather })
+    if (asteroids) await write('Asteroids.json', { ...header('NASA/JPL Center for Near-Earth Object Studies, SBDB Close-Approach Data API', 'cad.api'), records: asteroids })
+    if (exoplanets) await write('Exoplanets.json', { ...header('NASA Exoplanet Archive, Planetary Systems Composite Parameters', 'exoplanetarchive'), records: exoplanets })
+    if (weather) await write('SpaceWeather.json', { ...header('NASA Space Weather Database Of Notifications, Knowledge, Information (DONKI)', '/DONKI/'), pending: false, ...weather })
   } else {
     console.log('Dry run: nothing written.')
   }

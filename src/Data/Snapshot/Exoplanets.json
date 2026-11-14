@@ -1,5 +1,5 @@
 {
- "retrievedAt": "2026-11-14T20:03:13.844Z",
+ "retrievedAt": "2026-11-14T19:40:50.968Z",
  "source": "NASA Exoplanet Archive, Planetary Systems Composite Parameters",
  "requests": [
   "https://exoplanetarchive.ipac.caltech.edu/TAP/sync?query=select%20pl_name%2Chostname%2Cdiscoverymethod%2Cdisc_year%2Cdisc_facility%2Cpl_rade%2Cpl_orbper%2Csy_dist%2Csy_vmag%20from%20pscomppars%20where%20pl_name%20in%20('TRAPPIST-1%20e'%2C'Kepler-452%20b'%2C'51%20Peg%20b'%2C'Proxima%20Cen%20b'%2C'WASP-39%20b'%2C'HD%20209458%20b'%2C'Kepler-186%20f'%2C'K2-18%20b'%2C'TOI-700%20d'%2C'55%20Cnc%20e'%2C'HR%208799%20b'%2C'OGLE-2005-BLG-390L%20b')&format=json"
