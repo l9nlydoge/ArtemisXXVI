@@ -71,7 +71,7 @@ This replaces the "clean room, then space" idea in `DESIGN.md`.
 | Create a GitHub repository and push `main` | The code is online |
 | Deploy to GitHub Pages or Netlify | A public link opens the game |
 | Create a Firebase project and fill in `.env.local` | Two phones on mobile data join one room |
-| Delete `src/UI/Components/BallotBoard.tsx` and the five merged branches | `git branch` shows only `main` |
+| ~~Delete the unused `BallotBoard.tsx` and the merged branches~~ | Done on 14 November: the old UI folder is gone and `git branch` shows only `main` |
 | Ask the Local Lead about local judging times | You know the real deadline |
 | Request a FortiGuard web-filter classification for the deployed link (the guide recommends it) | Request sent |
 
