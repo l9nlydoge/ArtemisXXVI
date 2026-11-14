@@ -49,7 +49,7 @@ const Fragment = `
 
     vec4 coverage = texture2D(uCoverage, vUv);
     float painted = coverage.a * uCoverageOpacity;
-    color += coverage.rgb * painted * (0.09 + diffuse * 0.5);
+    color += coverage.rgb * painted * (0.04 + diffuse * 0.42);
 
     float rim = pow(1.0 - max(dot(normal, view), 0.0), 3.2);
     color += vec3(0.25, 0.5, 1.0) * rim * (0.05 + daylight * 0.85);

@@ -3,6 +3,7 @@ import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from 'three'
 export class SceneTextures {
   private static cells?: CanvasTexture
   private static foil?: CanvasTexture
+  private static tiles?: CanvasTexture
 
   static solarCells(): CanvasTexture {
     if (SceneTextures.cells) return SceneTextures.cells
@@ -28,6 +29,30 @@ export class SceneTextures {
     texture.colorSpace = SRGBColorSpace
     texture.anisotropy = 8
     SceneTextures.cells = texture
+    return texture
+  }
+
+  static mirrorTiles(): CanvasTexture {
+    if (SceneTextures.tiles) return SceneTextures.tiles
+    const size = 256
+    const canvas = document.createElement('canvas')
+    canvas.width = canvas.height = size
+    const context = canvas.getContext('2d')!
+    context.fillStyle = '#3a3f47'
+    context.fillRect(0, 0, size, size)
+    const tile = size / 8
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
+        const tone = 205 + ((row * 5 + column * 11) % 7) * 6
+        context.fillStyle = `rgb(${tone}, ${tone + 4}, ${tone + 10})`
+        context.fillRect(column * tile + 1, row * tile + 1, tile - 2, tile - 2)
+      }
+    }
+    const texture = new CanvasTexture(canvas)
+    texture.wrapS = texture.wrapT = RepeatWrapping
+    texture.colorSpace = SRGBColorSpace
+    texture.anisotropy = 8
+    SceneTextures.tiles = texture
     return texture
   }
 

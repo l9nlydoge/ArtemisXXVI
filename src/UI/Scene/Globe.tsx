@@ -13,7 +13,7 @@ export function Globe({ painter }: { painter: CoveragePainter }) {
 
   return (
     <group>
-      <mesh castShadow material={earth}>
+      <mesh material={earth}>
         <sphereGeometry args={[1, 192, 128]} />
       </mesh>
       <mesh scale={1.028} material={atmosphere}>
