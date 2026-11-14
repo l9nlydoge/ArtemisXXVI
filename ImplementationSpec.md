@@ -652,6 +652,26 @@ Not used:
 
 The asteroid numbers were compared with NeoWs for the eleven records both had: speed, distance, size and hazard flag agree.
 
+### 7.2.1 The challenge's own resource list
+
+Read on 14 November 2026 from the challenge page's Resources tab. The list is kept in `Data/Curated/ChallengeResources.ts`.
+
+| Group | Resource |
+|---|---|
+| NASA data and resources | Design and Develop Science Missions (an overview of the systems-engineering approach, with four mission segments: launch, space, ground, user) |
+| | General Mission Analysis Tool (GMAT) |
+| | Concept Maturity Levels (CMLs) |
+| | Mission Design Lab (MDL) |
+| | NASA Mission Viz |
+| | A Learning Game About Telescopes |
+| | Cubesat 101 |
+| Space agency partner resources | Canadian Space Agency: Digital Games and Activities |
+
+- **None of the game's four data sources is on this list.** The list is about how missions are designed, not about data feeds. The page does not say teams are limited to it.
+- **The game still uses NASA data,** which is what the Global Award rule asks for.
+- **The submission should connect the game to this list,** truthfully. The hangar is a small version of what these resources describe: choosing instruments, power and protection against a budget and a volume. Before step 7, read "Design and Develop Science Missions" and "Cubesat 101" and cite, on the Sources screen and in the project description, the specific ideas the game takes from them. Nothing has been taken from them yet, so nothing may be claimed yet.
+- **The site's certificate does not verify with this machine's command-line tools.** It opens normally in a browser.
+
 ### 7.3 The script
 
 ```
