@@ -18,6 +18,16 @@ import { ForecastLines } from '../Shared/ForecastLines'
 const Families = [ModuleFamily.Power, ModuleFamily.Instrument, ModuleFamily.Protection, ModuleFamily.Mobility, ModuleFamily.Utility, ModuleFamily.Crew]
 const WantedShare = 0.12
 
+function shortText(card: ModuleCard, mark: Mark, bayLeft: number, budgetLeft: number, t: (key: string, params?: Record<string, string | number>) => string): string | undefined {
+  const spec = card.mark(mark)
+  const bay = Math.max(0, spec.bayUnits - Math.max(0, bayLeft))
+  const budget = Math.max(0, spec.costMusd - Math.max(0, budgetLeft))
+  if (bay > 0 && budget > 0) return t('Hangar.NeedsBoth', { bay, budget })
+  if (bay > 0) return t('Hangar.NeedsBay', { bay })
+  if (budget > 0) return t('Hangar.NeedsBudget', { budget })
+  return undefined
+}
+
 function ModuleRow({ card }: { card: ModuleCard }) {
   const wording = useWording()
   const words = useMemo(() => new ModuleWording(wording), [wording])
@@ -52,17 +62,19 @@ function ModuleRow({ card }: { card: ModuleCard }) {
   }
 
   const best = owned as Mark
+  const short = shortText(card, best, loadout.bayLeft, loadout.budgetLeft, (key, params) => wording.t(key, params))
   return (
     <>
       {copies.length === 0 && (
-        <li className="ModuleRow">
+        <li className={`ModuleRow ${short ? 'IsShort' : ''}`}>
           <ModuleDrawing moduleId={card.id} />
           <div className="ModuleMain">
             <h3>{words.name(card)}</h3>
             <p className="ModuleEffect">{words.effect(card, best)}</p>
             <p className="ModuleStats"><span>{words.cost(card, best)}</span><span>{words.bay(card, best)}</span><span>{words.power(card)}</span></p>
+            {short && <p className="ModuleShort">{short}</p>}
           </div>
-          <button type="button" onClick={() => editLoadout((current) => current.install(card, best))}>{wording.t('Hangar.Fit')} {words.mark(best)}</button>
+          <button type="button" className={short ? 'IsShort' : ''} onClick={() => editLoadout((current) => current.install(card, best))}>{wording.t('Hangar.Fit')} {words.mark(best)}</button>
         </li>
       )}
       {copies.map((module) => (
@@ -88,6 +100,7 @@ function ModuleRow({ card }: { card: ModuleCard }) {
       {copies.length > 0 && loadout.canAdd(card) && (
         <li className="ModuleRow IsExtra">
           <button type="button" className="Quiet" onClick={() => editLoadout((current) => current.install(card, best))}>+ {wording.t('Hangar.AddSecond')}</button>
+          {short && <span className="ModuleShort">{short}</span>}
         </li>
       )}
     </>
@@ -133,6 +146,7 @@ export function HangarScreen() {
             <Meter label={wording.t('Hangar.Budget')} value={loadout.costMusd} max={loadout.bus.budgetMusd} text={wording.t('Hangar.BudgetValue', { used: loadout.costMusd, limit: loadout.bus.budgetMusd })} tone={loadout.costMusd > loadout.bus.budgetMusd ? 'Danger' : 'Foil'} />
             <Meter label={wording.t('Hangar.Bay')} value={loadout.bayUsed} max={loadout.bus.bayUnits} text={wording.t('Hangar.BayValue', { used: loadout.bayUsed, limit: loadout.bus.bayUnits })} tone={loadout.bayUsed > loadout.bus.bayUnits ? 'Danger' : 'Foil'} />
           </div>
+          {loadout.bayLeft === 0 && <p className="BayFull">{wording.t('Hangar.BayFull')}</p>}
           <p>{wording.t('Hangar.Power', { generation: craft.generation, capacity: craft.capacity })}</p>
           <p>{craft.passiveShield > 0 ? wording.t('Hangar.Hull', { hull: craft.maxHull, shield: craft.passiveShield }) : wording.t('Hangar.HullBare', { hull: craft.maxHull })}</p>
           <dl className="RecordLists">
@@ -171,7 +185,7 @@ export function HangarScreen() {
           })}
         </div>
         <footer className="HangarLaunch">
-          {issues.length > 0 && <p className="IssueLine">{issueText(issues[0], (key, params) => wording.t(key, params))}</p>}
+          {issues.length > 0 && <p className="IssueLine">{issues.map((issue) => issueText(issue, (key, params) => wording.t(key, params))).join('. ')}</p>}
           <button type="button" className="Primary IsLarge" disabled={issues.length > 0} onClick={launch}>{wording.t('Hangar.Launch')}</button>
         </footer>
       </aside>

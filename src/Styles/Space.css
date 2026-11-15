@@ -104,6 +104,10 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ModuleRow.IsLocked { color: var(--Muted); }
 .ModuleRow.IsExtra { grid-template-columns: 1fr; padding-block: 2px; border-top: 0; }
 .ModuleRow.IsExtra button { justify-self: start; font-size: 0.88rem; }
+.ModuleRow.IsExtra .ModuleShort { padding-left: 10px; }
+.ModuleShort { font-size: 0.84rem; color: var(--Caution); }
+.ModuleRow > button.IsShort { color: var(--Muted); border-style: dashed; }
+.BayFull { color: var(--Caution); font-size: 0.92rem; }
 .ModuleDrawing { width: 62px; height: 38px; color: var(--Text); opacity: 0.85; }
 .IsLocked .ModuleDrawing { opacity: 0.35; }
 .ModuleMain { min-width: 0; display: grid; gap: 1px; }
@@ -163,6 +167,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ContactMeta { font-size: 0.88rem; color: var(--Muted); }
 .ContactBand { font-size: 0.9rem; font-weight: 600; color: var(--Caution); }
 .ContactBand.IsSevere, .ContactBand.IsHigh { color: var(--NoGo); }
+.ContactBand.IsNone { color: var(--Muted); font-weight: 500; }
 .ContactPoints { font-size: 0.9rem; }
 .ContactBody > * { flex: none; }
 .ContactCard.IsPlayed { opacity: 0.55; }
@@ -229,6 +234,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .PreviewLine { display: grid; gap: 1px; font-size: 0.92rem; text-align: right; }
 .PreviewLine li { white-space: nowrap; }
 .PreviewLine .IsDamage { color: var(--NoGo); font-weight: 600; }
+.PreviewLine .IsOverGeneration { color: var(--Caution); }
 .LethalLine { color: var(--NoGo); font-weight: 600; font-size: 0.92rem; text-align: right; max-width: 14rem; }
 .ResultStrip { grid-column: 2 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 18px; align-items: center; }
 .ResultPoints { font-size: 1.5rem; font-weight: 700; color: var(--Foil); grid-row: span 2; }

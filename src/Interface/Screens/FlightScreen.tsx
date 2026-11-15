@@ -1,6 +1,5 @@
 import { useEffect, useMemo } from 'react'
 import { Rules } from '../../Engine/Core/Rules'
-import { RadiationBand } from '../../Engine/Events/RadiationBand'
 import { EventKind } from '../../Engine/Events/SpaceEvent'
 import type { Contact } from '../../Engine/Flight/Contact'
 import type { Encounter } from '../../Engine/Flight/Encounter'
@@ -68,7 +67,7 @@ function ContactCard({ flight, contact, index }: { flight: Flight; contact: Cont
   const { event } = contact
   const isStorm = event.kind === EventKind.Storm
   const showBand = contact.showsBandTo(flight.craft)
-  const band = showBand && contact.band !== RadiationBand.None ? <p className={`ContactBand Is${contact.band}`}>{wording.t('Contact.Radiation', { band: wording.t(`Band.${contact.band}`) })}</p> : null
+  const band = showBand ? <p className={`ContactBand Is${contact.band}`}>{wording.t('Contact.Radiation', { band: wording.t(`Band.${contact.band}`) })}</p> : null
 
   if (!contact.identified) {
     return (
@@ -294,7 +293,7 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
             </div>
             <div className="TurnCommit">
               <ul className="PreviewLine" aria-live="polite">
-                <li>{wording.t('Encounter.Uses', { power: preview.powerCost })}</li>
+                <li className={preview.powerCost > craft.generation ? 'IsOverGeneration' : ''}>{wording.t('Encounter.UsesMakes', { power: preview.powerCost, gain: craft.generation })}</li>
                 <li>{wording.t('Encounter.Records', { data: recording })}</li>
                 <li className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</li>
               </ul>
