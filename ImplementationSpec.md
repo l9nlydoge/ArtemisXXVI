@@ -2,7 +2,7 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup), 2 (engine), 3 (data), 4 (screens) and 5 (polish) of the build plan are done, and the balance pass of step 6 is in. There are 285 passing tests, including the balance targets of section 13.2 flown on the real weeks. The engine was reviewed independently twice and the data once; after each review deliberate errors were planted in a copy to confirm the tests catch them.
+**Status:** steps 1 (setup), 2 (engine), 3 (data), 4 (screens) and 5 (polish) of the build plan are done, and the balance pass of step 6 is in. On 15 November the team chose a 2D pixel-art game: the 3D scene and three.js are gone, replaced by a pixel-art Earth on a starfield and a pixel-art spacecraft assembled from the fitted modules (section 11). There are 285 passing tests, including the balance targets of section 13.2 flown on the real weeks. The engine was reviewed independently twice and the data once; after each review deliberate errors were planted in a copy to confirm the tests catch them.
 
 **How the numbers were checked:** the tables in section 5 were flown by the engine's test players on the real weeks, 300 flights per loadout. Results are in section 13.3, and the reasons for each change are in `GameDesign.md`. The balance tests in section 13.2 fail the build if a later change breaks them.
 
@@ -45,7 +45,7 @@ Each item has an ID so the build plan and the cut list can refer to it.
 | M6 | Logbook and Sources screens. |
 | M7 | Progress saved in the browser. |
 | M8 | English text. |
-| M9 | Earth backdrop from the first build, and the two card designs. |
+| M9 | Pixel-art Earth backdrop, made from the first build's Earth images, and the two card designs. |
 | M10 | Deployed at a public link, with AI use declared in the README. |
 
 ### 1.2 Should (in this order, as time allows)
@@ -54,9 +54,9 @@ Each item has an ID so the build plan and the cut list can refer to it.
 |---|---|
 | S1 | First-flight hints (three prompts). |
 | S2 | Third week: May 2024. |
-| S3 | Storm visuals: aurora and streaks. |
+| S3 | Storm visuals: the red storm-leg edge and the radiation-hit flash. |
 | S4 | Thrusters, Antenna, Repair Drone. |
-| S5 | Spacecraft model assembled from installed modules. |
+| S5 | Pixel-art spacecraft assembled from installed modules. |
 | S6 | Phone layout at 375 px. |
 | S7 | Turkish. |
 | S8 | Resume a flight after a page reload. |
@@ -77,19 +77,19 @@ Crew Capsule, further destinations, software patches, shared flight codes, debri
 
 ### 2.1 Stack
 
-Same as the first build, so `node_modules` and the reusable files carry over.
+Same as the first build, without the 3D packages.
 
 | Purpose | Choice |
 |---|---|
 | Build | Vite 8, TypeScript 7 (`tsc -b`) |
 | Interface | React 19 |
 | State | Zustand 5 |
-| 3D | three 0.187, @react-three/fiber 9, @react-three/drei 10, @react-three/postprocessing |
+| Pictures | 2D canvas: the backdrop and the spacecraft are drawn pixel by pixel, no library |
 | Tests | Vitest 5 |
 | Data script | Node, no extra packages (built-in `fetch`) |
 | Hosting | Any static host. `base: './'` in the Vite config so it works from a sub-path. |
 
-Removed from the first build: firebase, qrcode.
+Removed from the first build: firebase, qrcode. Removed on 15 November: three, @react-three/fiber, @react-three/drei, @react-three/postprocessing, postprocessing, @types/three.
 
 ### 2.2 Conventions
 
@@ -97,7 +97,7 @@ Removed from the first build: firebase, qrcode.
 - **Classes with base classes** for engine logic. No loose functions holding rules.
 - **Almost no comments.** Names carry the meaning.
 - **Git for everything.** One branch per milestone, merged into `main` when the team says so.
-- **The engine imports nothing from React, three or the browser.** It must run in Vitest under Node.
+- **The engine imports nothing from React or the browser.** It must run in Vitest under Node.
 - **No number that is a rule lives in a component.** Components read from the engine.
 
 ### 2.3 Layout
@@ -110,8 +110,11 @@ index.html
 vite.config.ts
 Tools/
   FetchNasaData.mjs            downloads and writes src/Data/Snapshot/*.json
+  MakeBackdrop.py              turns the Earth stills into the pixel-art Earths (Python, PIL)
+  CaptureScreens.mjs           headless screenshots of every screen
+  Source/                      the two Earth stills rendered from the first build's globe
 public/
-  Textures/                    Earth images from the first build
+  Backdrop/                    EarthLarge, EarthMedium, EarthSmall: indexed PNGs
   Images/Events/               NASA photographs for event cards
   Icon.svg
 src/
@@ -136,13 +139,15 @@ src/
     Curated/                   RareEvents.ts, WeekDefinitions.ts, Learned.ts, Images.ts
   State/                       GameStore, Screen, SaveGame
   I18n/                        Translator, StringsEn.json, StringsTr.json
-  World/                       3D scene
   Interface/
+    Backdrop/                  Backdrop (canvas behind every screen), Starfield
+    Spacecraft/                SpacecraftBlueprint (layout), SpacecraftPainter (part sprites),
+                               PixelCanvas, SpacecraftSprite (canvas component)
     Screens/
     Cards/                     ModuleCardView, EventCardView, ContactCardView
     Meters/                    PowerMeter, HullMeter, ChannelBar, BudgetMeter, TurnTrack, FlightTrack
-    Shared/                    Button, Panel, Hint
-  Styles/Space.css
+    Shared/                    Button, Panel, Hint, MotionPreference
+  Styles/Space.css, Scene.css
 ```
 
 ---
@@ -1291,7 +1296,7 @@ Selecting an unlocked card goes to the Hangar.
 │ ┌ Forecast ─────────┐                            ┌ Your modules ────────┐ │
 │ │ No storms         │                            │ Power                │ │
 │ │ 9 asteroid flybys │      spacecraft            │  [Solar Array  Mk I] │ │
-│ │  5 in radar range │      (Earth behind)        │  [Battery      Mk I] │ │
+│ │  5 in radar range │  (Earth's limb below)      │  [Battery      Mk I] │ │
 │ │ 4 planets         │                            │ Instruments          │ │
 │ │ Unknowns likely   │                            │  [Camera       Mk I] │ │
 │ └───────────────────┘                            │  [Spectrometer —   ] │ │
@@ -1349,7 +1354,7 @@ Choosing a card starts the encounter.
 │ │ [photograph]            │                       │  1     2     3      │ │
 │ │ 2019 OK                 │                       │ ×1    ×2     ?      │ │
 │ │ 24.5 km/s               │    spacecraft and     │ sun   shadow ?      │ │
-│ │ 71,355 km from Earth    │    Earth              │ rad 0 rad 2  ?      │ │
+│ │ 71,355 km from Earth    │  (Earth's limb below) │ rad 0 rad 2  ?      │ │
 │ │                         │                       └─────────────────────┘ │
 │ │ Visible   ▓▓▓░░░  3 / 9 │                                               │
 │ │ Spectrum  ░░░░░░  0 / 6 │                                               │
@@ -1433,8 +1438,8 @@ Three prompts, each shown once and stored in `hintsSeen`:
 
 - Every control reachable and operable by keyboard, with a visible focus ring.
 - Status is never colour alone: warnings carry a word or a shape.
-- `prefers-reduced-motion`: no camera moves, no card lifts, instant meter changes.
-- Text contrast at least 4.5:1 against its panel. Text never sits directly on the 3D scene; it sits on a panel or a scrim.
+- `prefers-reduced-motion`: the Earth jumps to each screen's place instead of sliding, the stars do not twinkle, the spacecraft does not idle, no card lifts, instant meter changes.
+- Text contrast at least 4.5:1 against its panel. Text never sits directly on the bright Earth; it sits on a panel or a scrim, and each screen's framing keeps the Earth clear of loose text.
 - Meters use `role="meter"` with a label and values.
 
 ---
@@ -1443,7 +1448,7 @@ Three prompts, each shown once and stored in `hintsSeen`:
 
 ### 11.1 Principle
 
-You are in orbit. The Earth is the picture. The interface is dark, flat and quiet, and stays at the edges. Photographs carry the wonder; the interface carries the numbers.
+You are in orbit, in a 2D pixel-art game. On 15 November the team chose 2D pixel art over the 3D scene: it reads at a glance, stays fast on any laptop, and lets the spacecraft change visibly with every module. The pixel-art Earth is the picture. The interface is dark, flat and quiet, and stays at the edges. Photographs carry the wonder; the interface carries the numbers. It should feel clean and responsive, like a well-made 2D pixel game, and every piece of art is original.
 
 ### 11.2 Tokens
 
@@ -1469,7 +1474,7 @@ You are in orbit. The Earth is the picture. The interface is dark, flat and quie
 **Module card (a data plate).** 5:7. Black, with a 1 px line border.
 
 - Top: module name, mark at the right ("Mk II").
-- Middle: a fine white line drawing of the hardware, one per module, drawn as inline SVG.
+- Middle: a picture of the hardware, one per module, on the shared art grid (section 11.8).
 - Bottom: three stamped figures in a row: cost, bay, power. Then one sentence of effect.
 - Mk III: the border is gold.
 - Selected or installed: a 3 px gold left edge.
@@ -1487,33 +1492,44 @@ Taken from `Archive/FirstBuild` with `git show Archive/FirstBuild:<path>`.
 
 | Take | Path | Change |
 |---|---|---|
-| Earth | `src/World/Earth/EarthMaterial.ts`, `AtmosphereMaterial.ts`, `Globe.tsx` | Fix the oversized sun glint: exponent 90 → about 600, strength 2.2 → about 0.7. |
-| Earth images | `public/Textures/*.jpg` | None. Keep the credit. |
-| Spacecraft parts | `src/World/Spacecraft/**` | Feed from `Loadout` instead of the old design (S5). |
-| Graphics checks | `src/World/GraphicsSupport.ts`, `MotionPreference.ts` | None. |
+| Earth | the first build's globe and its Solar System Scope images | Rendered once to two stills (`Tools/Source/`), then turned into pixel art by `Tools/MakeBackdrop.py`. The globe code and the images are no longer in the game. Keep the credit. |
+| Spacecraft layout | `SpacecraftBlueprint` | Rewritten to place part sprites on the art grid, fed from `Loadout` (S5). |
+| Motion check | `MotionPreference.ts` | Moved to `Interface/Shared`. |
 | Random and number helpers | `src/Engine/Simulation/SeededRandom.ts`, `src/Engine/Numbers.ts` | Move to `Engine/Core`, extend. |
 | Translation | `src/I18n/Translator.ts`, `UseTranslator.ts`, `Language.ts` | None. New string files. |
 | Project setup | `package.json`, `tsconfig.json`, `vite.config.ts`, `index.html`, `public/Icon.svg` | Remove firebase and qrcode. |
 
-Not taken: the old engine, the old screens, team sync, the camera director (a simpler fixed camera replaces it), the landmark spacecraft.
+Not taken: the old engine, the old screens, team sync, the camera director, the landmark spacecraft, and since 15 November the 3D scene.
 
 ### 11.5 The world
 
-- **One scene behind every screen:** the Earth, slowly turning, seen from low orbit, lit by the Sun with a night side and city lights.
-- **Camera:** fixed per screen, with a slow eased move between screens. Home: Earth fills the right two thirds. Hangar: Earth lower, spacecraft centre. Flight: spacecraft small at centre, Earth's limb across the lower half.
-- **Without WebGL:** a still photograph of Earth as the page background. Everything else works.
-- **Storm (S3):** an aurora band on the night side scaled by the turn's radiation, and thin bright streaks across the view for 600 ms when radiation hits.
-- **Encounter subject:** not modelled in 3D. The photograph on the card is the subject.
+- **One backdrop behind every screen:** a `<canvas>` drawn at art resolution and scaled up by a whole number with `image-rendering: pixelated`. One art pixel is the viewport height divided by about 225, rounded to a whole number of device pixels: 3 at 1280 × 720, 4 at 1440 × 900, 5 at 1920 × 1080.
+- **Stars:** a seeded field of single stars in three brightnesses and a few larger cross-shaped stars. About a third twinkle in three steps by swapping colours, not by fading.
+- **The Earth:** three pieces of art, each made for its size instead of scaled: a large limb (500 art pixels across, top 170 rows only, centred on South America) for Week, Hangar, Flight and Debrief; a medium globe (250) for Home; a small globe (140) for the Lab. Each is a palette-indexed PNG with ordered dithering on the terminator and the haze near the limb, single warm pixels for city lights and a stepped one-pixel atmosphere rim. Together they weigh about 30 KB.
+- **Framing per screen:** Home, the globe on the right two thirds. Week, Hangar and Flight, the limb across the lower part of the view, low enough in the Hangar and the encounter that the spacecraft sits over black space. Debrief, the limb in the gap between the top panels and the leg log. Lab, a small globe at the lower right. Between screens the Earth slides for 900 ms with an eased curve, landing on whole art pixels; an Earth that leaves sinks below the edge while the next one rises. The stars drift a few pixels with it.
+- **The spacecraft:** a sprite assembled from part sprites (section 11.8) by `SpacecraftBlueprint` and `SpacecraftPainter`, drawn to a canvas at 1x and scaled by a whole number: up to 4 in the middle of the Hangar, up to 3 in the middle of the encounter, smaller only when the space is too narrow. Every fitted module has a part, and a higher mark is bigger or more elaborate. In the encounter the parts switched on this turn get a gold outline. Two idle frames: the flight computer's light blinks, the battery's top cell flickers and the repair drone bobs one pixel.
+- **Storm (S3):** the red storm-leg edge on the flight screen and the red flash when radiation hits.
+- **Encounter subject:** not drawn. The photograph on the card is the subject.
 
 ### 11.6 Motion
 
 - One orchestrated moment per screen: cards dealt onto the scanner, or the rank bar filling.
+- The Earth's slide between screens, the stars' twinkle and the spacecraft's two idle frames are the only ambient motion, and all three stop under `prefers-reduced-motion`.
 - Everything else moves only in answer to the player.
-- Durations: 120 ms for presses, 240 ms for cards, 600 ms for meters.
+- Durations: 120 ms for presses, 240 ms for cards, 600 ms for meters, 900 ms for the Earth's slide.
 
 ### 11.7 Not allowed
 
-Glass or blurred panels, gradient buttons, glow text, emoji, icons without labels, rounded pill tags, capital-letter eyebrow labels, three shades of the same amber, cartoon illustrations, text placed directly over the bright Earth.
+Glass or blurred panels, gradient buttons, glow text, emoji, icons without labels, rounded pill tags, capital-letter eyebrow labels, three shades of the same amber, cartoon illustrations, text placed directly over the bright Earth, smoothed or fractionally scaled pixel art, soft glows on sprites.
+
+### 11.8 Pixel-art rules
+
+Shared by the backdrop, the spacecraft, the module pictures and the event card pictures.
+
+- **Pixel scale.** Art is authored on a small grid and shown at whole-number multiples with `image-rendering: pixelated` and no smoothing. One art pixel is 3 CSS pixels for sprites and the spacecraft; the backdrop uses a coarser grid since it is scenery. Never scale by a fraction, never rotate a sprite in CSS, and place sprites on whole art-pixel positions.
+- **Palette.** Black `#000000`; space `#070b1a`, `#0e1630`, `#1b2a4e`; ocean `#173a73`, `#1f5aa8`, `#3b7dd8`, `#7db8f2`; cloud `#c5d2e0`, `#eef3f7`, `#ffffff`; land `#1f4d2c`, `#3a7a3a`, `#6aa84f`, `#c9a45c`, `#8a6a3a`; night lights `#ffcf6b`; foil gold `#6b4410`, `#b9741c`, `#e8a838`, `#ffd27a`; hull grey `#161a22`, `#2b313c`, `#4a5362`, `#7c8797`, `#b8c1cc`; solar cell `#131a4d`, `#27307e`, `#4c57ba`; danger `#7a1f2b`, `#c8323f`, `#ff5263`; good `#1f7a4d`, `#3ecf85`; caution `#f2e05a`; aurora `#6a3fb8`, `#b06cf0`.
+- **Style.** Flat shading in two or three tones per material with the light from the upper left, a one-pixel darker outline on sprites against space, ordered dithering only where a gradient is needed (the Earth's terminator, the atmosphere), no anti-aliasing, no blur, no soft glows.
+- **Formats.** PNG, never JPEG, for pixel art. Indexed colour where possible.
 
 ---
 

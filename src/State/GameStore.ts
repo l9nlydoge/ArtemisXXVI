@@ -33,7 +33,6 @@ interface GameState {
   flightTick: number
   plan: TurnPlan
   summary?: FlightOutcomeSummary
-  worldReady: boolean
   go(screen: Screen): void
   pickWeek(weekId: string): void
   editLoadout(change: (loadout: Loadout) => Loadout): void
@@ -46,7 +45,6 @@ interface GameState {
   markHint(hint: string): void
   setLanguage(language: Language): void
   resetProgress(): void
-  markWorldReady(): void
 }
 
 GameData.install()
@@ -87,7 +85,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   flight: startFlight,
   flightTick: 0,
   plan: TurnPlan.empty,
-  worldReady: false,
 
   go: (screen) => set({ screen }),
 
@@ -170,5 +167,4 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ profile, loadout: loadoutFor(profile), weekId: weekFor(profile).id, flight: undefined, summary: undefined, plan: TurnPlan.empty, screen: Screen.Home })
   },
 
-  markWorldReady: () => set({ worldReady: true }),
 }))

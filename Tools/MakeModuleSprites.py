@@ -226,24 +226,25 @@ def ParticleDetector():
 
 def HighEnergyDetector():
     s = Sprite()
-    Shade(s, 6, 9, 24, 18, Palette.Gold)
-    s.Rect(5, 6, 25, 8, Palette.Hull[2])
-    for x in range(6, 25):
-        for y in (6, 7):
-            if (x + y) % 2 == 0:
-                s.Dot(x, y, Palette.Hull[4] if y == 6 else Palette.Hull[3])
-            else:
-                s.Dot(x, y, Palette.Hull[0])
-    s.Rect(5, 3, 5, 8, Palette.Hull[3])
-    s.Rect(25, 3, 25, 8, Palette.Hull[2])
-    s.Rect(9, 12, 21, 15, Palette.Hull[0])
-    for x in range(10, 21, 2):
-        s.Dot(x, 13, Palette.Aurora[0])
-    bolt = [(30, 0), (27, 3), (29, 4), (25, 8)]
-    for a, b in zip(bolt, bolt[1:]):
-        s.Line([a, b], Palette.Aurora[1], effect=True)
-    s.Dot(26, 7, Palette.Cloud[2], effect=True)
-    return s.Finish()
+    Shade(s, 2, 8, 19, 18, Palette.Gold)
+    s.Rect(5, 11, 16, 15, Palette.Hull[0])
+    s.Rect(6, 12, 15, 14, Palette.Aurora[0])
+    s.Rect(6, 12, 15, 12, Palette.Aurora[1])
+    s.Rect(2, 5, 19, 7, Palette.Hull[1])
+    for index, open in enumerate([0, 1, 0, 0, 1, 0, 1, 1, 0]):
+        x = 2 + index * 2
+        if not open:
+            s.Rect(x, 5, x + 1, 6, Palette.Hull[4])
+            s.Rect(x, 7, x + 1, 7, Palette.Hull[3])
+    zigzag = [(30, 0), (23, 5), (29, 7), (21, 13)]
+    for shift in (0, 1):
+        s.Line([(x + shift, y) for x, y in zigzag], Palette.Aurora[1])
+    s.Line([(x + 1, y) for x, y in zigzag[:2]], Palette.Cloud[2])
+    s.Line([(x, y) for x, y in zigzag[2:]], Palette.Cloud[1])
+    result = s.Finish()
+    for x, y in ((20, 11), (19, 9), (23, 15), (24, 13)):
+        result.putpixel((x, y), Palette.Caution)
+    return result
 
 
 def RadiationShielding():
@@ -322,16 +323,16 @@ def Thrusters():
 
 def Antenna():
     s = Sprite()
-    Shade(s, 11, 15, 20, 18, Palette.Gold)
-    s.Rect(15, 6, 16, 14, Palette.Hull[3])
-    s.Rect(16, 6, 16, 14, Palette.Hull[2])
-    for y, half in ((9, 3), (12, 4)):
-        s.Rect(15 - half, y, 16 + half, y, Palette.Hull[3])
-    s.Rect(14, 3, 17, 5, Palette.Hull[4])
-    s.Rect(16, 4, 17, 5, Palette.Hull[3])
+    Shade(s, 11, 16, 20, 18, Palette.Gold)
+    s.Rect(15, 9, 16, 15, Palette.Hull[3])
+    s.Rect(16, 9, 16, 15, Palette.Hull[2])
+    s.Rect(12, 12, 19, 12, Palette.Hull[3])
+    s.Rect(14, 6, 17, 8, Palette.Hull[4])
+    s.Rect(16, 7, 17, 8, Palette.Hull[3])
+    s.Dot(14, 6, Palette.Cloud[2])
     for radius in (5, 8, 11):
-        s.Arc(15.5, 5, radius, -40, 25, Palette.Ocean[3])
-        s.Arc(15.5, 5, radius, 155, 220, Palette.Ocean[3])
+        s.Arc(15.5, 7, radius, -45, 45, Palette.Ocean[3])
+        s.Arc(15.5, 7, radius, 135, 225, Palette.Ocean[3])
     return s.Finish()
 
 

@@ -176,17 +176,99 @@ def AsteroidC():
     return picture.Starfield(4, 3).Save()
 
 
+def AuroraProfile(columns):
+    source = Image.open(SourceFolder / 'Storm.jpg').convert('RGB')
+    width, height = source.size
+    strength = []
+    for column in range(columns):
+        total = 0
+        for x in range(column * width // columns, (column + 1) * width // columns, 4):
+            limb = 430 - 50 * x / width
+            for y in range(150, int(limb), 4):
+                r, g, b = source.getpixel((x, y))
+                total += max(0, r - g) + max(0, b - g) + max(0, g - r) // 2
+        strength.append(total)
+    smooth = [sum(strength[max(0, i - 3):i + 4]) / len(strength[max(0, i - 3):i + 4]) for i in range(columns)]
+    top = max(smooth)
+    return [value / top for value in smooth]
+
+
 def Storm():
-    def adjust(image):
-        image = ImageEnhance.Brightness(image).enhance(1.35)
-        vivid = ImageEnhance.Contrast(ImageEnhance.Color(image).enhance(1.9)).enhance(1.25)
-        dull = ImageEnhance.Color(image).enhance(0.15)
-        mask = image.convert('L').point(lambda value: 255 if value > 70 else 0 if value < 40 else (value - 40) * 8)
-        return Image.composite(vivid, dull, mask)
-    picture = Picture('Storm', (0, 120, 1280, 840), adjust)
-    picture.Nearest(['#000000', '#070b1a', '#0e1630', '#1b2a4e', '#1f7a4d', '#3ecf85', '#6a3fb8', '#b06cf0', '#7a1f2b', '#c8323f', '#eef3f7'], spread=30, floor=26)
-    picture.Night(['#3ecf85', '#1f7a4d', '#b06cf0', '#6a3fb8', '#c8323f'], '#070b1a')
-    return picture.Starfield(8, 4).Save()
+    picture = Picture('Storm', (0, 0, 1280, 853))
+    art = picture.Art
+    art.paste(Black, (0, 0, ArtWidth, ArtHeight))
+    generator = random.Random(26)
+    centre, radius, crest = 80, 260, 46
+
+    def LimbAt(x):
+        return crest + radius - (radius ** 2 - (x - centre) ** 2) ** 0.5
+
+    def Noise(x, y):
+        value = 0.0
+        for scale, weight in ((9, 0.6), (4, 0.3), (2, 0.1)):
+            gx, gy = x / scale, y / scale * 2.4
+            ix, iy = int(gx), int(gy)
+            fx, fy = gx - ix, gy - iy
+            corner = lambda cx, cy: random.Random(cx * 7919 + cy * 104729 + scale).random()
+            top = corner(ix, iy) * (1 - fx) + corner(ix + 1, iy) * fx
+            bottom = corner(ix, iy + 1) * (1 - fx) + corner(ix + 1, iy + 1) * fx
+            value += weight * (top * (1 - fy) + bottom * fy)
+        return value
+
+    for x in range(ArtWidth):
+        limb = round(LimbAt(x))
+        for y in range(limb + 1, ArtHeight):
+            depth = y - limb
+            cloud = Noise(x, y) + (0.12 if depth < 6 else 0)
+            colour = '#070b1a'
+            if cloud + Threshold(x, y) * 0.16 > 0.62:
+                colour = '#0e1630'
+            if depth == 1 and cloud > 0.5:
+                colour = '#173a73'
+            art.putpixel((x, y), Hex(colour))
+        art.putpixel((x, limb), Hex('#1b2a4e'))
+        art.putpixel((x, limb - 1), Hex('#1f7a4d'))
+
+    for _ in range(7):
+        cx, cy = generator.randrange(6, ArtWidth - 6), 0
+        cy = round(LimbAt(cx)) + generator.randrange(6, ArtHeight - round(LimbAt(cx)) - 2) if ArtHeight - round(LimbAt(cx)) > 9 else None
+        if cy is None:
+            continue
+        for _ in range(generator.randrange(1, 4)):
+            x, y = cx + generator.randrange(-2, 3), cy + generator.randrange(-1, 2)
+            if y > LimbAt(x) + 4:
+                art.putpixel((x, y), Hex('#ffcf6b'))
+
+    profile = AuroraProfile(ArtWidth)
+    ramp = ['#3ecf85', '#3ecf85', '#3ecf85', '#1f7a4d', '#6a3fb8', '#b06cf0', '#b06cf0', '#6a3fb8', '#7a1f2b']
+    rays = [generator.uniform(0.2, 0.4) for _ in range(ArtWidth)]
+    x = 0
+    while x < ArtWidth:
+        width = generator.choice((1, 1, 2, 2, 3))
+        lift = generator.uniform(0.55, 1.0) if generator.random() < 0.5 else generator.uniform(0.3, 0.6)
+        for column in range(x, min(ArtWidth, x + width)):
+            rays[column] = lift
+        x += width + generator.choice((0, 1, 1, 2))
+    for x in range(ArtWidth):
+        strength = profile[x] ** 0.8
+        if strength < 0.1:
+            continue
+        glow = round(1 + 2 * strength)
+        height = round(glow + (5 + 26 * strength) * rays[x])
+        base = round(LimbAt(x)) - 2
+        for step in range(height):
+            y = base - step
+            if y < 0:
+                break
+            share = step / max(1, height - 1)
+            position = share * (len(ramp) - 1) + Threshold(x, y) * 0.7
+            colour = ramp[max(0, min(len(ramp) - 1, round(position)))]
+            if step < glow:
+                colour = '#3ecf85' if step < glow - 1 or strength > 0.5 else '#1f7a4d'
+            elif (share - 0.55) / 0.45 > 0.5 - Threshold(x, y) * 1.9:
+                continue
+            art.putpixel((x, y), Hex(colour))
+    return picture.Starfield(14, 4).Save()
 
 
 def StormSevere():
@@ -207,6 +289,10 @@ def ExoplanetVisible():
     picture.Ramp(['#000000', '#1c0606', '#3a0e0c', '#7a1f2b', '#a8301e', '#d2502a', '#e8a838', '#ffd27a'], floor=0.04, gamma=1.1, channel=lambda r, g, b: (0.6 * r + 0.4 * g) / 255)
     for x, y in ((521, 649), (565, 662), (750, 786), (874, 825)):
         picture.Paint([picture.Place(box, x, y)], '#000000')
+    for x, y, size in ((58, 39, 2), (71, 40, 1), (86, 41, 2), (103, 42, 1), (117, 43, 2)):
+        picture.Paint([(x + dx, y + dy) for dx in range(size) for dy in range(size)], '#000000')
+        if x > 80:
+            picture.Paint([(x - 1, y + dy) for dy in range(size)], '#a8301e')
     return picture.Save()
 
 

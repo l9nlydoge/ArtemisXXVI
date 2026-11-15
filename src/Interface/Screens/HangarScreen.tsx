@@ -14,6 +14,7 @@ import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { ModuleWording } from '../Cards/ModuleWording'
 import { Meter } from '../Meters/Meter'
 import { ForecastLines } from '../Shared/ForecastLines'
+import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
 
 const Families = [ModuleFamily.Power, ModuleFamily.Instrument, ModuleFamily.Protection, ModuleFamily.Mobility, ModuleFamily.Utility, ModuleFamily.Crew]
 const WantedShare = 0.12
@@ -169,6 +170,10 @@ export function HangarScreen() {
             </div>
           </dl>
         </section>
+      </div>
+
+      <div className="HangarStage">
+        <SpacecraftSprite loadout={loadout} maxScale={4} label={wording.t('Hangar.Spacecraft')} />
       </div>
 
       <aside className="Panel HangarModules">
