@@ -17,8 +17,8 @@ const ArtPixel = 16
 export class RecordsShot extends Shot {
   private get cards(): Card[] {
     return [
-      { picture: 'AsteroidA', figure: String(Assets.figures.asteroids), label: 'asteroids', from: 0, pan: -1 },
-      { picture: 'Storm', figure: String(Assets.donkiStorms), label: 'storms', from: Beat.at(2), pan: 1 },
+      { picture: 'AsteroidA', figure: String(Assets.figures.asteroids), label: 'asteroid passes', from: 0, pan: -1 },
+      { picture: 'Storm', figure: String(Assets.figures.storms), label: 'storm legs', from: Beat.at(2), pan: 1 },
     ]
   }
 

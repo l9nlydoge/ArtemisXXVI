@@ -31,7 +31,7 @@ class Trailer {
       [Join.Wipe, Join.Cut, Join.Cut, Join.Wipe, Join.Cut, Join.Wipe, Join.Cut],
       Cuts[Cuts.length - 1],
     )
-    return { stormIds: Assets.stormCount, donki: Assets.donkiStorms, figures: Assets.figures, rock: Assets.rock, craft: [Assets.craft[0].width, Assets.craft[0].height] }
+    return { figures: Assets.figures, rock: Assets.rock, craft: [Assets.craft[0].width, Assets.craft[0].height] }
   }
 
   render(time: number): Promise<void> {

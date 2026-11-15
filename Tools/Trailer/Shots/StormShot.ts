@@ -45,8 +45,8 @@ export class StormShot extends Shot {
   draw(context: CanvasRenderingContext2D, t: number) {
     if (t < SceneFrom) this.flare(context, t)
     else this.scene(context, t)
-    Type.reveal(context, 'Survive it.', 160, 250, t - 0.05, { size: 160, shadow: Palette.Black })
-    Type.reveal(context, 'The great storm of May 2024', 160, 340, t - Beat.at(1), { size: 80, colour: Palette.Aurora1, shadow: Palette.Black })
+    Type.reveal(context, 'Survive the great storm', 160, 230, t - 0.05, { size: 160, shadow: Palette.Black })
+    Type.reveal(context, 'of May 2024.', 160, 380, t - Beat.at(1), { size: 160, colour: Palette.Aurora1, shadow: Palette.Black })
   }
 
   private flare(context: CanvasRenderingContext2D, t: number) {

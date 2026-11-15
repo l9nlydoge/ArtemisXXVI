@@ -208,9 +208,7 @@ class Music {
 }
 
 export const Effects: [number, CueName, CueParams?][] = [
-  [Beat.at(1), 'ScannerPing'],
-  [Beat.at(3), 'ScannerPing'],
-  [Beat.at(5), 'CardOn'],
+  [Beat.at(2), 'ScannerPing'],
   ...[1, 2, 3, 4, 5, 6].map((beat) => [4.8 + Beat.at(beat), 'ModuleFit'] as [number, CueName]),
   [4.8, 'ScreenForward'],
   [13.2, 'Deploy'],
