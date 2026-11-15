@@ -18,9 +18,31 @@ export interface SceneLayer {
   needsPaint(now: number): boolean
 }
 
+export interface EarthHold {
+  place?: EarthPlace
+}
+
+export interface EarthRelease {
+  from?: EarthPlace
+  snap: boolean
+}
+
 export class SceneLayers {
   static readonly shared = new SceneLayers()
   private readonly layers = new Set<SceneLayer>()
+  earth?: EarthHold
+  released?: EarthRelease
+
+  holdEarth(place?: EarthPlace) {
+    this.earth = { place }
+    this.released = undefined
+  }
+
+  releaseEarth(from: EarthPlace | undefined, snap: boolean) {
+    if (!this.earth) return
+    this.earth = undefined
+    this.released = { from, snap }
+  }
 
   add(layer: SceneLayer): () => void {
     this.layers.add(layer)

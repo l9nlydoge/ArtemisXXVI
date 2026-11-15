@@ -148,6 +148,7 @@ class BackdropScene {
   private frame(now: number, delta: number) {
     this.orbit.update(delta)
     this.voiceOrbit()
+    this.followHold(now)
     if (this.move) {
       const progress = Math.min(1, (now - this.move.started) / TravelMs)
       const eased = 1 - (1 - progress) ** 3
@@ -161,11 +162,32 @@ class BackdropScene {
     const globe = this.globeFor(this.current.radius)
     const turnStep = Math.floor(this.orbit.turn * 1600)
     const streak = this.streak
-    const signature = this.move ? `move ${now}` : `${twinkle} ${turnStep} ${Math.floor(this.orbit.offset * StarRate)} ${globe} ${streak}`
+    const signature = this.move || SceneLayers.shared.earth ? `move ${now}` : `${twinkle} ${turnStep} ${Math.floor(this.orbit.offset * StarRate)} ${globe} ${streak}`
     const layersWant = [...SceneLayers.shared.all].some((layer) => layer.needsPaint(now))
     if (signature === this.signature && !layersWant) return
     this.signature = signature
     this.paint(view, twinkle, now)
+  }
+
+  private followHold(now: number) {
+    const layers = SceneLayers.shared
+    if (layers.earth) {
+      this.move = undefined
+      const place = layers.earth.place
+      if (place) this.current = { x: Math.round(place.x), y: Math.round(place.y), radius: place.radius, driftX: this.target.driftX, driftY: this.target.driftY }
+      return
+    }
+    const released = layers.released
+    if (!released) return
+    layers.released = undefined
+    if (released.snap || MotionPreference.reduced) {
+      this.move = undefined
+      this.current = this.target
+      return
+    }
+    const from = released.from ? { ...released.from, driftX: this.target.driftX, driftY: this.target.driftY } : { ...this.current }
+    this.current = from
+    this.move = { from, to: this.target, started: now }
   }
 
   private voiceOrbit() {
@@ -204,6 +226,8 @@ class BackdropScene {
 
   private paintEarth() {
     const { context, current } = this
+    const hold = SceneLayers.shared.earth
+    if (hold && !hold.place) return
     const settled = this.globeFor(current.radius)
     const turn = this.orbit.turn
     if (!this.move && settled) {

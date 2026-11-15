@@ -36,7 +36,7 @@ export function useLaunch(flight: Flight | undefined, firstFlight: boolean): boo
     let part: LaunchPart | undefined
     scene.craft.visible = false
     const begin = requestAnimationFrame(() => {
-      part = new LaunchPart(scene.now, firstFlight, () => setLaunching(false))
+      part = new LaunchPart(scene.now, firstFlight, flight?.isStormLeg ? 'Storm' : 'Flight', () => setLaunching(false))
       scene.craft.visible = false
       scene.setPart('Launch', part)
     })
@@ -49,6 +49,7 @@ export function useLaunch(flight: Flight | undefined, firstFlight: boolean): boo
     window.addEventListener('pointerdown', skip, true)
     return () => {
       cancelAnimationFrame(begin)
+      part?.finish(scene, true)
       window.removeEventListener('keydown', skip, true)
       window.removeEventListener('pointerdown', skip, true)
       scene.setPart('Launch', undefined)
