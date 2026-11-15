@@ -137,10 +137,10 @@ export class CraftActor {
     const left = this.left(now)
     const top = this.top(now)
     this.pieces = [...owners].map((owner) => {
-      const image = SpriteImage.fromPixels(pixels, this.crop, (_x, _y, at) => at === owner)
+      const image = SpriteImage.withOutline(SpriteImage.fromPixels(pixels, this.crop, (_x, _y, at) => at === owner), Colours.HullDeep)
       const angle = random.next() * Math.PI * 2
-      const speed = 4 + random.next() * 9
-      return { image, left, top, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1 }
+      const speed = owner === 'Body' ? 3 : 10 + random.next() * 16
+      return { image, left: left - 1, top: top - 1, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 2 }
     })
   }
 
@@ -149,6 +149,15 @@ export class CraftActor {
     if (this.brokeAt >= 0) {
       const seconds = (now - this.brokeAt) / 1000
       for (const piece of this.pieces) piece.image.drawAt(context, piece.left + piece.vx * seconds, piece.top + piece.vy * seconds)
+      if (seconds < 0.3) {
+        const centreX = Math.round(this.x.at(now))
+        const centreY = Math.round(this.y.at(now))
+        const size = [2, 5, 8, 5][Math.min(3, Math.floor(seconds / 0.075))]
+        context.fillStyle = seconds < 0.15 ? '#ffffff' : Colours.Caution
+        context.fillRect(centreX - size, centreY, size * 2 + 1, 1)
+        context.fillRect(centreX, centreY - size, 1, size * 2 + 1)
+        context.fillRect(centreX - 1, centreY - 1, 3, 3)
+      }
       return
     }
     const bob = still ? 0 : Math.floor(now / BobMs) % 2

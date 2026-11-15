@@ -136,3 +136,11 @@ export class FlightScene implements SceneLayer {
     this.craft.y.set(y, now, snap)
   }
 }
+
+declare global {
+  interface Window {
+    __FlightScene?: FlightScene
+  }
+}
+
+if (import.meta.env?.DEV && typeof window !== 'undefined') window.__FlightScene = FlightScene.shared

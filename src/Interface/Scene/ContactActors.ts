@@ -202,7 +202,7 @@ export class DartContact extends ContactActor {
 export class BurstContact extends ContactActor {
   point(scene: FlightScene): Point {
     const stage = scene.stageArt()
-    return { x: Math.round(stage.left + (stage.right - stage.left) * 0.24), y: Math.round(stage.top + (stage.bottom - stage.top) * 0.16) }
+    return { x: Math.round(stage.left + (stage.right - stage.left) * 0.2), y: Math.round(stage.top + (stage.bottom - stage.top) * 0.1) }
   }
 
   protected draw(context: CanvasRenderingContext2D, _view: SceneView, now: number, scene: FlightScene) {

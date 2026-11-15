@@ -39,6 +39,14 @@ export class SpriteImage {
     })
   }
 
+  static withOutline(source: SpriteImage, colour: string): SpriteImage {
+    const line = SpriteImage.silhouette(source, colour)
+    return new SpriteImage(source.width + 2, source.height + 2, (context) => {
+      for (const [dx, dy] of [[0, 1], [2, 1], [1, 0], [1, 2]]) context.drawImage(line.canvas, dx, dy)
+      context.drawImage(source.canvas, 1, 1)
+    })
+  }
+
   draw(context: CanvasRenderingContext2D, x: number, y: number) {
     context.drawImage(this.canvas, Math.round(x - this.width / 2), Math.round(y - this.height / 2))
   }

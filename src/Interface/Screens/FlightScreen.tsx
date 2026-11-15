@@ -23,6 +23,7 @@ import { useEncounterScene } from '../Scene/UseEncounterScene'
 import { TurnClock, useTurnTimer } from '../Scene/TurnClock'
 import { useTravelBeat, type Travel } from '../Scene/UseTravelBeat'
 import { useLaunch } from '../Scene/UseLaunch'
+import { useCountUp } from '../Scene/UseCountUp'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -353,6 +354,7 @@ export function FlightScreen() {
   const mode = encounter ? SceneMode.Encounter : travel ? SceneMode.Travel : SceneMode.Scanner
   useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}:${mode}`)
   const inLaunch = useLaunch(flight, firstFlight)
+  const points = useCountUp(flight?.pointsEarned ?? 0)
   const endShown = useEncounterScene(flight, plan, tick)
   if (!flight) return null
   const hit = flight.lastOutcome?.incoming ?? 0
@@ -363,7 +365,7 @@ export function FlightScreen() {
       <header className="FlightHead">
         <p className="LegLabel">{wording.t('Flight.Leg', { leg: flight.legIndex + 1, count: Rules.legsPerFlight })}</p>
         <FlightTrack flight={flight} />
-        <p className="FlightPoints">{wording.t('Flight.Points', { points: flight.pointsEarned })}</p>
+        <p className={`FlightPoints ${points.counting ? 'IsCounting' : ''}`}>{wording.t('Flight.Points', { points: points.value })}</p>
       </header>
       {encounter ? <EncounterView flight={flight} encounter={encounter} paused={flight.isOver} /> : flight.isOver ? <div /> : travel ? <TravelView flight={flight} travel={travel} /> : <ScannerView flight={flight} />}
       {flight.isOver && endShown && (

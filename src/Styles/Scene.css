@@ -25,3 +25,17 @@
 .FlightScreen:not(.IsLaunching) > .FlightFoot { animation: SlideUp 240ms steps(4, end) backwards; }
 @keyframes SlideUp { from { transform: translateY(24px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .FlightScreen > .FlightHead, .FlightScreen > .FlightFoot { animation: none; } }
+.Meter.IsFoil .MeterCell.IsFull { transition: background-color 0s; }
+.Meter.IsFoil .MeterCell.IsGhost { animation: CellBlink 900ms steps(1, end) infinite; }
+@keyframes CellBlink { 50% { background: var(--Foil0); } }
+.EventCard .ChannelFill { transition: width 480ms steps(6, end) 320ms; }
+.ActionCard.IsOn { animation: Thunk 150ms steps(3, end); }
+@keyframes Thunk { 0% { transform: translateY(calc(var(--U) * -1)); } 33% { transform: translateY(calc(var(--U) * -4)); } 66% { transform: translateY(calc(var(--U) * -2)); } }
+.TrackLeg.IsDone:has(+ .IsNow) .TrackDot { animation: NodeFlash 360ms steps(1, end); }
+@keyframes NodeFlash { 0% { background: var(--White); box-shadow: 0 0 0 var(--U) var(--White); } 33% { background: var(--Foil3); box-shadow: 0 0 0 var(--U) var(--Foil2); } 66% { background: var(--White); box-shadow: 0 0 0 var(--U) var(--Foil3); } }
+.FlightPoints.IsCounting { color: var(--Foil3); }
+@media (prefers-reduced-motion: reduce) {
+  .Meter.IsFoil .MeterCell.IsGhost, .ActionCard.IsOn, .TrackLeg.IsDone:has(+ .IsNow) .TrackDot { animation: none; }
+  .Meter.IsFoil .MeterCell.IsFull { transition-delay: 0s !important; }
+  .EventCard .ChannelFill { transition: none; }
+}
