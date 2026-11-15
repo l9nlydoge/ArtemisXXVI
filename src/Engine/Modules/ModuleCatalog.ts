@@ -19,7 +19,7 @@ export class ModuleCatalog {
     new RadiationShielding('RadiationShielding', { minRank: 1, marks: Marks.table([5, 9, 15], [1, 2, 3], [1, 2, 3], [0, 80, 240]) }),
     new MagneticShield('MagneticShield', 4, { minRank: 1, marks: Marks.table([12, 20, 32], [2, 2, 3], [6, 9, 13], [70, 150, 380]) }),
     new FlightComputer('FlightComputer', { minRank: 1, marks: Marks.table([6, 10, 16], [1, 1, 1], [1, 2, Number.POSITIVE_INFINITY], [40, 100, 240]) }),
-    new Thrusters('Thrusters', 2, { minRank: 2, marks: Marks.table([10, 16, 26], [2, 2, 3], [2, 3, 4], [100, 180, 400]) }),
+    new Thrusters('Thrusters', 2, { minRank: 2, marks: Marks.table([10, 16, 26], [1, 1, 2], [2, 3, 4], [100, 180, 400]) }),
     new Antenna('Antenna', { minRank: 3, marks: Marks.table([8, 14, 22], [1, 2, 2], [1.1, 1.2, 1.35], [120, 220, 460]) }),
     new RepairDrone('RepairDrone', 3, { minRank: 3, marks: Marks.table([9, 15, 24], [1, 1, 2], [6, 9, 12], [110, 200, 420]) }),
     new CrewCapsule('CrewCapsule', { minRank: 6, marks: Marks.table([0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]) }),

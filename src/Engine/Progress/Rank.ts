@@ -25,7 +25,7 @@ export interface RankProgress {
 }
 
 export class Rank {
-  static readonly thresholds: readonly number[] = [0, 150, 400, 900, 1800, 3500]
+  static readonly thresholds: readonly number[] = [0, 150, 350, 900, 1800, 3500]
 
   static get top(): number {
     return Rank.thresholds.length
