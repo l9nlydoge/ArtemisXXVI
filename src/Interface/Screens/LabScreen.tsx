@@ -21,11 +21,11 @@ function OfferCard({ offer }: { offer: LabOffer }) {
 
   return (
     <li className={`OfferCard Panel Is${state} ${offer.ownedMark === 3 ? 'IsTop' : ''}`}>
-      <p className="OfferFamily">{wording.t(`Family.${card.family}`)}</p>
       <header>
-        <h3>{words.name(card)}</h3>
-        <span className="OwnedMark">{offer.ownedMark > 0 ? wording.t('Lab.Owned', { mark: wording.t(`Mark.${offer.ownedMark}`) }) : state === OfferState.InDevelopment ? '' : wording.t('Lab.NotOwned')}</span>
+        <p className="OfferFamily">{wording.t(`Family.${card.family}`)}</p>
+        <span className={`OwnedMark ${offer.ownedMark > 0 ? 'IsOwned' : ''}`}>{offer.ownedMark > 0 ? wording.t('Lab.Owned', { mark: wording.t(`Mark.${offer.ownedMark}`) }) : state === OfferState.InDevelopment ? '' : wording.t('Lab.NotOwned')}</span>
       </header>
+      <h3>{words.name(card)}</h3>
       <ModuleDrawing moduleId={card.id} />
       {state === OfferState.InDevelopment ? (
         <p className="OfferEffect">{wording.t(`Module.${card.id}.Effect`)}</p>
