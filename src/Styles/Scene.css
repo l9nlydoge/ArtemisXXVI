@@ -16,3 +16,7 @@
 .TurnClock.IsPaused .TurnClockCell.IsOn { animation: none; }
 @keyframes ClockBlink { 50% { background: var(--Danger0); } }
 @media (prefers-reduced-motion: reduce) { .TurnClock.IsDanger .TurnClockCell.IsOn { animation: none; } }
+.TravelView { display: grid; align-content: start; justify-items: center; padding-top: 6vh; min-height: 0; }
+.TravelLine { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; padding: 12px 21px; color: var(--Hull4); animation: Arrive 90ms steps(3, end) backwards; }
+.TravelLine strong { font-weight: 400; color: var(--White); }
+.FlightFoot.IsTravel { grid-template-columns: minmax(210px, 258px); }

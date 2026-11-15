@@ -19,6 +19,7 @@ const ArtRows = 225
 const TravelMs = 850
 const TwinkleMs = 650
 const StarRate = 0.14
+const StreakPace = 40
 
 interface Framing {
   globe: Globe
@@ -153,11 +154,16 @@ class BackdropScene {
     const twinkle = MotionPreference.reduced ? 0 : Math.floor(now / TwinkleMs) % 3
     const globe = this.globeFor(this.current.radius)
     const turnStep = Math.floor(this.orbit.turn * 1600)
-    const signature = this.move ? `move ${now}` : `${twinkle} ${turnStep} ${Math.floor(this.orbit.offset * StarRate)} ${globe}`
+    const streak = this.streak
+    const signature = this.move ? `move ${now}` : `${twinkle} ${turnStep} ${Math.floor(this.orbit.offset * StarRate)} ${globe} ${streak}`
     const layersWant = [...SceneLayers.shared.all].some((layer) => layer.needsPaint(now))
     if (signature === this.signature && !layersWant) return
     this.signature = signature
     this.paint(view, twinkle, now)
+  }
+
+  private get streak(): number {
+    return Math.min(24, Math.floor(Math.max(0, this.orbit.pace - StreakPace) / 8))
   }
 
   private get view(): SceneView {
@@ -177,7 +183,7 @@ class BackdropScene {
     context.fillStyle = '#000000'
     context.fillRect(0, 0, this.width, this.height)
     const starShift = Math.floor(this.orbit.offset * StarRate)
-    this.stars.paint(context, this.width, this.height, Math.round(current.driftX) + starShift, Math.round(current.driftY), twinkle)
+    this.stars.paint(context, this.width, this.height, Math.round(current.driftX) + starShift, Math.round(current.driftY), twinkle, this.streak)
     this.paintEarth()
     for (const layer of SceneLayers.shared.all) layer.paint(context, view, now)
   }

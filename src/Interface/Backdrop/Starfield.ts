@@ -28,7 +28,7 @@ export class Starfield {
     })
   }
 
-  paint(context: CanvasRenderingContext2D, width: number, height: number, driftX: number, driftY: number, beat: number) {
+  paint(context: CanvasRenderingContext2D, width: number, height: number, driftX: number, driftY: number, beat: number, streak = 0) {
     for (let tileY = Math.floor(driftY / TileHeight) * TileHeight - driftY; tileY < height; tileY += TileHeight) {
       for (let tileX = Math.floor(driftX / TileWidth) * TileWidth - driftX; tileX < width; tileX += TileWidth) {
         for (const star of this.stars) {
@@ -37,9 +37,16 @@ export class Starfield {
           if (x < -1 || y < -1 || x > width || y > height) continue
           const dimmed = star.phase > 0 && (star.phase + beat) % 3 === 0
           const level = Math.max(0, star.level - (dimmed ? 1 : 0))
+          if (streak > 0 && star.level >= 2) {
+            const tail = Math.round(streak * (star.level / 4))
+            context.fillStyle = Levels[Math.max(0, level - 2)]
+            context.fillRect(x + 1, y, tail, 1)
+            context.fillStyle = Levels[Math.max(0, level - 1)]
+            context.fillRect(x + 1, y, Math.ceil(tail / 3), 1)
+          }
           context.fillStyle = Levels[level]
           context.fillRect(x, y, 1, 1)
-          if (star.large && !dimmed) {
+          if (star.large && !dimmed && streak === 0) {
             context.fillStyle = Levels[1]
             context.fillRect(x - 1, y, 1, 1)
             context.fillRect(x + 1, y, 1, 1)

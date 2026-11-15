@@ -21,6 +21,7 @@ import { SceneMode } from '../Scene/FlightScene'
 import { useSceneStage } from '../Scene/SceneStage'
 import { useEncounterScene } from '../Scene/UseEncounterScene'
 import { TurnClock, useTurnTimer } from '../Scene/TurnClock'
+import { useTravelBeat, type Travel } from '../Scene/UseTravelBeat'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -141,6 +142,24 @@ function ScannerView({ flight }: { flight: Flight }) {
             {flight.isStormLeg ? wording.t('Flight.HoldStorm') : wording.t('Flight.Hold')}
           </button>
         </div>
+      </footer>
+    </>
+  )
+}
+
+function TravelView({ flight, travel }: { flight: Flight; travel: Travel }) {
+  const wording = useWording()
+  return (
+    <>
+      <section className="TravelView" aria-live="polite">
+        <p className="TravelLine Panel">
+          <strong>{wording.t('Flight.Cruise')}</strong>
+          <span>{travel.gain > 0 ? wording.t('Flight.CruisePower', { gain: travel.gain }) : wording.t('Flight.CruiseFull')}</span>
+          <span className="Muted">{wording.t('Flight.CruiseSkip')}</span>
+        </p>
+      </section>
+      <footer className="FlightFoot Panel IsTravel">
+        <StatusMeters flight={flight} />
       </footer>
     </>
   )
@@ -328,8 +347,9 @@ export function FlightScreen() {
   const loadout = useGameStore((state) => state.loadout)
   const root = useRef<HTMLElement>(null)
   const encounter = flight?.encounter
-  const mode = encounter ? SceneMode.Encounter : SceneMode.Scanner
-  useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}`)
+  const travel = useTravelBeat(flight)
+  const mode = encounter ? SceneMode.Encounter : travel ? SceneMode.Travel : SceneMode.Scanner
+  useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}:${mode}`)
   const endShown = useEncounterScene(flight, plan, tick)
   if (!flight) return null
   const hit = flight.lastOutcome?.incoming ?? 0
@@ -342,7 +362,7 @@ export function FlightScreen() {
         <FlightTrack flight={flight} />
         <p className="FlightPoints">{wording.t('Flight.Points', { points: flight.pointsEarned })}</p>
       </header>
-      {encounter ? <EncounterView flight={flight} encounter={encounter} paused={flight.isOver} /> : flight.isOver ? <div /> : <ScannerView flight={flight} />}
+      {encounter ? <EncounterView flight={flight} encounter={encounter} paused={flight.isOver} /> : flight.isOver ? <div /> : travel ? <TravelView flight={flight} travel={travel} /> : <ScannerView flight={flight} />}
       {flight.isOver && endShown && (
         <div className={`FlightEnd Panel ${flight.phase === FlightPhase.Lost ? 'IsLost' : ''}`} role="dialog" aria-label={wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}>
           <h2>{wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}</h2>
