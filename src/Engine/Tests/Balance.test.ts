@@ -127,7 +127,7 @@ describe('Balance on the real weeks (spec 13.2, as adjusted in GameDesign.md)', 
 
   test('B8: every module the lab sells by rank 2 appears in some week\'s top five loadouts', () => {
     const seen = new Set(Object.values(ranked).flatMap((scores) => scores.slice(0, 5).flatMap((score) => [...LoadoutSearch.modules(score.loadout)])))
-    const sold = ModuleCatalog.shared.all.filter((card) => card.isObtainable && card.minRank <= 2 && card.id !== 'Thrusters').map((card) => card.id)
+    const sold = ModuleCatalog.shared.all.filter((card) => card.isObtainable && card.minRank <= 2).map((card) => card.id)
     expect(sold.filter((id) => !seen.has(id))).toEqual([])
   })
 })
