@@ -206,7 +206,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .TurnHint { padding: 8px 12px; font-size: 0.8rem; color: var(--Muted); border-top: 1px solid var(--Line); }
 
 .FlightFoot { display: grid; grid-template-columns: minmax(200px, 250px) 1fr auto; align-items: center; gap: 22px; padding: 12px 18px; }
-.FlightFoot.IsEncounter { height: 188px; }
+.FlightFoot.IsEncounter { min-height: 188px; }
 .FootHint { color: var(--Muted); font-size: 0.95rem; max-width: 34rem; }
 .StatusMeters { display: grid; gap: 10px; }
 .FootActions { display: flex; justify-content: flex-end; gap: 10px; }
@@ -255,9 +255,13 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 @keyframes Hit { 0% { opacity: 0; background-position: 0 0, 0 0; } 12% { opacity: 1; } 100% { opacity: 0; background-position: 90px 0, 0 0; } }
 
 @media (max-height: 760px) {
-  .FlightFoot.IsEncounter { height: 172px; }
+  .FlightFoot.IsEncounter { min-height: 172px; }
   .EventPhoto img { height: clamp(110px, 19vh, 150px); }
-  .ActionCard .ModuleDrawing { width: 42px; height: 24px; }
+  .ActionCard { padding: 6px 10px 8px; }
+  .ActionTop { margin-bottom: 0; }
+  .ActionCard .ModuleDrawing { width: 36px; height: 20px; }
+  .ActionName { font-size: 0.9rem; }
+  .ActionUse { font-size: 0.92rem; }
   .TurnPlanArea { gap: 6px; }
   .ScannerView { gap: 6px; }
   .ContactBody { gap: 4px; padding: 10px 12px 6px; }
