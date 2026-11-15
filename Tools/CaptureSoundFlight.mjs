@@ -133,6 +133,12 @@ await sleep(2500)
 await shot('8-Lab')
 await evaluate(helpers + `const buy = [...document.querySelectorAll('button')].find(b => b.textContent.includes('Unlock') && !b.disabled); buy?.click(); await wait(800)`)
 await shot('9-LabBought')
+if (process.argv[5] === 'second') {
+  await evaluate(helpers + `btn('Fly a mission').click(); await wait(2000); const cards = [...document.querySelectorAll('button')].filter(b => b.textContent.includes('Build for this week') && !b.disabled); cards[cards.length - 1]?.click(); await wait(2000); btn('Launch')?.click(); await wait(2500)`)
+  await shot('10-SecondFlight')
+  await evaluate(helpers + `let g = 0; while (!btn('See the debrief') && g++ < 200) { if (btn('End turn')) { document.querySelectorAll('.ActionCard:not(.IsIdle):not(.IsOn):not(:disabled)').forEach(c => c.click()); await wait(120); btn('End turn')?.click(); await wait(700) } else if (btn('Continue')) { btn('Continue').click(); await wait(900) } else if (btn('Approach')) { btn('Approach').click(); await wait(700) } else if (btn('Hold and recharge')) { btn('Hold and recharge').click(); await wait(700) } else await wait(100) } btn('See the debrief')?.click(); await wait(1500)`)
+  await shot('11-SecondDebrief')
+}
 report.state = await evaluate('return window.Artemis26Sound?.sound.contextState')
 const log = await evaluate('return (window.Artemis26Sound?.log ?? []).map(r => r.name + (r.params && Object.keys(r.params).length ? JSON.stringify(r.params) : ""))')
 report.cueCounts = {}
