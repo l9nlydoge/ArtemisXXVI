@@ -40,7 +40,7 @@ describe('Module catalog', () => {
   test('only modules that cost power are active', () => {
     const active = catalog.all.filter((card) => card.isActive).map((card) => card.id)
     expect(active).toEqual(['Camera', 'Spectrometer', 'Radar', 'ParticleDetector', 'HighEnergyDetector', 'MagneticShield', 'Thrusters', 'RepairDrone'])
-    expect(catalog.get('Camera').powerCost).toBe(2)
+    expect(catalog.get('Camera').powerCost).toBe(3)
     expect(catalog.get('Radar').powerCost).toBe(4)
     expect(catalog.get('SolarArray').powerCost).toBe(0)
   })

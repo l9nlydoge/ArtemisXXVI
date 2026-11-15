@@ -83,9 +83,9 @@ describe('Tables match the spec', () => {
   test('modules', () => {
     expect(row('SolarArray')).toEqual({ rank: 1, power: 0, cost: [8, 14, 24], bay: [1, 2, 3], value: [2, 3, 5], unlock: [0, 90, 260] })
     expect(row('Battery')).toEqual({ rank: 1, power: 0, cost: [6, 10, 18], bay: [1, 1, 2], value: [6, 10, 16], unlock: [0, 70, 220] })
-    expect(row('Camera')).toEqual({ rank: 1, power: 2, cost: [10, 18, 30], bay: [2, 2, 3], value: [3, 4, 6], unlock: [0, 110, 320] })
+    expect(row('Camera')).toEqual({ rank: 1, power: 3, cost: [10, 18, 30], bay: [2, 2, 3], value: [3, 4, 6], unlock: [0, 110, 320] })
     expect(row('ParticleDetector')).toEqual({ rank: 1, power: 1, cost: [6, 10, 16], bay: [1, 1, 1], value: [2, 3, 5], unlock: [0, 80, 240] })
-    expect(row('Spectrometer')).toEqual({ rank: 1, power: 4, cost: [14, 24, 38], bay: [2, 3, 3], value: [4, 6, 8], unlock: [0, 140, 360] })
+    expect(row('Spectrometer')).toEqual({ rank: 1, power: 3, cost: [14, 24, 38], bay: [2, 3, 3], value: [4, 6, 8], unlock: [0, 140, 360] })
     expect(row('Radar')).toEqual({ rank: 1, power: 4, cost: [16, 26, 40], bay: [3, 3, 4], value: [5, 7, 10], unlock: [90, 170, 400] })
     expect(row('HighEnergyDetector')).toEqual({ rank: 2, power: 3, cost: [18, 28, 44], bay: [2, 2, 3], value: [4, 6, 9], unlock: [120, 200, 440] })
     expect(row('RadiationShielding')).toEqual({ rank: 1, power: 0, cost: [5, 9, 15], bay: [1, 2, 3], value: [1, 2, 3], unlock: [0, 80, 240] })

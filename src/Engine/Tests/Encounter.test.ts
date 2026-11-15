@@ -34,9 +34,9 @@ describe('Charging', () => {
     const { state, encounter } = start(starter, [[1, 0], [1, 0, true], [1, 0]], { charge: 2 })
     expect(state.charge).toBe(5)
     encounter.commit(plan('Camera#1'))
-    expect(state.charge).toBe(3)
+    expect(state.charge).toBe(2)
     encounter.commit(plan())
-    expect(state.charge).toBe(6)
+    expect(state.charge).toBe(5)
   })
 })
 
@@ -91,8 +91,8 @@ describe('Recording', () => {
     const outcome = encounter.commit(plan('Camera#1'))
     expect(outcome.wasted).toEqual(['Camera#1'])
     expect(outcome.gains.size).toBe(0)
-    expect(outcome.powerCost).toBe(2)
-    expect(outcome.chargeAfter).toBe(charge - 2)
+    expect(outcome.powerCost).toBe(3)
+    expect(outcome.chargeAfter).toBe(charge - 3)
     expect(encounter.recorded.get(Channel.Visible)).toBe(9)
   })
 
