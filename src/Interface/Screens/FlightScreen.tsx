@@ -261,7 +261,7 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
                   {wording.t('Result.Chase', { cost: Rules.chaseCost })}: {contact.identified ? wording.text(contact.event.label) : wording.t('Contact.Unknown')}
                 </button>
               ))}
-              {flight.phase === FlightPhase.EncounterDone && <button type="button" className="Primary" onClick={() => send(Commands.proceed)}>{wording.t('Result.Continue')}</button>}
+              {flight.phase === FlightPhase.EncounterDone && <button type="button" className="Primary IsLarge" onClick={() => send(Commands.proceed)}>{wording.t('Result.Continue')}</button>}
             </div>
           </div>
         ) : (

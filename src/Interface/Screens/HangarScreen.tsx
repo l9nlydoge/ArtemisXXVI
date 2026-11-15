@@ -76,7 +76,7 @@ function ModuleRow({ card }: { card: ModuleCard }) {
           <div className="ModuleControls">
             <div className="MarkStepper" role="group" aria-label={words.name(card)}>
               {AllMarks.map((mark) => (
-                <button key={mark} type="button" aria-pressed={module.mark === mark} disabled={mark > owned} title={mark > owned ? wording.t('Hangar.MarkLocked') : undefined} onClick={() => editLoadout((current) => current.setMark(module.key, mark))}>
+                <button key={mark} type="button" aria-pressed={module.mark === mark} disabled={mark > owned} title={mark > owned ? `${words.mark(mark)}: ${wording.t('Hangar.MarkLocked')}` : words.mark(mark)} aria-label={words.mark(mark)} onClick={() => editLoadout((current) => current.setMark(module.key, mark))}>
                   {'I'.repeat(mark)}
                 </button>
               ))}

@@ -101,7 +101,7 @@ function Craft() {
     const station = game.screen === Screen.Flight && (!game.flight?.encounter || game.flight.phase === FlightPhase.Lost) ? undefined : Stations[game.screen]
     const step = Math.min(delta, 0.1)
     const blend = MotionPreference.reduced ? 1 : 1 - Math.exp(-2.2 * step)
-    const size = craft.scale.x + ((station?.size ?? 0) - craft.scale.x) * blend
+    const size = !station && game.screen !== Screen.Flight ? 0 : craft.scale.x + ((station?.size ?? 0) - craft.scale.x) * blend
     craft.scale.setScalar(size)
     craft.visible = size > 0.04
     if (station) {
