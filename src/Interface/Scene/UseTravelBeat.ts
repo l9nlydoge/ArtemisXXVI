@@ -19,6 +19,7 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
   const lastLeg = useRef(leg)
   const lastCharge = useRef(flight?.state.charge ?? 0)
   const voiced = useRef(-1)
+  const hush = useRef<(() => void) | undefined>(undefined)
   const [travel, setTravel] = useState<{ gain: number; full: boolean; started: number } | undefined>(undefined)
 
   useEffect(() => {
@@ -34,7 +35,7 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
     if (!travel) return
     const orbit = Orbit.shared
     const beat = new TravelBeat(TravelUsual, OrbitPace.Travel, OrbitPace.Scan)
-    if (voiced.current !== travel.started) Sound.play('Travel', { duration: beat.length / 1000 })
+    if (voiced.current !== travel.started) hush.current = Sound.play('Travel', { duration: beat.length / 1000 })
     voiced.current = travel.started
     const finish = () => {
       orbit.hold(undefined)
@@ -51,6 +52,7 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
     })
     const skip = (event: Event) => {
       event.preventDefault()
+      hush.current?.()
       finish()
     }
     window.addEventListener('keydown', skip, true)
@@ -63,5 +65,9 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
     }
   }, [travel])
 
-  return travel && { gain: travel.gain, full: travel.full, skip: () => setTravel(undefined) }
+  return travel && { gain: travel.gain, full: travel.full, skip: () => {
+      hush.current?.()
+      setTravel(undefined)
+    },
+  }
 }

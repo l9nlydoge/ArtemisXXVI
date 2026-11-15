@@ -5,6 +5,7 @@ import { LaunchHandle } from './Cues/LaunchCues'
 import { SoundEngine } from './SoundEngine'
 import { SoundSettings } from './SoundSettings'
 import { TurnTimer } from './TurnTimer'
+import type { Voice } from './Voice'
 
 export interface LaunchControl {
   liftoff(): void
@@ -121,13 +122,15 @@ export class SoundSystem {
     this.guard(() => this.on && this.live?.context.state === 'suspended' && SoundSystem.quietly(this.live.context.resume()))
   }
 
-  play(name: CueName, params: CueParams = {}, delay = 0): void {
+  play(name: CueName, params: CueParams = {}, delay = 0): () => void {
     this.record(name, params)
+    let voice: Voice | undefined
     this.guard(() => {
       const live = this.ready()
       if (!live) return
-      live.library.get(name)?.play(live.engine, live.engine.now + Math.max(0, delay), params)
+      voice = live.library.get(name)?.play(live.engine, live.engine.now + Math.max(0, delay), params)
     })
+    return () => this.guard(() => voice?.stopAt(0, 0.12))
   }
 
   ambience(place: AmbiencePlace | keyof typeof AmbiencePlace): void {
