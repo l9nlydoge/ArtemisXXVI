@@ -1,343 +1,459 @@
+@font-face { font-family: 'InterfaceFallback'; src: local('Arial Narrow'), local('Liberation Sans Narrow'), local('DejaVu Sans Condensed'), local('Roboto Condensed'), local('Arial'), local('Helvetica'), local('DejaVu Sans'); size-adjust: 76%; }
+
 :root {
-  --Space: #000000;
-  --Panel: rgba(7, 9, 12, 0.94);
-  --Plate: #0b0d10;
-  --Line: rgba(255, 255, 255, 0.14);
-  --LineStrong: rgba(255, 255, 255, 0.4);
-  --Text: #f3f5f6;
-  --Muted: #a6b0bb;
-  --Foil: #e8a838;
-  --Go: #3ecf85;
-  --NoGo: #ff5263;
+  --Black: #000000;
+  --Space0: #070b1a;
+  --Space1: #0e1630;
+  --Space2: #1b2a4e;
+  --Ocean0: #173a73;
+  --Ocean1: #1f5aa8;
+  --Ocean2: #3b7dd8;
+  --Ocean3: #7db8f2;
+  --Cloud0: #c5d2e0;
+  --Cloud1: #eef3f7;
+  --White: #ffffff;
+  --NightLights: #ffcf6b;
+  --Foil0: #6b4410;
+  --Foil1: #b9741c;
+  --Foil2: #e8a838;
+  --Foil3: #ffd27a;
+  --Hull0: #161a22;
+  --Hull1: #2b313c;
+  --Hull2: #4a5362;
+  --Hull3: #7c8797;
+  --Hull4: #b8c1cc;
+  --Cell0: #131a4d;
+  --Cell1: #27307e;
+  --Cell2: #4c57ba;
+  --Danger0: #7a1f2b;
+  --Danger1: #c8323f;
+  --Danger2: #ff5263;
+  --Good0: #1f7a4d;
+  --Good1: #3ecf85;
   --Caution: #f2e05a;
-  --Gutter: clamp(16px, 2.6vw, 40px);
-  --Ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --Aurora0: #6a3fb8;
+  --Aurora1: #b06cf0;
+
+  --Space: var(--Space0);
+  --Text: var(--Cloud1);
+  --Muted: var(--Hull3);
+  --Foil: var(--Foil2);
+  --Go: var(--Good1);
+  --NoGo: var(--Danger2);
+  --Line: var(--Hull1);
+  --LineStrong: var(--Hull2);
+
+  --U: 3px;
+  --Type: 'Jersey 10', 'InterfaceFallback', 'Arial Narrow', sans-serif;
+  --Body: 20px;
+  --Head: 30px;
+  --Display: 40px;
+  --Gutter: clamp(18px, 2.6vw, 42px);
+  --Snap: 90ms steps(3, end);
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #Root { height: 100%; }
-body { background: var(--Space); color: var(--Text); font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif; font-size: 16px; line-height: 1.4; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; overflow: hidden; }
+body { background: var(--Space); color: var(--Text); font-family: var(--Type); font-size: var(--Body); line-height: 24px; font-variant-numeric: tabular-nums; -webkit-font-smoothing: none; font-smooth: never; overflow: hidden; }
 ul, ol { list-style: none; }
-h1, h2, h3 { font-weight: 600; line-height: 1.15; }
-h2 { font-size: 1.05rem; }
-h3 { font-size: 1rem; }
-a { color: var(--Text); text-underline-offset: 3px; }
-button { font: inherit; color: inherit; background: none; border: 1px solid var(--Line); border-radius: 2px; padding: 8px 14px; cursor: pointer; transition: border-color 120ms, background-color 120ms, color 120ms; }
-button:hover:not(:disabled) { border-color: var(--LineStrong); }
-button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
-:focus-visible { outline: 2px solid var(--Foil); outline-offset: 2px; }
-.Primary { background: var(--Foil); border-color: var(--Foil); color: #14100a; font-weight: 600; }
-.Primary:hover:not(:disabled) { background: #f4b94e; border-color: #f4b94e; }
-.Primary:disabled { background: transparent; border-color: var(--Line); color: var(--Muted); opacity: 1; }
-.Primary.IsLarge { font-size: 1.15rem; padding: 13px 28px; }
-.Quiet { border-color: transparent; color: var(--Muted); padding-inline: 10px; }
-.Quiet:hover:not(:disabled) { color: var(--Text); border-color: var(--Line); }
+h1, h2, h3 { font-weight: 400; line-height: 1; }
+h1 { font-size: var(--Head); }
+h2, h3 { font-size: var(--Body); line-height: 24px; color: var(--White); }
+strong, b { font-weight: 400; color: var(--White); }
+a { color: var(--Ocean3); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+a:hover { color: var(--White); }
+img { image-rendering: pixelated; }
+::selection { background: var(--Foil2); color: var(--Hull0); }
+
+button {
+  --Ring: var(--Black);
+  --Face: var(--Hull1);
+  --Lit: var(--Hull2);
+  --Dim: var(--Hull0);
+  --Drop: var(--Black);
+  position: relative;
+  font: inherit;
+  line-height: 24px;
+  color: var(--Text);
+  background: var(--Face);
+  border: 0;
+  border-radius: 0;
+  padding: 6px 15px;
+  margin: var(--U) var(--U) calc(var(--U) * 2);
+  cursor: pointer;
+  box-shadow: inset 0 var(--U) 0 var(--Lit), inset 0 calc(var(--U) * -1) 0 var(--Dim), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Drop);
+}
+button:hover:not(:disabled) { --Face: var(--Hull2); --Lit: var(--Hull3); --Dim: var(--Hull1); }
+button:active:not(:disabled) { transform: translateY(var(--U)); --Drop: transparent; }
+button:disabled { cursor: not-allowed; color: var(--Muted); --Face: var(--Hull0); --Lit: var(--Hull0); --Dim: var(--Hull0); --Ring: var(--Hull1); --Drop: transparent; }
+:focus-visible { outline: var(--U) solid var(--White); outline-offset: var(--U); }
+button:focus-visible { outline-offset: calc(var(--U) * 2); }
+
+.Primary { --Ring: var(--Foil0); --Face: var(--Foil2); --Lit: var(--Foil3); --Dim: var(--Foil1); color: var(--Hull0); }
+.Primary:hover:not(:disabled) { --Face: var(--Foil3); --Lit: var(--White); --Dim: var(--Foil2); }
+.Primary:disabled { color: var(--Muted); }
+.Primary.IsLarge { font-size: var(--Head); line-height: 30px; padding: 12px 24px; }
+.Quiet { --Ring: transparent; --Face: transparent; --Lit: transparent; --Dim: transparent; --Drop: transparent; color: var(--Hull4); padding-inline: 9px; }
+.Quiet:hover:not(:disabled) { --Face: var(--Hull1); --Lit: var(--Hull1); --Dim: var(--Hull1); color: var(--White); }
+.Quiet:disabled { --Ring: transparent; --Face: transparent; }
 .Muted { color: var(--Muted); }
-.Panel { background: var(--Panel); border: 1px solid var(--Line); border-radius: 2px; }
+.Panel {
+  --Ring: var(--Hull1);
+  background: var(--Hull0);
+  box-shadow: inset 0 var(--U) 0 var(--Hull1), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Black);
+}
 
 .WorldLayer { position: fixed; inset: 0; z-index: 0; background: var(--Space); }
-.WorldLayer.IsStill { background: radial-gradient(120% 90% at 78% 60%, #10233f 0%, #050a14 45%, #000000 75%); }
+.WorldLayer.IsStill { background: var(--Space0); }
 .World { width: 100%; height: 100% !important; display: block; }
 .Interface { position: relative; z-index: 1; height: 100dvh; }
 .Interface > main { height: 100%; }
 
-.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(28px, 7vh, 72px) var(--Gutter) 18px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.72) 30%, rgba(0, 0, 0, 0) 58%); }
-.HomeIntro { max-width: 31rem; display: grid; gap: 18px; }
-.HomeIntro h1 { font-size: clamp(3.2rem, 7.4vw, 6.2rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.92; }
-.Pitch { font-size: 1.3rem; font-weight: 500; line-height: 1.3; max-width: 26rem; }
-.HomeActions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.HomeFoot { display: grid; gap: 22px; }
-.RankBadge { width: min(100%, 22rem); display: grid; gap: 6px; }
-.RankTitle { display: flex; gap: 10px; align-items: baseline; font-size: 1.15rem; font-weight: 600; }
+.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(30px, 8vh, 78px) var(--Gutter) 18px; }
+.HomeIntro { max-width: 30rem; display: grid; gap: 21px; justify-items: start; }
+.HomeIntro h1 { font-size: 80px; line-height: 72px; color: var(--White); text-shadow: 0 6px 0 var(--Black); }
+.Pitch { font-size: var(--Head); line-height: 33px; max-width: 27rem; color: var(--Cloud1); }
+.HomeActions { display: flex; align-items: center; gap: 15px; margin-top: 9px; }
+.HomeFoot { display: grid; gap: 24px; justify-items: start; }
+.RankBadge { width: min(100%, 24rem); display: grid; gap: 6px; }
+.HomeFoot .RankBadge { padding: 15px 18px 18px; background: var(--Hull0); box-shadow: inset 0 var(--U) 0 var(--Hull1), 0 calc(var(--U) * -1) 0 var(--Hull1), 0 var(--U) 0 var(--Hull1), calc(var(--U) * -1) 0 0 var(--Hull1), var(--U) 0 0 var(--Hull1), 0 calc(var(--U) * 2) 0 var(--Black); }
+.RankTitle { display: flex; gap: 12px; align-items: baseline; font-size: var(--Head); line-height: 30px; color: var(--White); }
 .RankNumber { color: var(--Foil); }
-.RankTrack { height: 4px; background: var(--Line); }
-.RankFill { height: 100%; background: var(--Foil); transition: width 600ms var(--Ease); }
-.RankNote, .RankPoints { font-size: 0.9rem; color: var(--Muted); }
+.RankTrack { height: 12px; background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull1); margin: var(--U) var(--U) 6px; }
+.RankFill { height: 100%; background: var(--Foil); box-shadow: inset 0 var(--U) 0 var(--Foil3), inset 0 calc(var(--U) * -1) 0 var(--Foil1); transition: width var(--Snap); }
+.RankNote { color: var(--Hull4); }
 .RankPoints { color: var(--Text); }
-.Credits { display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 0.78rem; color: var(--Muted); }
+.Credits { display: flex; flex-wrap: wrap; gap: 0 27px; color: var(--Hull4); padding: 6px 12px; background: var(--Space0); }
+.CreditArt { color: var(--Cloud0); }
 
-.ScreenHead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-.ScreenHead h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
-.ScreenHead .Quiet { padding: 4px 8px; margin-left: -8px; }
+.ScreenHead { display: flex; align-items: baseline; gap: 6px 18px; flex-wrap: wrap; }
+.ScreenHead h1 { color: var(--White); }
+.ScreenHead .Quiet { margin-left: -9px; }
 
-.ForecastLines { display: grid; gap: 3px; font-size: 0.95rem; }
-.ForecastLines li.IsDanger { color: var(--NoGo); font-weight: 600; }
-.ForecastLines li.IsCaution { color: var(--Caution); font-weight: 600; }
+.ForecastLines { display: grid; gap: 0; }
+.ForecastLines li.IsDanger { color: var(--NoGo); }
+.ForecastLines li.IsCaution { color: var(--Caution); }
 
-.WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 22px var(--Gutter) 26px; }
-.WeekRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: start; }
-.WeekCard { display: grid; grid-template-rows: clamp(120px, 24vh, 210px) 1fr; overflow: hidden; }
+.WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 21px var(--Gutter) 24px; overflow-y: auto; }
+.WeekRow { display: grid; grid-template-columns: repeat(3, 384px); justify-content: center; gap: 27px; align-content: start; }
+.WeekCard { display: grid; grid-template-rows: 216px 1fr; overflow: hidden; }
 .WeekCard img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 100%; object-position: 50% 0; }
-.WeekBody { display: grid; gap: 8px; padding: 16px 18px 18px; align-content: start; }
-.WeekBody h2 { font-size: 1.3rem; }
-.WeekDates { font-size: 0.9rem; color: var(--Muted); }
-.WeekAbout { font-size: 0.95rem; }
-.WeekBody .Primary { justify-self: start; margin-top: 6px; }
-.WeekLogged { font-size: 0.85rem; }
-.WeekCard.IsLocked img { filter: grayscale(1) brightness(0.72); }
+.WeekBody { display: grid; gap: 6px; padding: 15px 18px 18px; align-content: start; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.WeekBody h2 { font-size: var(--Head); line-height: 30px; }
+.WeekDates { color: var(--Muted); }
+.WeekBody .Primary { justify-self: start; margin-top: 9px; }
+.WeekCard.IsLocked img { filter: grayscale(1) brightness(0.6); }
 .WeekCard.IsLocked .WeekBody > :not(.WeekLock):not(h2):not(.WeekDates) { color: var(--Muted); }
-.WeekLock { font-weight: 600; color: var(--Text); margin-top: 6px; }
+.WeekCard.IsLocked h2 { color: var(--Hull4); }
+.WeekLock { color: var(--Text); margin-top: 6px; padding: 6px 12px; background: var(--Hull1); justify-self: start; }
 
-.HangarScreen { display: grid; grid-template-columns: minmax(300px, 380px) 1fr minmax(380px, 470px); grid-template-rows: auto 1fr; gap: 14px 18px; padding: 18px var(--Gutter) 20px; }
+.HangarScreen { display: grid; grid-template-columns: minmax(300px, 384px) 1fr minmax(400px, 480px); grid-template-rows: auto minmax(0, 1fr); gap: 15px 21px; padding: 18px var(--Gutter) 24px; }
 .HangarScreen .ScreenHead { grid-column: 1 / -1; }
-.HangarLeft { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 0; }
-.HangarForecast, .HangarCraft { padding: 14px 16px; display: grid; gap: 9px; }
-.HangarCraft p { font-size: 0.95rem; }
-.HangarInstruction { flex-basis: 100%; color: var(--Muted); font-size: 0.95rem; margin-top: -8px; }
-.HangarLimits { display: grid; gap: 12px; padding: 4px 0 8px; border-bottom: 1px solid var(--Line); margin-bottom: 2px; }
-.HangarLimits .MeterHead { font-size: 1rem; }
-.HangarLimits .MeterLabel { color: var(--Text); font-weight: 600; }
-.HangarLimits .MeterText { font-size: 1.1rem; }
-.HangarLimits .MeterTrack { height: 8px; }
-.RecordLists { display: grid; gap: 6px; font-size: 0.95rem; }
-.RecordLists dt { color: var(--Muted); font-size: 0.82rem; }
-.RecordLists dd { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.HangarLeft { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 0; }
+.HangarForecast, .HangarCraft { padding: 15px 18px 18px; display: grid; gap: 9px; }
+.HangarInstruction { flex-basis: 100%; color: var(--Hull4); }
+.HangarLimits { display: grid; gap: 12px; padding: 3px 0 12px; box-shadow: 0 var(--U) 0 var(--Hull1); margin-bottom: 6px; }
+.HangarLimits .MeterLabel { color: var(--White); }
+.HangarLimits .MeterText { color: var(--Foil); }
+.RecordLists { display: grid; gap: 0; }
+.RecordLists dt { color: var(--Muted); margin-top: 6px; }
+.RecordLists dd { display: flex; flex-wrap: wrap; gap: 0 12px; }
 .RecordLists .IsWanted { color: var(--Caution); }
-.RecordLists em { font-style: normal; font-size: 0.85rem; }
-.HangarModules { grid-column: 3; display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
-.HangarModules > h2 { padding: 12px 16px 8px; }
-.ModuleScroll { overflow-y: auto; padding: 0 16px 8px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; }
-.FamilyName { font-size: 0.82rem; font-weight: 500; color: var(--Muted); padding: 10px 0 2px; }
-.ModuleRow { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; padding: 9px 0 9px 10px; border-top: 1px solid var(--Line); border-left: 3px solid transparent; }
-.ModuleRow.IsFitted { border-left-color: var(--Foil); background: rgba(232, 168, 56, 0.06); }
-.ModuleRow.IsLocked { color: var(--Muted); }
-.ModuleRow.IsExtra { grid-template-columns: 1fr; padding-block: 2px; border-top: 0; }
-.ModuleRow.IsExtra button { justify-self: start; font-size: 0.88rem; }
+.RecordLists em { font-style: normal; }
+.HangarModules { grid-column: 3; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; }
+.HangarModules > h2 { padding: 15px 18px 6px; font-size: var(--Head); line-height: 30px; }
+.ModuleScroll { overflow-y: auto; padding: 0 18px 12px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); }
+.FamilyName { color: var(--Muted); padding: 12px 0 6px; }
+.ModuleRow { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; padding: 9px 9px 9px 12px; margin: 3px 3px 9px; background: var(--Hull0); box-shadow: 0 calc(var(--U) * -1) 0 var(--Hull1), 0 var(--U) 0 var(--Hull1), calc(var(--U) * -1) 0 0 var(--Hull1), var(--U) 0 0 var(--Hull1); }
+.ModuleRow.IsFitted { --Muted: var(--Hull4); background: var(--Hull1); box-shadow: inset 0 var(--U) 0 var(--Hull2), inset 6px 0 0 var(--Foil2), 0 calc(var(--U) * -1) 0 var(--Black), 0 var(--U) 0 var(--Black), calc(var(--U) * -1) 0 0 var(--Black), var(--U) 0 0 var(--Black), 0 calc(var(--U) * 2) 0 var(--Black); padding-left: 18px; }
+.ModuleRow.IsLocked { color: var(--Muted); background: transparent; box-shadow: 0 calc(var(--U) * -1) 0 var(--Hull1), 0 var(--U) 0 var(--Hull1), calc(var(--U) * -1) 0 0 var(--Hull1), var(--U) 0 0 var(--Hull1); }
+.ModuleRow.IsLocked h3 { color: var(--Hull4); }
+.ModuleRow.IsExtra { grid-template-columns: 1fr; padding: 0; margin-top: -3px; background: none; box-shadow: none; }
+.ModuleRow.IsExtra button { justify-self: start; }
 .ModuleRow.IsExtra:has(.ModuleShort) { grid-template-columns: auto 1fr; align-items: center; }
-.ModuleShort { font-size: 0.84rem; color: var(--Caution); }
-.ModuleRow > button.IsShort { color: var(--Muted); border-style: dashed; }
-.BayFull { color: var(--Caution); font-size: 0.92rem; }
+.ModuleShort { color: var(--Caution); line-height: 22px; }
+.ModuleRow > button.IsShort { color: var(--Muted); }
+.BayFull { color: var(--Caution); }
 .ModuleDrawing { --Scale: 2; display: block; width: calc(32px * var(--Scale)); height: calc(20px * var(--Scale)); background-repeat: no-repeat; background-size: calc(448px * var(--Scale)) calc(20px * var(--Scale)); background-position: calc(var(--Sprite, 0) * -32px * var(--Scale)) 0; image-rendering: pixelated; }
 .IsLocked .ModuleDrawing { opacity: 0.35; }
-.ModuleMain { min-width: 0; display: grid; gap: 1px; }
-.ModuleEffect { font-size: 0.88rem; color: var(--Muted); }
-.ModuleStats { display: flex; gap: 12px; font-size: 0.84rem; }
-.ModuleControls { display: grid; gap: 2px; justify-items: end; }
-.ModuleControls .Quiet { font-size: 0.82rem; padding: 2px 6px; }
-.MarkStepper { display: flex; }
-.MarkStepper button { min-width: 34px; padding: 5px 8px; border-radius: 0; margin-left: -1px; font-weight: 600; letter-spacing: 0.08em; }
-.MarkStepper button:disabled { opacity: 0.35; }
-.MarkStepper button[aria-pressed='true'] { background: var(--Foil); border-color: var(--Foil); color: #14100a; position: relative; }
-.HangarLaunch { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--Line); }
-.IssueLine { color: var(--NoGo); font-size: 0.92rem; font-weight: 500; }
+.ModuleMain { min-width: 0; display: grid; gap: 0; }
+.ModuleEffect { color: var(--Muted); }
+.ModuleStats { display: flex; gap: 12px; color: var(--Text); }
+.ModuleControls { display: grid; gap: 0; justify-items: end; }
+.ModuleControls .Quiet { padding: 0 6px; margin: 3px 0 0; }
+.MarkStepper { display: flex; margin: 3px 3px 6px; }
+.MarkStepper button { min-width: 36px; padding: 3px 6px; margin: 0; --Drop: var(--Black); box-shadow: inset 0 var(--U) 0 var(--Lit), inset 0 calc(var(--U) * -1) 0 var(--Dim), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Drop); }
+.MarkStepper button:last-child { box-shadow: inset 0 var(--U) 0 var(--Lit), inset 0 calc(var(--U) * -1) 0 var(--Dim), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Drop); }
+.MarkStepper button:disabled { --Face: var(--Hull0); --Ring: var(--Black); color: var(--Hull2); }
+.MarkStepper button[aria-pressed='true'] { --Ring: var(--Foil0); --Face: var(--Foil2); --Lit: var(--Foil3); --Dim: var(--Foil1); color: var(--Hull0); }
+.HangarLaunch { display: flex; align-items: center; justify-content: flex-end; gap: 15px; padding: 12px 18px 15px; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.IssueLine { color: var(--NoGo); }
 
-.Meter { display: grid; gap: 4px; }
-.MeterHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.92rem; }
-.MeterLabel { color: var(--Muted); }
-.MeterText { font-weight: 600; }
-.MeterTrack { position: relative; height: 6px; background: var(--Line); }
-.MeterFill, .MeterGhost { position: absolute; inset: 0 auto 0 0; transition: width 240ms var(--Ease); }
-.MeterFill { background: var(--Text); }
-.MeterGhost { background: var(--LineStrong); }
-.Meter.IsFoil .MeterFill { background: var(--Foil); }
-.Meter.IsGood .MeterFill { background: var(--Go); }
-.Meter.IsDanger .MeterFill { background: var(--NoGo); }
+.Meter { display: grid; gap: 3px; }
+.MeterHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.MeterLabel { color: var(--Hull4); }
+.MeterText { color: var(--White); }
+.MeterTrack { position: relative; height: 12px; margin: var(--U); background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull1); }
+.MeterTrack.IsCells { display: flex; gap: var(--U); background: var(--Space0); }
+.MeterCell { flex: 1 1 0; min-width: 0; background: var(--Hull1); }
+.MeterCell.IsGhost { background: var(--Hull3); }
+.MeterCell.IsFull { background: var(--Cloud0); }
+.Meter.IsFoil .MeterCell.IsFull { background: var(--Foil2); }
+.Meter.IsGood .MeterCell.IsFull { background: var(--Good1); }
+.Meter.IsDanger .MeterCell.IsFull { background: var(--Danger2); }
+.MeterFill, .MeterGhost { position: absolute; inset: 0 auto 0 0; transition: width var(--Snap); }
+.MeterFill { background: var(--Cloud0); }
+.MeterGhost { background: var(--Hull3); }
+.Meter.IsFoil .MeterFill { background: var(--Foil2); }
+.Meter.IsGood .MeterFill { background: var(--Good1); }
+.Meter.IsDanger .MeterFill { background: var(--Danger2); }
 .Meter.IsDanger .MeterText { color: var(--NoGo); }
-.MeterNote { font-size: 0.82rem; color: var(--Muted); }
+.MeterNote { color: var(--Muted); }
 
-.FlightScreen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px var(--Gutter) 16px; position: relative; }
-.FlightHead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px; }
-.LegLabel { font-size: 1.15rem; font-weight: 700; }
-.FlightPoints { font-size: 1.15rem; font-weight: 700; color: var(--Foil); }
+.FlightScreen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 15px; padding: 12px var(--Gutter) 18px; position: relative; }
+.FlightHead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
+.LegLabel { font-size: var(--Head); line-height: 30px; color: var(--White); }
+.FlightPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); }
 .FlightTrack { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
-.TrackLeg { position: relative; display: grid; justify-items: center; gap: 3px; font-size: 0.8rem; color: var(--Muted); padding-top: 14px; }
-.TrackLeg::before { content: ''; position: absolute; top: 4px; left: 0; right: 0; height: 1px; background: var(--Line); }
+.TrackLeg { position: relative; display: grid; justify-items: center; gap: 0; color: var(--Muted); padding-top: 18px; line-height: 22px; }
+.TrackLeg::before { content: ''; position: absolute; top: 6px; left: 0; right: 0; height: 3px; background: var(--Hull1); }
 .TrackLeg:first-child::before { left: 50%; }
 .TrackLeg:last-child::before { right: 50%; }
-.TrackDot { position: absolute; top: 0; width: 9px; height: 9px; border: 1px solid var(--LineStrong); background: var(--Space); }
-.TrackLeg.IsDone .TrackDot { background: var(--Muted); border-color: var(--Muted); }
-.TrackLeg.IsNow { color: var(--Text); font-weight: 600; }
-.TrackLeg.IsNow .TrackDot { background: var(--Foil); border-color: var(--Foil); transform: scale(1.35); }
-.TrackStorm { font-size: 0.74rem; font-weight: 600; color: var(--Caution); }
+.TrackLeg.IsDone::before { background: var(--Hull3); }
+.TrackDot { position: absolute; top: 3px; width: 9px; height: 9px; background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull2); }
+.TrackLeg.IsDone .TrackDot { background: var(--Hull3); box-shadow: 0 0 0 var(--U) var(--Hull3); }
+.TrackLeg.IsNow { color: var(--White); }
+.TrackLeg.IsNow .TrackDot { top: 0; width: 15px; height: 15px; background: var(--Foil2); box-shadow: 0 0 0 var(--U) var(--Foil0); }
+.TrackStorm { color: var(--Caution); }
 .TrackLeg.IsSevere .TrackStorm { color: var(--NoGo); }
-.TrackLeg.IsStorm .TrackDot { border-color: var(--Caution); }
-.TrackLeg.IsSevere .TrackDot { border-color: var(--NoGo); }
+.TrackLeg.IsStorm .TrackDot { box-shadow: 0 0 0 var(--U) var(--Caution); }
+.TrackLeg.IsSevere .TrackDot { box-shadow: 0 0 0 var(--U) var(--Danger2); }
 
-.ScannerView { display: grid; grid-template-rows: auto 1fr; gap: 10px; min-height: 0; }
-.ViewTitle { font-size: 1rem; font-weight: 500; color: var(--Muted); }
-.ContactRow { display: flex; justify-content: center; align-items: stretch; gap: 16px; min-height: 0; max-height: 100%; align-self: start; }
-.ContactCard { width: min(100%, 390px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
-.ContactAction { padding: 4px 14px 14px; }
-.ContactRow[data-count="3"] .ContactCard { width: min(100%, 360px); }
-.ContactBody { display: flex; flex-direction: column; gap: 7px; padding: 12px 14px 8px; overflow-y: auto; scrollbar-width: thin; }
-.ContactBody h2 { font-size: 1.2rem; }
-.ContactPoints { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.ScannerView { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 9px; min-height: 0; }
+.ViewTitle { font-size: var(--Body); line-height: 24px; color: var(--Hull4); }
+.ContactRow { display: flex; justify-content: center; align-items: stretch; gap: 24px; min-height: 0; max-height: 100%; align-self: start; padding: 3px 3px 6px; }
+.ContactCard { width: 384px; flex: none; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.ContactRow[data-count="3"] .ContactCard { width: 384px; }
+.ContactAction { padding: 6px 18px 18px; }
+.ContactBody { display: flex; flex-direction: column; gap: 6px; padding: 12px 18px 6px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); }
+.ContactBody h2 { font-size: var(--Head); line-height: 30px; }
+.ContactPoints { display: flex; flex-wrap: wrap; gap: 0 12px; }
 .ContactPointsAll { white-space: nowrap; }
-.ContactMeta { font-size: 0.88rem; color: var(--Muted); }
-.ContactBand { font-size: 0.9rem; font-weight: 600; color: var(--Caution); }
+.ContactMeta { color: var(--Muted); }
+.ContactBand { color: var(--Caution); }
 .ContactBand.IsSevere, .ContactBand.IsHigh { color: var(--NoGo); }
-.ContactBand.IsNone { color: var(--Muted); font-weight: 500; }
-.ContactPoints { font-size: 0.9rem; }
+.ContactBand.IsNone { color: var(--Muted); }
+.ContactPoints strong { color: var(--Foil3); }
 .ContactBody > * { flex: none; }
-.ContactCard.IsPlayed { opacity: 0.55; }
-.UnknownField { height: clamp(84px, 15vh, 130px); background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 5px), radial-gradient(60% 90% at 50% 50%, rgba(255, 255, 255, 0.1), transparent 70%); border-bottom: 1px solid var(--Line); }
-.EmptyNote { padding: 16px; justify-self: center; }
-.FactList { display: grid; gap: 2px; font-size: 0.9rem; }
+.ContactCard.IsPlayed { opacity: 0.5; }
+.UnknownField { height: 216px; background: var(--Black) repeating-conic-gradient(var(--Space0) 0 25%, var(--Black) 0 50%) 0 0 / 12px 12px; box-shadow: inset 0 calc(var(--U) * -1) 0 var(--Hull1); }
+.EmptyNote { padding: 18px; justify-self: center; }
+.FactList { display: grid; gap: 0; }
 
-.EventPhoto { display: grid; }
+.EventPhoto { display: grid; background: var(--Black); }
 .EventPhoto img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 216px; }
-.EventPhoto.IsCompact img { height: 144px; padding-inline: max(0px, round(down, calc((100% - 256px) / 2), 1px)); }
-.EventPhoto figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 5px 14px; font-size: 0.72rem; line-height: 1.3; color: var(--Muted); border-bottom: 1px solid var(--Line); }
+.EventPhoto.IsCompact img { height: 216px; }
+.EventPhoto figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 6px 18px 6px; line-height: 20px; color: var(--Muted); background: var(--Hull0); box-shadow: inset 0 var(--U) 0 var(--Hull1); }
 .EventPhoto .Credit { text-align: right; flex: none; max-width: 45%; }
 
 .ChannelBars { display: grid; gap: 6px; }
-.ChannelBar { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 0.88rem; }
-.ChannelAmount { font-weight: 600; }
-.ChannelTrack { grid-column: 1 / -1; position: relative; height: 5px; background: var(--Line); }
-.ChannelFill, .ChannelPending { position: absolute; inset: 0 auto 0 0; transition: width 240ms var(--Ease); }
-.ChannelFill { background: var(--Text); }
-.ChannelPending { background: var(--Foil); }
-.ChannelBar.IsFull .ChannelFill { background: var(--Go); }
+.ChannelBar { display: grid; grid-template-columns: 1fr auto; gap: 0 12px; line-height: 22px; }
+.ChannelAmount { color: var(--White); }
+.ChannelTrack { grid-column: 1 / -1; position: relative; height: 9px; margin: 3px; background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull1); }
+.ChannelFill, .ChannelPending { position: absolute; inset: 0 auto 0 0; transition: width var(--Snap); }
+.ChannelFill { background: var(--Cloud0); }
+.ChannelPending { background: var(--Foil2); }
+.ChannelBar.IsFull .ChannelFill { background: var(--Good1); }
+.ChannelBar.IsFull .ChannelAmount { color: var(--Go); }
 .ChannelBar.IsClosed { color: var(--Muted); }
-.ChannelBar.IsClosed .ChannelAmount { font-weight: 400; font-size: 0.82rem; }
-.ChannelBar.IsClosed .ChannelTrack { background: repeating-linear-gradient(90deg, var(--Line) 0 4px, transparent 4px 8px); }
+.ChannelBar.IsClosed .ChannelAmount { color: var(--Muted); }
+.ChannelBar.IsClosed .ChannelTrack { background: repeating-linear-gradient(90deg, var(--Hull1) 0 6px, var(--Space0) 6px 12px); }
 
-.EncounterView { display: grid; grid-template-columns: minmax(300px, 400px) 1fr minmax(250px, 310px); gap: 16px; min-height: 0; align-items: start; }
-.EventCard { grid-column: 1; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: 100%; overflow: hidden; }
-.EventBody { display: grid; grid-template-rows: auto minmax(0, auto) auto; gap: 8px; padding: 12px 14px 14px; min-height: 0; align-content: start; }
-.FactList.IsScrolling { overflow-y: auto; scrollbar-width: thin; min-height: 2.6em; }
-.EventBody h1 { font-size: 1.35rem; font-weight: 700; }
+.EncounterView { display: grid; grid-template-columns: 384px 1fr minmax(260px, 318px); gap: 18px; min-height: 0; align-items: start; padding: 3px 3px 0; }
+.EventCard { grid-column: 1; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100% - 6px); overflow: hidden; }
+.EventBody { display: grid; grid-template-rows: auto minmax(0, auto) auto; gap: 9px; padding: 12px 18px 18px; min-height: 0; align-content: start; }
+.FactList.IsScrolling { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); min-height: 48px; }
+.EventBody h1 { color: var(--White); }
 .TurnTrack { grid-column: 3; display: grid; gap: 0; }
-.TurnCell { display: grid; grid-template-columns: auto 1fr; gap: 1px 12px; padding: 8px 12px; border-left: 3px solid transparent; font-size: 0.86rem; color: var(--Muted); }
-.TurnCell + .TurnCell { border-top: 1px solid var(--Line); }
-.TurnNumber { grid-row: span 3; font-weight: 600; min-width: 3.4rem; }
-.TurnCell.IsNow { border-left-color: var(--Foil); color: var(--Text); background: rgba(232, 168, 56, 0.07); }
-.TurnCell.IsPast { opacity: 0.5; }
-.TurnCell.IsNow .TurnSignal { font-weight: 600; }
-.TurnRadiation { color: var(--NoGo); font-weight: 600; }
+.TurnCell { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; padding: 6px 15px 6px 18px; color: var(--Muted); line-height: 22px; }
+.TurnCell + .TurnCell { box-shadow: inset 0 var(--U) 0 var(--Hull1); padding-top: 9px; }
+.TurnNumber { grid-row: span 3; min-width: 3.4rem; }
+.TurnCell.IsNow { color: var(--Text); background: var(--Hull1); box-shadow: inset 6px 0 0 var(--Foil2); padding-block: 9px; }
+.TurnCell.IsNow .TurnNumber { color: var(--Foil); }
+.TurnCell.IsPast { color: var(--Hull2); }
+.TurnCell.IsPast span { color: inherit; }
+.TurnCell.IsNow .TurnSignal { color: var(--White); }
+.TurnRadiation { color: var(--NoGo); }
 .TurnShadow { color: var(--Caution); }
 .TurnUnknown { grid-row: span 3; align-self: center; }
-.TurnHint { padding: 8px 12px; font-size: 0.8rem; color: var(--Muted); border-top: 1px solid var(--Line); }
+.TurnHint { padding: 9px 15px 9px 18px; color: var(--Muted); box-shadow: inset 0 var(--U) 0 var(--Hull1); line-height: 22px; }
 
-.FlightFoot { display: grid; grid-template-columns: minmax(200px, 250px) 1fr auto; align-items: center; gap: 22px; padding: 12px 18px; }
-.FlightFoot.IsEncounter { min-height: 188px; }
-.FootHint { color: var(--Muted); font-size: 0.95rem; max-width: 34rem; }
-.StatusMeters { display: grid; gap: 10px; }
-.FootActions { display: flex; justify-content: flex-end; gap: 10px; }
-.TurnPlanArea { display: grid; gap: 10px; min-width: 0; align-self: stretch; align-content: center; }
-.TurnBrief { font-size: 0.95rem; }
-.ActionRow { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 186px); gap: 10px; }
+.FlightFoot { display: grid; grid-template-columns: minmax(210px, 258px) 1fr auto; align-items: center; gap: 24px; padding: 12px 18px 15px; }
+.FlightFoot.IsEncounter { min-height: 204px; }
+.FootHint { color: var(--Hull4); max-width: 36rem; }
+.StatusMeters { display: grid; gap: 9px; }
+.FootActions { display: flex; justify-content: flex-end; gap: 12px; }
+.TurnPlanArea { display: grid; gap: 9px; min-width: 0; align-self: stretch; align-content: center; }
+.TurnBrief { color: var(--Hull4); }
+.TurnBrief strong { color: var(--White); }
+.TurnBrief .Muted { color: var(--Muted); }
+.ActionRow { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 192px); gap: 18px; padding: 12px 6px 9px; }
 .ActionRow li { display: grid; min-width: 0; }
-.ActionCard { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 2px; text-align: left; padding: 8px 12px 10px; background: var(--Plate); border-left-width: 3px; transition: transform 120ms var(--Ease), border-color 120ms, background-color 120ms; }
-.ActionTop { display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px; }
-.ActionKey { font: inherit; font-size: 0.78rem; font-weight: 600; line-height: 1; min-width: 20px; padding: 3px 5px; text-align: center; border: 1px solid var(--LineStrong); border-radius: 2px; color: var(--Muted); }
-.ActionName { font-size: 0.95rem; font-weight: 600; line-height: 1.15; }
-.ActionCost { font-size: 0.82rem; color: var(--Muted); }
-.ActionUse { font-size: 1rem; font-weight: 600; line-height: 1.2; align-self: end; padding-top: 4px; }
-.ActionCard.IsIdle { border-style: dashed; border-left-style: solid; }
-.ActionCard.IsIdle .ActionUse { color: var(--Muted); font-weight: 400; font-size: 0.9rem; }
-.ActionCard.IsOn { border-color: var(--Foil); background: rgba(232, 168, 56, 0.12); transform: translateY(-4px); }
-.ActionCard.IsOn .ActionCost, .ActionCard.IsOn .ActionKey { color: var(--Foil); border-color: var(--Foil); }
-.TurnCommit { display: grid; gap: 10px; justify-items: end; min-width: 190px; }
-.PreviewLine { display: grid; gap: 1px; font-size: 0.92rem; text-align: right; }
-.PreviewLine li { white-space: nowrap; }
-.PreviewLine .IsDamage { color: var(--NoGo); font-weight: 600; }
-.PreviewLine .IsOverGeneration { color: var(--Caution); }
-.LethalLine { color: var(--NoGo); font-weight: 600; font-size: 0.92rem; text-align: right; max-width: 14rem; }
-.ResultStrip { grid-column: 2 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 18px; align-items: center; }
-.ResultPoints { font-size: 1.5rem; font-weight: 700; color: var(--Foil); grid-row: span 2; }
-.ResultState { font-weight: 600; }
-.ResultLearned { grid-column: 2; font-size: 0.9rem; color: var(--Muted); max-width: 50rem; hyphens: manual; }
-.ResultActions { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 8px; align-items: center; }
-.FlightEnd { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; gap: 10px; justify-items: center; padding: 26px 40px; text-align: center; }
-.FlightEnd { border-top: 3px solid var(--Go); min-width: 320px; }
-.FlightEnd.IsLost { border-top-color: var(--NoGo); }
-.FlightEnd h2 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
 
-.ContactCard { animation: Deal 420ms var(--Ease) backwards; }
-.ContactCard:nth-child(2) { animation-delay: 110ms; }
-.ContactCard:nth-child(3) { animation-delay: 220ms; }
-.EventCard, .TurnTrack { animation: Arrive 360ms var(--Ease) backwards; }
-.TurnTrack { animation-delay: 120ms; }
-.ResultStrip { animation: Arrive 300ms var(--Ease) backwards; }
-.FlightEnd { animation: Arrive 360ms var(--Ease) backwards; }
-.FlightScreen.IsStormLeg { box-shadow: inset 0 3px 0 var(--NoGo); }
-.RadiationHit { position: fixed; inset: 0; z-index: 3; pointer-events: none; animation: Hit 700ms ease-out forwards; background: repeating-linear-gradient(112deg, transparent 0 46px, rgba(255, 82, 99, 0.16) 46px 48px), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(255, 82, 99, 0.3) 100%); }
-.RadiationHit.IsHeavy { background: repeating-linear-gradient(112deg, transparent 0 30px, rgba(255, 82, 99, 0.26) 30px 33px), radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(255, 82, 99, 0.48) 100%); }
-@keyframes Deal { from { opacity: 0; transform: translateY(22px); } }
-@keyframes Arrive { from { opacity: 0; transform: translateY(8px); } }
-@keyframes Hit { 0% { opacity: 0; background-position: 0 0, 0 0; } 12% { opacity: 1; } 100% { opacity: 0; background-position: 90px 0, 0 0; } }
+.ActionCard {
+  --Ring: var(--Black);
+  --Face: var(--Hull1);
+  --Lit: var(--Hull2);
+  --Dim: var(--Hull0);
+  --Drop: var(--Black);
+  --Muted: var(--Hull4);
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  gap: 0;
+  text-align: left;
+  padding: 6px 6px 9px;
+  margin: 0;
+  box-shadow: inset 0 var(--U) 0 var(--Lit), inset var(--U) 0 0 var(--Lit), inset 0 calc(var(--U) * -1) 0 var(--Dim), inset calc(var(--U) * -1) 0 0 var(--Dim), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 3) 0 var(--Drop);
+}
+.ActionTop { display: flex; justify-content: space-between; align-items: start; padding: 6px 6px 3px 9px; margin-bottom: 6px; background: var(--Space1); box-shadow: inset 0 var(--U) 0 var(--Black); }
+.ActionTop .ModuleDrawing { margin-top: 3px; }
+.ActionKey { font: inherit; line-height: 18px; min-width: 21px; padding: 0 3px; margin: 3px; text-align: center; color: var(--Hull4); background: var(--Hull0); box-shadow: 0 0 0 var(--U) var(--Hull2); }
+.ActionName { color: var(--White); line-height: 22px; padding-inline: 6px; }
+.ActionCost { color: var(--Muted); line-height: 22px; padding-inline: 6px; }
+.ActionUse { color: var(--Foil3); line-height: 22px; align-self: end; padding: 3px 6px 0; }
+.ActionCard:hover:not(:disabled) { --Ring: var(--Hull3); --Face: var(--Hull1); --Lit: var(--Hull2); --Dim: var(--Hull0); transform: translateY(calc(var(--U) * -1)); --Drop: var(--Black); }
+.ActionCard.IsOn { --Ring: var(--Foil2); --Lit: var(--Foil1); --Dim: var(--Foil0); --Face: var(--Hull1); transform: translateY(calc(var(--U) * -3)); }
+.ActionCard.IsOn:hover:not(:disabled) { --Ring: var(--Foil3); --Lit: var(--Foil1); --Dim: var(--Foil0); transform: translateY(calc(var(--U) * -3)); }
+.ActionCard:active:not(:disabled), .ActionCard.IsOn:active:not(:disabled) { transform: translateY(var(--U)); --Drop: transparent; }
+.ActionCard.IsOn .ActionKey { color: var(--Hull0); background: var(--Foil2); box-shadow: 0 0 0 var(--U) var(--Foil0); }
+.ActionCard.IsOn .ActionTop { background: var(--Space2); }
+.ActionCard.IsIdle { --Face: var(--Hull0); --Lit: var(--Hull1); --Dim: var(--Hull0); --Muted: var(--Hull3); }
+.ActionCard.IsIdle .ActionUse { color: var(--Muted); }
+.ActionCard.IsIdle .ActionName { color: var(--Hull4); }
+.ActionCard:disabled { --Face: var(--Hull0); --Lit: var(--Hull0); --Dim: var(--Hull0); --Ring: var(--Hull1); --Drop: transparent; --Muted: var(--Hull3); color: var(--Muted); }
+.ActionCard:disabled .ActionName { color: var(--Hull4); }
+.ActionCard:disabled .ActionUse { color: var(--Caution); }
+.ActionCard:disabled .ActionTop { background: var(--Space0); }
+.ActionCard:disabled .ModuleDrawing { opacity: 0.4; }
+
+.TurnCommit { display: grid; gap: 9px; justify-items: end; min-width: 198px; }
+.PreviewLine { display: grid; gap: 0; text-align: right; line-height: 22px; color: var(--Hull4); }
+.PreviewLine li { white-space: nowrap; }
+.PreviewLine .IsDamage { color: var(--NoGo); }
+.PreviewLine .IsOverGeneration { color: var(--Caution); }
+.LethalLine { color: var(--NoGo); text-align: right; max-width: 15rem; line-height: 22px; }
+.ResultStrip { grid-column: 2 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 6px 21px; align-items: center; }
+.ResultPoints { font-size: var(--Display); line-height: 40px; color: var(--Foil); grid-row: span 2; }
+.ResultState { color: var(--White); }
+.ResultLearned { grid-column: 2; color: var(--Hull4); max-width: 50rem; hyphens: manual; }
+.ResultActions { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 12px; align-items: center; }
+.FlightEnd { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; gap: 12px; justify-items: center; padding: 27px 42px 30px; text-align: center; min-width: 330px; }
+.FlightEnd { box-shadow: inset 0 9px 0 var(--Good1), 0 -3px 0 var(--Black), 0 3px 0 var(--Black), -3px 0 0 var(--Black), 3px 0 0 var(--Black), 0 9px 0 var(--Black); }
+.FlightEnd.IsLost { box-shadow: inset 0 9px 0 var(--Danger2), 0 -3px 0 var(--Black), 0 3px 0 var(--Black), -3px 0 0 var(--Black), 3px 0 0 var(--Black), 0 9px 0 var(--Black); }
+.FlightEnd h2 { font-size: var(--Display); line-height: 40px; }
+
+.ContactCard { animation: Deal 90ms steps(3, end) backwards; }
+.ContactCard:nth-child(2) { animation-delay: 60ms; }
+.ContactCard:nth-child(3) { animation-delay: 120ms; }
+.EventCard, .TurnTrack { animation: Arrive 90ms steps(3, end) backwards; }
+.TurnTrack { animation-delay: 60ms; }
+.ResultStrip { animation: Arrive 90ms steps(3, end) backwards; }
+.FlightEnd { animation: Arrive 90ms steps(3, end) backwards; }
+.FlightScreen.IsStormLeg { box-shadow: inset 0 6px 0 var(--Danger2); }
+.RadiationHit { position: fixed; inset: 0; z-index: 3; pointer-events: none; animation: Hit 480ms steps(4, end) forwards; box-shadow: inset 0 0 0 9px rgba(255, 82, 99, 0.7); background: repeating-linear-gradient(112deg, transparent 0 45px, rgba(255, 82, 99, 0.16) 45px 48px); }
+.RadiationHit.IsHeavy { box-shadow: inset 0 0 0 18px rgba(255, 82, 99, 0.75); background: repeating-linear-gradient(112deg, transparent 0 30px, rgba(255, 82, 99, 0.26) 30px 33px); }
+@keyframes Deal { from { opacity: 0; transform: translateY(18px); } }
+@keyframes Arrive { from { opacity: 0; transform: translateY(6px); } }
+@keyframes Hit { 0% { opacity: 1; background-position: 0 0; } 100% { opacity: 0; background-position: 96px 0; } }
+
+@media (max-height: 860px) {
+  .EventPhoto { justify-items: center; padding-top: 9px; background: var(--Hull0); }
+  .EventPhoto img, .EventPhoto.IsCompact img { width: 256px; height: 144px; padding-inline: 0; box-shadow: 0 0 0 var(--U) var(--Black); }
+  .EventPhoto figcaption { justify-self: stretch; margin-top: 9px; }
+  .UnknownField { height: 153px; }
+}
 
 @media (max-height: 760px) {
-  .FlightFoot.IsEncounter { min-height: 172px; }
-  .EventPhoto img { height: 144px; }
-  .EventPhoto.IsCompact img { height: 108px; }
-  .ActionCard { padding: 6px 10px 8px; }
-  .ActionTop { margin-bottom: 0; }
-  .ActionName { font-size: 0.9rem; }
-  .ActionUse { font-size: 0.92rem; }
+  .FlightScreen { gap: 12px; padding-block: 9px 15px; }
+  .FlightFoot.IsEncounter { min-height: 186px; }
+  .FlightFoot { padding-block: 9px 12px; }
+  .ActionRow { padding-block: 9px 6px; }
+  .ActionTop { margin-bottom: 3px; }
   .TurnPlanArea { gap: 6px; }
   .ScannerView { gap: 6px; }
-  .ContactBody { gap: 4px; padding: 10px 12px 6px; }
-  .ContactBody h2 { font-size: 1.1rem; }
-  .FactList, .ContactMeta { font-size: 0.85rem; }
-  .ContactAction { padding: 4px 12px 10px; }
-  .ChannelBars { gap: 4px; }
-  .FlightFoot { padding-block: 10px; }
+  .ContactBody { gap: 3px; padding: 9px 18px 3px; }
+  .ContactAction { padding: 6px 18px 15px; }
+  .ChannelBars { gap: 3px; }
   .StatusMeters { gap: 6px; }
+  .TurnCell { padding-block: 3px; }
+  .TurnCell + .TurnCell { padding-top: 6px; }
+  .TurnCell.IsNow { padding-block: 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .RadiationHit { display: none; }
-  * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
-  .ActionCard.IsOn { transform: none; }
+  .RadiationHit { animation: none; opacity: 0; }
+  * { transition-duration: 0ms !important; animation-duration: 0ms !important; animation-delay: 0ms !important; }
+  .ActionCard.IsOn, .ActionCard.IsOn:hover:not(:disabled) { transform: none; }
+  .ActionCard:hover:not(:disabled) { transform: none; }
 }
 
-.DebriefScreen { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr) minmax(250px, 310px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 16px; padding: 22px var(--Gutter) 20px; }
-.DebriefVerdict { align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
-.DebriefVerdict.IsLost { border-top-color: var(--NoGo); }
-.DebriefVerdict h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
-.BankedPoints { font-size: 1.3rem; font-weight: 600; color: var(--Foil); }
+.DebriefScreen { display: grid; grid-template-columns: minmax(330px, 450px) minmax(0, 1fr) minmax(260px, 318px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px 21px; padding: 21px var(--Gutter) 24px; }
+.DebriefVerdict { align-self: start; padding: 24px 24px 21px; display: grid; gap: 9px; box-shadow: inset 0 9px 0 var(--Good1), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
+.DebriefVerdict.IsLost { box-shadow: inset 0 9px 0 var(--Danger2), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
+.DebriefVerdict h1 { font-size: var(--Display); line-height: 40px; color: var(--White); }
+.BankedPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); }
 .LossWhy { color: var(--NoGo); }
 .DebriefRank { align-self: start; padding: 18px; display: grid; gap: 12px; }
 .DebriefRank .RankBadge { width: 100%; }
-.RankUp { padding: 10px 12px; border: 1px solid var(--Foil); display: grid; gap: 2px; }
-.RankUpTitle { font-weight: 700; color: var(--Foil); }
-.DebriefMissed { padding: 16px 20px; display: grid; gap: 10px; align-content: start; align-self: start; }
-.MissList { display: grid; gap: 8px; }
+.RankUp { padding: 9px 12px; background: var(--Hull1); box-shadow: inset 6px 0 0 var(--Foil2); display: grid; gap: 0; }
+.RankUpTitle { color: var(--Foil); }
+.DebriefMissed { padding: 18px 21px; display: grid; gap: 9px; align-content: start; align-self: start; }
+.DebriefMissed h2 { font-size: var(--Head); line-height: 30px; }
+.MissList { display: grid; gap: 6px; }
 .MissList button { white-space: nowrap; }
-.MissList li { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 0.95rem; color: var(--Muted); }
-.MissList li.IsBiggest { font-size: 1.15rem; font-weight: 600; color: var(--Text); }
-.DebriefLog { grid-column: 1 / -1; grid-row: 3; padding: 14px 18px 0; display: grid; gap: 10px; }
-.LegLog { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
-.LegEntry { display: grid; gap: 4px; align-content: start; padding: 10px 14px 12px; border-top: 3px solid var(--Line); min-width: 0; }
-.LegEntry + .LegEntry { border-left: 1px solid var(--Line); }
-.LegEntry.IsComplete { border-top-color: var(--Go); }
-.LegEntry.IsPartial { border-top-color: var(--Foil); }
-.LegEntry.IsLostHere { border-top-color: var(--NoGo); }
-.LegEntry.IsNotFlown { border-top-style: dashed; }
-.LegDate { font-size: 0.85rem; color: var(--Muted); }
-.LegEvent { display: grid; gap: 1px; }
-.LegEvent + .LegEvent { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--Line); }
-.LegName { font-weight: 600; font-size: 1.02rem; overflow-wrap: anywhere; }
-.LegName.IsQuiet { font-weight: 400; color: var(--Muted); }
-.LegState { font-size: 0.85rem; color: var(--Muted); }
+.MissList li { display: flex; justify-content: space-between; align-items: center; gap: 15px; color: var(--Muted); }
+.MissList li.IsBiggest { font-size: var(--Head); line-height: 30px; color: var(--Text); }
+.MissList li.IsBiggest button { font-size: var(--Body); }
+.DebriefLog { grid-column: 1 / -1; grid-row: 3; padding: 15px 18px 0; display: grid; gap: 9px; }
+.LegLog { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 3px; background: var(--Hull1); }
+.LegEntry { display: grid; gap: 3px; align-content: start; padding: 12px 12px 12px; background: var(--Hull0); box-shadow: inset 0 6px 0 var(--Hull1); min-width: 0; line-height: 22px; }
+.LegEntry.IsComplete { box-shadow: inset 0 6px 0 var(--Good1); }
+.LegEntry.IsPartial { box-shadow: inset 0 6px 0 var(--Foil2); }
+.LegEntry.IsLostHere { box-shadow: inset 0 6px 0 var(--Danger2); }
+.LegEntry.IsNotFlown { box-shadow: none; background: repeating-linear-gradient(90deg, var(--Hull1) 0 6px, var(--Hull0) 6px 12px) 0 0 / 100% 6px no-repeat, var(--Hull0); }
+.LegDate { color: var(--Muted); padding-top: 6px; }
+.LegEvent { display: grid; gap: 0; }
+.LegEvent + .LegEvent { margin-top: 6px; padding-top: 6px; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.LegName { color: var(--White); overflow-wrap: anywhere; }
+.LegName.IsQuiet { color: var(--Muted); }
+.LegState { color: var(--Muted); }
 .LegEntry.IsComplete .LegState { color: var(--Go); }
-.LegPoints { font-size: 1.15rem; font-weight: 700; color: var(--Foil); margin-top: 2px; }
-.LegLost { font-size: 0.88rem; font-weight: 600; color: var(--NoGo); }
-.DebriefActions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin: 0 -18px; padding: 12px 18px; border-top: 1px solid var(--Line); }
-.DebriefActions .Primary { margin-left: 6px; }
+.LegPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); margin-top: 3px; }
+.LegLost { color: var(--NoGo); }
+.DebriefActions { display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin: 0 -18px; padding: 12px 18px 15px; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.DebriefActions .Primary { margin-left: 9px; }
 
-.LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px var(--Gutter) 18px; }
-.LabHead .LabPoints { font-size: 1.1rem; font-weight: 600; color: var(--Foil); margin-left: auto; }
-.LabBody { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; min-height: 0; }
-.LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 16px; }
-.LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; display: grid; gap: 6px; align-content: start; }
-.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-.OfferFamily { font-size: 0.8rem; color: var(--Muted); }
-.OfferCard { display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
-.OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.OfferCard h3 { font-size: 1.05rem; }
-.OwnedMark { font-size: 0.8rem; color: var(--Muted); white-space: nowrap; }
-.OwnedMark.IsOwned { color: var(--Text); }
-.OfferCard .ModuleDrawing { --Scale: 3; margin: 4px 0; }
-.OfferEffect { font-size: 0.88rem; }
-.OfferMark { font-weight: 700; }
-.OfferCard footer { padding-top: 6px; border-top: 1px solid var(--Line); font-size: 0.86rem; min-height: 2.5rem; display: flex; align-items: center; }
-.OfferCard .Primary { width: 100%; font-size: 0.9rem; padding: 7px 8px; }
+.LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 15px; padding: 18px var(--Gutter) 21px; }
+.LabHead .LabPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); margin-left: auto; }
+.LabBody { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 21px; min-height: 0; }
+.LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 18px; margin: 3px; }
+.LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding: 3px 9px 9px 3px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); display: grid; gap: 6px; align-content: start; }
+.LabScroll > h2 { font-size: var(--Head); line-height: 30px; margin-top: 9px; }
+.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 18px; padding-bottom: 6px; }
+.OfferFamily { color: var(--Muted); }
+.OfferCard { --Muted: var(--Hull4); display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 3px; padding: 12px 15px 12px; background: var(--Hull1); box-shadow: inset 0 var(--U) 0 var(--Hull2), 0 -3px 0 var(--Black), 0 3px 0 var(--Black), -3px 0 0 var(--Black), 3px 0 0 var(--Black), 0 9px 0 var(--Black); margin-bottom: 6px; }
+.OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 9px; }
+.OfferCard h3 { font-size: var(--Body); }
+.OwnedMark { color: var(--Muted); white-space: nowrap; }
+.OwnedMark.IsOwned { color: var(--Foil3); }
+.OfferCard .ModuleDrawing { --Scale: 3; margin: 6px 0; }
+.OfferMark { color: var(--White); }
+.OfferCard footer { padding-top: 9px; box-shadow: inset 0 var(--U) 0 var(--Hull2); min-height: 54px; display: flex; align-items: center; }
+.OfferCard .Primary { width: calc(100% - 6px); }
+.OfferCard.IsInDevelopment, .OfferCard.IsRankLocked { --Muted: var(--Hull3); background: var(--Hull0); box-shadow: 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1); }
 .OfferCard.IsInDevelopment { color: var(--Muted); }
 .OfferCard.IsRankLocked .ModuleDrawing, .OfferCard.IsInDevelopment .ModuleDrawing { opacity: 0.4; }
 .OfferCard.IsRankLocked .OfferEffect, .OfferCard.IsRankLocked .ModuleStats { color: var(--Muted); }
-.OfferCard.IsTop { border-color: var(--Foil); }
-.IsMaxed { color: var(--Foil); font-weight: 600; }
+.OfferCard.IsTop { box-shadow: inset 0 var(--U) 0 var(--Foil1), 0 -3px 0 var(--Foil2), 0 3px 0 var(--Foil2), -3px 0 0 var(--Foil2), 3px 0 0 var(--Foil2), 0 9px 0 var(--Black); }
+.IsMaxed { color: var(--Foil); }

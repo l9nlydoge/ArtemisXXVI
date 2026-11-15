@@ -3,6 +3,7 @@
   "Home.Pitch": "Build the spacecraft. Fly a week that really happened. Find out what you should have packed.",
   "Footer.Disclaimer": "Uses public NASA data and imagery. Not affiliated with or endorsed by NASA.",
   "Footer.Earth": "Earth imagery: Solar System Scope, CC BY 4.0.",
+  "Credits.Art": "Pixel art made with AI tools. Event pictures are redrawn from NASA images.",
   "Text.Literal": "{text}",
   "Event.Storm.Name": "Geomagnetic storm, Kp {kp}",
   "Fact.Speed": "{speed} km/s",

@@ -25,6 +25,7 @@ export function HomeScreen() {
         <footer className="Credits">
           <span>{wording.t('Footer.Disclaimer')}</span>
           <span>{wording.t('Footer.Earth')}</span>
+          <span className="CreditArt">{wording.t('Credits.Art')}</span>
         </footer>
       </div>
     </main>
