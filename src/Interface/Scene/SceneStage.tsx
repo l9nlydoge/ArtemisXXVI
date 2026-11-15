@@ -55,9 +55,15 @@ export function useSceneStage(root: RefObject<HTMLElement | null>, mode: SceneMo
     const frame = requestAnimationFrame(() => update(false))
     const observer = new ResizeObserver(() => update(true))
     observer.observe(element)
+    const stage = element.querySelector('.EncounterStage, .ScannerView, .TravelView')
+    if (stage) observer.observe(stage)
+    const viewport = element.parentElement
+    const onScroll = () => update(true)
+    viewport?.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
+      viewport?.removeEventListener('scroll', onScroll)
     }
   }, [mode, layoutKey])
 }

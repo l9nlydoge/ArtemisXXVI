@@ -1,0 +1,389 @@
+@media (max-width: 1100px), (max-height: 720px) {
+  .Interface {
+    --Gutter: clamp(12px, 3vw, 30px);
+    --LeftGutter: max(var(--Gutter), env(safe-area-inset-left));
+    --RightGutter: max(var(--Gutter), env(safe-area-inset-right));
+    --TopGutter: max(12px, env(safe-area-inset-top));
+    --BottomGutter: max(24px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+  }
+
+  .Interface > main {
+    height: auto;
+    min-height: 100%;
+    padding: var(--TopGutter) var(--RightGutter) var(--BottomGutter) var(--LeftGutter);
+    align-content: start;
+  }
+
+  .Interface button.SoundToggle {
+    position: absolute;
+    inset: var(--TopGutter) var(--RightGutter) auto auto;
+    width: 44px;
+    min-height: 44px;
+    background: var(--Hull0);
+  }
+
+  .SoundToggle .SoundTip {
+    inset: calc(100% + 6px) 0 auto auto;
+  }
+
+  .ScreenHead { padding-inline-end: 54px; }
+  .Interface button { min-height: 44px; }
+
+  .Interface.OnHome {
+    background: linear-gradient(90deg, rgb(0 0 0 / 75%), rgb(0 0 0 / 60%));
+  }
+
+  .Interface > .HomeScreen {
+    padding-top: calc(var(--TopGutter) + 54px);
+    gap: 30px;
+  }
+
+  .HomeIntro h1 {
+    font-size: clamp(56px, 15vw, 130px);
+    line-height: 0.9;
+    margin-left: 0;
+  }
+
+  .HomeActions { gap: 6px 12px; }
+  .HomeActions .Quiet { font-size: var(--Body); line-height: 24px; padding: 9px 12px; }
+  .HomeFoot { gap: 18px; }
+
+  .WeekScreen,
+  .HomeScreen,
+  .DebriefScreen,
+  .SourcesScreen,
+  .LogbookGrid,
+  .LabScroll,
+  .ModuleScroll {
+    overflow: visible;
+  }
+
+  .HangarScreen,
+  .DebriefScreen,
+  .LabBody {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .HangarModules,
+  .HangarStage,
+  .DebriefLog,
+  .LabSide,
+  .LabScroll {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .HangarStage {
+    display: grid;
+    grid-template-rows: 132px auto;
+    justify-items: center;
+    gap: 9px;
+    padding: 0;
+  }
+
+  .HangarStage .SpacecraftSprite canvas { max-width: 100%; object-fit: contain; }
+
+  .HangarStage .HintCallout.IsStageFoot,
+  .EncounterScene .HintCallout.IsStageFoot {
+    position: relative;
+    inset: auto;
+    width: auto;
+    margin: 0 3px 6px;
+  }
+
+  .HangarStage .HintCallout::after,
+  .EncounterScene .HintCallout::after,
+  .FlightFoot .HintCallout::after {
+    display: none;
+  }
+
+  .HangarModules { display: flex; flex-direction: column; }
+  .HangarLaunch {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    flex-wrap: wrap;
+    gap: 3px 12px;
+    padding-bottom: max(9px, env(safe-area-inset-bottom));
+    background: var(--Hull0);
+  }
+
+  .Interface.OnHangar { scroll-padding-bottom: 130px; }
+  .IssueLine { flex: 1 1 180px; }
+  .ModuleRow h3 { white-space: normal; }
+  .ModuleRow.IsExtra { flex-wrap: wrap; gap: 3px 12px; }
+
+  .FlightScreen {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .FlightHead {
+    order: -4;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(44px, auto) auto;
+    gap: 9px 12px;
+  }
+
+  .FlightPoints { text-align: right; margin-inline-end: 54px; }
+
+  .FlightTrack {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .TrackLeg { text-align: center; padding-inline: 2px; }
+
+  .ScannerView {
+    grid-template-rows: auto;
+    padding-block-end: 114px;
+  }
+
+  .ContactRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr));
+    gap: 15px;
+    max-height: none;
+  }
+
+  .ContactCard, .EventCard { grid-template-rows: auto; max-height: none; }
+  .ContactCard { width: min(100%, 384px); justify-self: center; }
+  .ContactBody { overflow: visible; }
+  .UnknownField { height: clamp(72px, 22vw, 144px); }
+
+  .EventPhoto, .EventPhoto.IsCompact { display: grid; }
+
+  .EventPhoto img, .EventPhoto.IsCompact img {
+    float: none;
+    width: min(100%, 384px);
+    height: auto;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    margin: 0;
+    justify-self: center;
+  }
+
+  .EventPhoto figcaption, .EventPhoto.IsCompact figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 3px 9px;
+    padding: 6px 12px;
+  }
+
+  .EventPhoto .Credit, .EventPhoto.IsCompact .Credit {
+    flex: 0 1 auto;
+    text-align: start;
+    max-width: 100%;
+  }
+
+  :is(.ContactCard, .EventCard) .ChannelBars { grid-template-columns: minmax(0, 1fr); }
+  :is(.ContactCard, .EventCard) .ChannelBar { grid-template-columns: minmax(0, 1fr) auto; }
+  :is(.ContactCard, .EventCard) .ChannelAmount { grid-column: 2; grid-row: 1; }
+  :is(.ContactCard, .EventCard) .ChannelTrack { grid-column: 1 / -1; grid-row: 2; }
+
+  .FlightFoot:not(.IsEncounter) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .FlightFoot .StatusMeters {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 118px), 1fr));
+    gap: 9px 15px;
+    align-items: start;
+  }
+
+  .FootActions, .ResultActions { flex-wrap: wrap; }
+  .FlightFoot .HintCallout.IsInline { grid-template-columns: minmax(0, 1fr); }
+  .TravelView { min-height: 162px; padding-top: 0; }
+  .TravelLine { padding: 6px 12px; }
+
+  .EncounterView, .FlightFoot.IsEncounter { display: contents; }
+
+  .EncounterScene {
+    order: -2;
+    display: grid;
+    justify-items: center;
+  }
+
+  .EncounterStage { width: 100%; height: clamp(102px, 18dvh, 186px); }
+
+  .FlightFoot.IsEncounter .StatusMeters,
+  .TurnPlanArea,
+  .ResultStrip,
+  .TurnCommit {
+    min-width: 0;
+    padding: 9px 12px;
+    background: var(--Hull0);
+    box-shadow: inset 0 3px var(--Hull1), 0 3px var(--Black);
+  }
+
+  .FlightFoot.IsEncounter .StatusMeters { order: -1; }
+
+  .EventCard, .TurnTrack { order: 1; }
+  .EventBody { grid-template-rows: auto; }
+
+  .FactList.IsScrolling {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .ActionRow {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+    gap: 15px 9px;
+  }
+
+  .ActionTop { padding-inline: 3px; }
+
+  .Interface.OnFlight:has(.TurnCommit):not(:has(.EncounterScene .HintCallout)) {
+    scroll-padding-bottom: 140px;
+  }
+
+  .TurnCommit {
+    order: 2;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 3px 9px;
+    justify-items: stretch;
+    align-items: center;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+
+  .FlightScreen:not(:has(.EncounterScene .HintCallout)) .TurnCommit {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    box-shadow: 0 -3px var(--Hull2), 0 6px var(--Black);
+  }
+
+  .PreviewLine {
+    grid-row: span 2;
+    text-align: start;
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  .LethalLine { text-align: inherit; }
+  .TurnCommit .TurnClock { justify-self: end; }
+  .TurnCommit .TurnClockCells { gap: 2px; }
+  .TurnCommit .TurnClockCell { width: 6px; height: 6px; }
+  .TurnCommit .Primary { font-size: var(--Body); line-height: 24px; padding: 6px 12px; }
+
+  .ResultStrip { grid-template-columns: minmax(0, 1fr); }
+  .ResultPoints, .ResultLearned, .ResultActions { grid-column: auto; grid-row: auto; }
+
+  .FlightEnd {
+    order: -3;
+    position: relative;
+    inset: auto;
+    transform: none;
+    width: min(100%, 420px);
+    min-width: 0;
+    margin-inline: auto;
+    padding: 21px 15px 18px;
+  }
+
+  .DebriefActions, .MissList li { flex-wrap: wrap; gap: 6px 12px; }
+  .MissList button { white-space: normal; }
+  .LabScreen, .LogbookScreen { grid-template-rows: auto auto; }
+  .LabScroll { padding-inline: 3px; }
+  .OfferCard header { flex-wrap: wrap; gap: 0 9px; }
+  .OwnedMark { white-space: normal; }
+}
+
+@media (min-width: 750px) and (max-width: 1100px),
+       (min-width: 750px) and (max-height: 720px) {
+  .HangarScreen { grid-template: auto auto 1fr / minmax(0, 1fr) minmax(0, 1.55fr); }
+  .HangarModules { grid-column: 2; grid-row: 2 / span 2; }
+  .HangarStage { grid-column: 1; align-self: start; }
+  .HangarLeft { justify-content: start; }
+  .DebriefScreen { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .DebriefMissed { grid-row: span 2; }
+  .DebriefLog { grid-column: 1 / -1; }
+  .LabBody { grid-template-columns: minmax(0, 1fr) 240px; }
+  .LabSide { grid-column: 2; grid-row: 1; }
+  .LabScroll { grid-column: 1; grid-row: 1; }
+}
+
+@media (max-width: 1100px) and (min-width: 621px),
+       (max-height: 720px) and (min-width: 621px) {
+  .Interface > .DebriefScreen { padding-top: calc(var(--TopGutter) + 54px); }
+}
+
+@media (max-width: 620px) {
+  .Pitch { font-size: 26px; line-height: 28px; }
+  .HomeIntro { gap: 15px; }
+
+  .ModuleScroll { padding-inline: 9px; }
+
+  .ModuleRow {
+    grid-template: auto / 64px minmax(0, 1fr);
+    gap: 6px 9px;
+  }
+
+  .ModuleRow > .ModuleDrawing { grid-area: 1 / 1; }
+  .ModuleMain { display: grid; grid-column: 2; gap: 3px; }
+  .ModuleRow .ModuleMain > *,
+  .ModuleRow.IsLocked .ModuleEffect { grid-area: auto; }
+
+  .ModuleControls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    grid-column: 1 / -1;
+    gap: 0 9px;
+  }
+
+  .MarkStepper button { min-width: 44px; }
+  .ModuleRow > button { grid-area: auto / 1 / auto / -1; justify-self: end; }
+  .HangarLaunch .Primary { width: 100%; }
+
+  .FlightHead .LegLabel, .FlightHead .FlightPoints { font-size: 24px; line-height: 24px; }
+  .FlightHead { min-height: 44px; }
+  .TrackLeg { font-size: 16px; line-height: 16px; }
+  .ContactPointsAll { white-space: normal; }
+
+  .DebriefVerdict h1 { padding-inline-end: 44px; }
+  .LabHead .LabPoints { margin-left: 0; }
+
+  .PictureEntry,
+  .CheckedList li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .PictureEntry img {
+    width: min(256px, calc(100% - 6px));
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (min-width: 620px) and (max-height: 500px) {
+  .FlightScreen:has(.TurnPlanArea) {
+    display: grid;
+    grid-template: auto / minmax(0, 1fr) minmax(0, 2fr);
+    align-items: start;
+  }
+
+  .FlightScreen:has(.TurnPlanArea) .FlightHead { grid-area: 1 / 1 / auto / -1; }
+  .FlightScreen:has(.TurnPlanArea) .EncounterScene { grid-area: 2 / 1; }
+  .FlightScreen:has(.TurnPlanArea) .StatusMeters { grid-area: 3 / 1; }
+  .FlightScreen:has(.TurnPlanArea) .TurnPlanArea { grid-area: 2 / 2 / span 2; }
+  .FlightScreen:has(.TurnPlanArea) :is(.EventCard, .TurnTrack, .TurnCommit) { grid-column: 1 / -1; }
+  .TurnCommit { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .PreviewLine { grid-row: auto; display: flex; flex-wrap: wrap; gap: 3px 12px; }
+}
+
+@media (pointer: coarse) {
+  .ActionKey { display: none; }
+}

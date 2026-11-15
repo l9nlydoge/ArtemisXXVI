@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ReactNode } from 'react'
 import { Backdrop } from './Interface/Backdrop/Backdrop'
 import { DebriefScreen } from './Interface/Screens/DebriefScreen'
 import { FlightScreen } from './Interface/Screens/FlightScreen'
@@ -36,13 +36,19 @@ function CurrentScreen(): ReactNode {
 
 export function App() {
   const screen = useGameStore((state) => state.screen)
+  const viewport = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    viewport.current?.scrollTo(0, 0)
+  }, [screen])
+
   return (
     <>
       <Backdrop />
-      <div className={`Interface On${screen}`}>
+      <div ref={viewport} className={`Interface On${screen}`}>
+        <SoundLayer />
         <CurrentScreen />
       </div>
-      <SoundLayer />
     </>
   )
 }

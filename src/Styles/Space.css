@@ -111,11 +111,11 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .Interface { position: relative; z-index: 1; height: 100dvh; }
 .Interface > main { height: 100%; }
 
-.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(30px, 8vh, 78px) var(--Gutter) 18px; }
+.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; gap: 24px; padding: clamp(30px, 8vh, 78px) var(--Gutter) 18px; overflow-y: auto; }
 .HomeIntro { max-width: 40rem; display: grid; gap: 21px; justify-items: start; }
 .HomeIntro h1 { font-size: 160px; line-height: 130px; margin-left: -6px; color: var(--White); text-shadow: 0 6px 0 var(--Black); }
 .Pitch { font-size: var(--Head); line-height: 33px; max-width: 27rem; color: var(--Cloud1); }
-.HomeActions { display: flex; align-items: center; gap: 15px; margin-top: 9px; }
+.HomeActions { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin-top: 9px; }
 .HomeActions .Quiet { font-size: var(--Head); line-height: 30px; padding: 12px 15px; }
 .HomeFoot { display: grid; gap: 24px; justify-items: start; }
 .RankBadge { width: min(100%, 24rem); display: grid; gap: 6px; }
@@ -138,9 +138,9 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .ForecastLines li.IsCaution { color: var(--Caution); }
 
 .WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 21px var(--Gutter) 24px; overflow-y: auto; }
-.WeekRow { display: grid; grid-template-columns: repeat(3, 384px); justify-content: center; gap: 27px; align-content: start; }
-.WeekCard { display: grid; grid-template-rows: 216px 1fr; overflow: hidden; }
-.WeekCard img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 100%; object-position: 50% 0; }
+.WeekRow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 285px), 1fr)); width: min(100%, 1206px); margin-inline: auto; gap: 27px; align-content: start; }
+.WeekCard { display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
+.WeekCard img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000000; }
 .WeekBody { display: grid; gap: 6px; padding: 15px 18px 18px; align-content: start; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
 .WeekBody h2 { font-size: var(--Head); line-height: 30px; }
 .WeekDates { color: var(--Muted); }
@@ -238,11 +238,10 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .TrackLeg.IsStorm .TrackDot { box-shadow: 0 0 0 var(--U) var(--Caution); }
 .TrackLeg.IsSevere .TrackDot { box-shadow: 0 0 0 var(--U) var(--Danger2); }
 
-.ScannerView { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 9px; min-height: 0; }
+.ScannerView { grid-row: 2; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 9px; min-height: 0; }
 .ViewTitle { font-size: var(--Body); line-height: 24px; color: var(--Hull4); }
 .ContactRow { display: flex; justify-content: center; align-items: stretch; gap: 24px; min-height: 0; max-height: 100%; align-self: start; padding: 3px 3px 6px; }
-.ContactCard { width: 384px; flex: none; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
-.ContactRow[data-count="3"] .ContactCard { width: 384px; }
+.ContactCard { flex: 0 1 384px; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
 .ContactAction { padding: 6px 18px 18px; }
 .ContactBody { display: flex; flex-direction: column; gap: 6px; padding: 12px 18px 6px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); }
 .ContactBody h2 { font-size: var(--Head); line-height: 30px; }
@@ -299,6 +298,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .TurnHint { padding: 9px 15px 9px 18px; color: var(--Muted); box-shadow: inset 0 var(--U) 0 var(--Hull1); line-height: 22px; }
 
 .FlightFoot { display: grid; grid-template-columns: minmax(210px, 258px) 1fr auto; align-items: center; gap: 24px; padding: 12px 18px 15px; }
+.FlightFoot.IsScanner { grid-row: 3; }
 .FlightFoot.IsEncounter { min-height: 204px; }
 .FootHint { color: var(--Hull4); max-width: 36rem; }
 .StatusMeters { display: grid; gap: 9px; }
@@ -348,7 +348,6 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 
 .TurnCommit { display: grid; gap: 9px; justify-items: end; min-width: 198px; }
 .PreviewLine { display: grid; gap: 0; text-align: right; line-height: 22px; color: var(--Hull4); }
-.PreviewLine li { white-space: nowrap; }
 .PreviewLine .IsDamage { color: var(--NoGo); }
 .PreviewLine .IsOverGeneration { color: var(--Caution); }
 .LethalLine { color: var(--NoGo); text-align: right; max-width: 15rem; line-height: 22px; }
@@ -431,7 +430,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
   .ActionCard:hover:not(:disabled) { transform: none; }
 }
 
-.DebriefScreen { display: grid; grid-template-columns: minmax(330px, 450px) minmax(0, 1fr) minmax(260px, 318px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px 21px; padding: 21px var(--Gutter) 24px; width: 100%; max-width: 1920px; margin-inline: auto; }
+.DebriefScreen { display: grid; grid-template-columns: minmax(330px, 450px) minmax(0, 1fr) minmax(260px, 318px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px 21px; padding: 21px var(--Gutter) 24px; width: 100%; max-width: 1920px; margin-inline: auto; overflow-y: auto; }
 .DebriefVerdict { align-self: start; padding: 24px 24px 21px; display: grid; gap: 9px; box-shadow: inset 0 9px 0 var(--Good1), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
 .DebriefVerdict.IsLost { box-shadow: inset 0 9px 0 var(--Danger2), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
 .DebriefVerdict h1 { font-size: var(--Display); line-height: 40px; color: var(--White); }
@@ -449,7 +448,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .MissList li.IsBiggest { font-size: var(--Head); line-height: 30px; color: var(--Text); }
 .MissList li.IsBiggest button { font-size: var(--Body); }
 .DebriefLog { grid-column: 1 / -1; grid-row: 3; padding: 15px 18px 0; display: grid; gap: 9px; }
-.LegLog { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0 3px; background: var(--Hull1); }
+.LegLog { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 144px), 1fr)); gap: 3px; background: var(--Hull1); }
 .LegEntry { display: grid; gap: 3px; align-content: start; padding: 12px 12px 12px; background: var(--Hull0); box-shadow: inset 0 6px 0 var(--Hull1); min-width: 0; line-height: 22px; }
 .LegEntry.IsComplete { box-shadow: inset 0 6px 0 var(--Good1); }
 .LegEntry.IsPartial { box-shadow: inset 0 6px 0 var(--Foil2); }
@@ -473,7 +472,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 18px; margin: 3px; }
 .LabScroll { grid-column: 1; grid-row: 1; overflow: hidden auto; padding: 3px 9px 9px 3px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); display: grid; gap: 6px; align-content: start; }
 .LabScroll > h2 { font-size: var(--Head); line-height: 30px; margin-top: 9px; }
-.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, 288px); justify-content: start; gap: 18px; padding-bottom: 6px; }
+.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 288px), 1fr)); gap: 18px; padding-bottom: 6px; }
 .OfferFamily { color: var(--Muted); }
 .OfferCard { --Muted: var(--Hull4); display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 3px; padding: 12px 15px 12px; background: var(--Hull1); box-shadow: inset 0 var(--U) 0 var(--Hull2), 0 -3px 0 var(--Black), 0 3px 0 var(--Black), -3px 0 0 var(--Black), 3px 0 0 var(--Black), 0 9px 0 var(--Black); margin-bottom: 6px; }
 .OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 9px; }

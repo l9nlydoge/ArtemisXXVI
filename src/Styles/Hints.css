@@ -1,4 +1,4 @@
-.HangarStage, .EncounterStage { position: relative; }
+.HangarStage { position: relative; }
 
 .HintCallout {
   --Ring: var(--Ocean2);

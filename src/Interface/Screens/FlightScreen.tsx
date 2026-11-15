@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Rules } from '../../Engine/Core/Rules'
 import { EventKind } from '../../Engine/Events/SpaceEvent'
 import type { Contact } from '../../Engine/Flight/Contact'
@@ -128,14 +128,7 @@ function ScannerView({ flight }: { flight: Flight }) {
   const send = useGameStore((state) => state.send)
   return (
     <>
-      <section className="ScannerView">
-        <h1 className="ViewTitle">{wording.t('Flight.ScanTitle')}</h1>
-        {flight.contacts.length === 0 && <p className="Panel EmptyNote">{wording.t('Flight.NoContacts')}</p>}
-        <ul className="ContactRow" data-count={flight.contacts.length}>
-          {flight.contacts.map((contact, index) => <ContactCard key={contact.event.id} flight={flight} contact={contact} index={index} />)}
-        </ul>
-      </section>
-      <footer className="FlightFoot Panel">
+      <footer className="FlightFoot Panel IsScanner">
         <StatusMeters flight={flight} />
         <div className="FootMiddle">
           <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
@@ -150,6 +143,13 @@ function ScannerView({ flight }: { flight: Flight }) {
           </button>
         </div>
       </footer>
+      <section className="ScannerView">
+        <h1 className="ViewTitle">{wording.t('Flight.ScanTitle')}</h1>
+        {flight.contacts.length === 0 && <p className="Panel EmptyNote">{wording.t('Flight.NoContacts')}</p>}
+        <ul className="ContactRow">
+          {flight.contacts.map((contact, index) => <ContactCard key={contact.event.id} flight={flight} contact={contact} index={index} />)}
+        </ul>
+      </section>
     </>
   )
 }
@@ -162,7 +162,7 @@ function TravelView({ flight, travel }: { flight: Flight; travel: Travel }) {
         <p className="TravelLine Panel">
           <strong>{wording.t('Flight.Cruise')}</strong>
           <span>{travel.gain > 0 ? wording.t('Flight.CruisePower', { gain: travel.gain }) : wording.t('Flight.CruiseFull')}</span>
-          <span className="Muted">{wording.t('Flight.CruiseSkip')}</span>
+          <button type="button" className="Quiet" onClick={travel.skip}>{wording.t('Flight.CruiseSkip')}</button>
         </p>
       </section>
       <footer className="FlightFoot Panel IsTravel">
@@ -239,18 +239,8 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
   return (
     <>
       <section className="EncounterView">
-        <article className="EventCard Panel">
-          <EventPhoto imageId={event.imageId} />
-          <div className="EventBody">
-            <h1>{wording.text(event.label)}</h1>
-            <ul className="FactList IsScrolling">
-              {event.facts.map((fact, at) => <li key={at}>{wording.text(fact)}</li>)}
-            </ul>
-            <ChannelBars event={event} craft={craft} recorded={encounter.recorded} pending={over ? undefined : preview.gains} />
-          </div>
-        </article>
-
-        <div className="EncounterStage" role="img" aria-label={wording.t('Hangar.Spacecraft')}>
+        <div className="EncounterScene">
+          <div className="EncounterStage" role="img" aria-label={wording.t('Hangar.Spacecraft')} />
           <HintSlot
             candidates={[
               { hint: Hint.Encounter, when: !over && encounter.turnIndex === 0 },
@@ -261,6 +251,17 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
             onShow={setHintOpen}
           />
         </div>
+
+        <article className="EventCard Panel">
+          <EventPhoto imageId={event.imageId} />
+          <div className="EventBody">
+            <h1>{wording.text(event.label)}</h1>
+            <ul className="FactList IsScrolling">
+              {event.facts.map((fact, at) => <li key={at}>{wording.text(fact)}</li>)}
+            </ul>
+            <ChannelBars event={event} craft={craft} recorded={encounter.recorded} pending={over ? undefined : preview.gains} />
+          </div>
+        </article>
 
         <ol className="TurnTrack Panel" aria-label={wording.t('Turn.Label', { turn: encounter.turnIndex + 1 })}>
           {visible.map((condition, index) => {
@@ -343,8 +344,8 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
                 <li className={preview.powerCost > craft.generation ? 'IsOverGeneration' : ''}>{wording.t('Encounter.UsesMakes', { power: preview.powerCost, gain: craft.generation })}</li>
                 <li>{wording.t('Encounter.Records', { data: recording })}</li>
                 <li className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</li>
+                {preview.lost && <li className="LethalLine">{wording.t('Encounter.Lethal')}</li>}
               </ul>
-              {preview.lost && <p className="LethalLine">{wording.t('Encounter.Lethal')}</p>}
               <TurnClock timer={timer} paused={paused || hintOpen} />
               <button type="button" className="Primary IsLarge" disabled={!preview.valid} onClick={() => send(Commands.commit(plan.list))}>{wording.t('Encounter.EndTurn')}</button>
             </div>
@@ -368,6 +369,11 @@ export function FlightScreen() {
   const firstFlight = useGameStore((state) => state.profile.flights === 0)
   const travel = useTravelBeat(flight)
   const mode = encounter ? SceneMode.Encounter : travel ? SceneMode.Travel : SceneMode.Scanner
+
+  useLayoutEffect(() => {
+    root.current?.parentElement?.scrollTo(0, 0)
+  }, [mode, flight?.legIndex, flight?.phase, encounter?.event.id])
+
   useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}:${mode}`)
   const inLaunch = useLaunch(flight, firstFlight)
   const points = useCountUp(flight?.pointsEarned ?? 0)

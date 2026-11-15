@@ -6,6 +6,7 @@ import './Styles/Scene.css'
 import './Styles/Hints.css'
 import './Styles/Sources.css'
 import './Styles/Logbook.css'
+import './Styles/Responsive.css'
 
 createRoot(document.getElementById('Root')!).render(
   <StrictMode>

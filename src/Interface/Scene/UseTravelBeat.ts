@@ -51,6 +51,8 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
       orbit.hold(beat.pace(elapsed))
     })
     const skip = (event: Event) => {
+      if (event instanceof KeyboardEvent && event.key === 'Tab') return
+      if (event.target instanceof Element && event.target.closest('button')) return
       event.preventDefault()
       hush.current?.()
       finish()
