@@ -2,9 +2,9 @@
 
 This document says how to build the game described in `Concept.md`. It holds every rule and every number. Where the two documents disagree, this one wins and the concept gets corrected.
 
-**Status:** steps 1 (setup), 2 (engine) and 3 (data) of the build plan are done. There are 273 passing tests and no game screens yet. The engine was reviewed independently twice and the data once; after each review deliberate errors were planted in a copy to confirm the tests catch them.
+**Status:** steps 1 (setup), 2 (engine), 3 (data), 4 (screens) and 5 (polish) of the build plan are done, and the balance pass of step 6 is in. There are 285 passing tests, including the balance targets of section 13.2 flown on the real weeks. The engine was reviewed independently twice and the data once; after each review deliberate errors were planted in a copy to confirm the tests catch them.
 
-**How the numbers were checked:** the tables in section 5 were flown by the engine's two test players, 300 flights per loadout, on two hand-written sample weeks. Results are in section 13.3. They show the shape is right. They are starting values: the sample weeks are not the real data, and the balance tests in section 13.2 are what tune them once it is in.
+**How the numbers were checked:** the tables in section 5 were flown by the engine's test players on the real weeks, 300 flights per loadout. Results are in section 13.3, and the reasons for each change are in `GameDesign.md`. The balance tests in section 13.2 fail the build if a later change breaks them.
 
 ---
 
@@ -295,7 +295,7 @@ Each turn has `signal`, `radiation` and `inShadow`. A contact's conditions are f
   - if `T ≥ S`, the storm is stretched: `storm.radiation[floor(i × S / T)]`;
   - if `T < S`, the contact sits in the middle of the storm: `storm.radiation[floor((S − T) / 2) + i]`.
   - Either way the contact meets the storm's peak. A short flyby takes less radiation in total, and cannot dodge the worst turn.
-- the South Atlantic Anomaly: on a leg with no storm, each turn has probability 0.15 of **2** radiation.
+- the South Atlantic Anomaly: on a leg with no storm, each turn has probability 0.15 of **1** radiation. Radiation Shielding Mk I cancels it.
 
 ### 4.7 Scoring an encounter
 
@@ -358,7 +358,7 @@ Costs are in millions of dollars. "Bay" is bay units. A value of 0 unlock points
 
 | Id | Name | Min rank | Budget | Bay | Hull | Base generation | Base capacity |
 |---|---|---|---|---|---|---|---|
-| SmallSat | Small spacecraft | 1 | 60 | 8 | 16 | 2 | 6 |
+| SmallSat | Small spacecraft | 1 | 60 | 8 | 16 | 1 | 6 |
 | Explorer | Medium spacecraft | 3 | 110 | 12 | 22 | 2 | 8 |
 | Flagship | Large spacecraft | 5 | 200 | 18 | 30 | 3 | 10 |
 
@@ -377,10 +377,10 @@ Format for three marks: `I / II / III`. Every Mk II needs rank 2 and every Mk II
 
 | Id | Min rank | Channel | Power | Cost | Bay | Data per use | Unlock points |
 |---|---|---|---|---|---|---|---|
-| Camera | 1 | Visible | 2 | 10 / 18 / 30 | 2 / 2 / 3 | 3 / 4 / 6 | 0 / 110 / 320 |
+| Camera | 1 | Visible | 3 | 10 / 18 / 30 | 2 / 2 / 3 | 3 / 4 / 6 | 0 / 110 / 320 |
 | ParticleDetector | 1 | Particles | 1 | 6 / 10 / 16 | 1 / 1 / 1 | 2 / 3 / 5 | 0 / 80 / 240 |
-| Spectrometer | 1 | Spectrum | 3 | 14 / 24 / 38 | 2 / 3 / 3 | 4 / 6 / 8 | 60 / 140 / 360 |
-| Radar | 1 | Radar | 4 | 16 / 26 / 40 | 3 / 3 / 4 | 5 / 7 / 10 | 90 / 170 / 400 |
+| Spectrometer | 1 | Spectrum | 3 | 14 / 24 / 38 | 2 / 3 / 3 | 4 / 6 / 8 | 0 / 140 / 360 |
+| Radar | 1 | Radar | 4 | 16 / 26 / 40 | 2 / 3 / 4 | 5 / 7 / 10 | 90 / 170 / 400 |
 | HighEnergyDetector | 2 | HighEnergy | 3 | 18 / 28 / 44 | 2 / 2 / 3 | 4 / 6 / 9 | 120 / 200 / 440 |
 
 Radar also enables Survey (section 4.3) at any mark.
@@ -407,14 +407,14 @@ All modules have `maxCopies = 1` except Solar Array and Battery.
 ### 5.3 Starting profile
 
 - Points 0, lifetime points 0, rank 1.
-- Owned at Mk I: SolarArray, Battery, Camera, ParticleDetector, RadiationShielding.
-- Default loadout: those five on the SmallSat. Cost 35 of 60, bay 6 of 8.
+- Owned at Mk I: SolarArray, Battery, Camera, Spectrometer, ParticleDetector, RadiationShielding.
+- Default loadout: those six on the SmallSat. Cost 49 of 60, bay 8 of 8. The bay is full, so every module bought later is fitted in place of another. The Hangar says what a module is short of before it is fitted (section 10.4).
 
 ### 5.4 Ranks
 
 | Rank | Lifetime points | Title | Unlocks |
 |---|---|---|---|
-| 1 | 0 | Trainee | SmallSat, week July 2019. In the lab from the start: Spectrometer, Radar, MagneticShield, FlightComputer |
+| 1 | 0 | Trainee | SmallSat, week July 2019. In the lab from the start: Radar, MagneticShield, FlightComputer |
 | 2 | 150 | Flight Controller | Week 2022, HighEnergyDetector, Thrusters, Mk II |
 | 3 | 400 | Mission Specialist | Explorer, Antenna, RepairDrone |
 | 4 | 900 | Flight Director | Week May 2024, Mk III |
@@ -1297,9 +1297,9 @@ Selecting an unlocked card goes to the Hangar.
 │ └───────────────────┘                            │  [Spectrometer —   ] │ │
 │                                                  │  [Radar      locked] │ │
 │ ┌ Spacecraft ───────────────────────────┐        │ Protection           │ │
-│ │ Budget   ▓▓▓▓▓▓▓░░░░░  35 of 60       │        │  …                   │ │
-│ │ Bay      ▓▓▓▓▓▓▓▓▓░░░   6 of 8        │        └──────────────────────┘ │
-│ │ Power    +4 a turn · holds 12         │                                 │
+│ │ Budget   ▓▓▓▓▓▓▓▓▓▓░░  49 of 60       │        │  …                   │ │
+│ │ Bay      ▓▓▓▓▓▓▓▓▓▓▓▓   8 of 8        │        └──────────────────────┘ │
+│ │ Power    +3 a turn · holds 12         │                                 │
 │ │ Hull     16 · Shielding −1            │                    [ Launch ]   │
 │ │ Can record: Visible, Particles        │                                 │
 │ │ Cannot record: Radar, Spectrum,       │                                 │
@@ -1312,10 +1312,12 @@ Selecting an unlocked card goes to the Hangar.
   - Owned and not installed: click to install at the highest owned mark that fits.
   - Installed: gold left edge; a mark stepper (I, II, III; unowned marks disabled); a remove control.
   - Solar Array and Battery, once installed, show "Add a second". Each copy has its own mark.
-  - Not owned: dimmed, with "Unlock in the lab for 60 points".
+  - Not owned: dimmed, with "Unlock in the lab: 90 points".
+  - A fit that would go over bay space or budget is still allowed, but before it is pressed the row says what is short: "Needs 2 more bay and $5M more: remove a module first". The fit control is drawn dashed. The count includes any excess the loadout already has.
+  - When the bay is full, the spacecraft panel says so: "Bay full. To fit another module, remove one first." The starter fills it, so every purchase is a swap.
   - Rank-locked: dimmed, with "Rank 2".
 - **Spacecraft panel (bottom left):** the two limits as meters, the derived values, and two lists: what this loadout can and cannot record. The "cannot" list is compared with the forecast: a channel the week needs and the loadout lacks is flagged.
-- **Launch** is disabled while `issues()` is not empty, and the first issue is written next to it.
+- **Launch** is disabled while `issues()` is not empty, and every issue is written next to it.
 - **Hover or focus on a module** shows the full card: drawing, what it does in one sentence, numbers for all three marks.
 
 ### 10.5 Flight: scanner
@@ -1359,7 +1361,7 @@ Choosing a card starts the encounter.
 │ [Camera        ] [Spectrometer  ] [Particle Det. ] [Magnetic Shield]      │
 │ [2 power  +6   ] [3 power  +8   ] [1 power  none ] [4 power  blocks 6]    │
 │                                                                           │
-│ This turn: uses 5 power · records 14 · takes 0 damage        [ End turn ] │
+│ Plan uses 5 power. Makes 3 a turn · records 14 · no damage   [ End turn ] │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -1534,7 +1536,7 @@ Glass or blurred panels, gradient buttons, glow text, emoji, icons without label
 | Area | Cases |
 |---|---|
 | Loadout | Each issue kind is reported; a valid loadout has none; install, remove and setMark return new objects; JSON round trip. |
-| Spacecraft | Derived values for the starter loadout: generation 4, capacity 12, hull 16, shielding 1. |
+| Spacecraft | Derived values for the starter loadout: generation 3, capacity 12, hull 16, shielding 1. |
 | Event factories | 2019 OK and the 11 May 2024 storm produce the values in sections 6.1 and 6.2. Each exoplanet method maps to its channel. |
 | Encounter | Charge step respects shadow and capacity; a plan over budget is invalid; gain uses signal and caps at capacity; `minMark` blocks recording; shield order (passive, then active); loss on hull ≤ 0. |
 | Scoring | Base, channel bonus, full bonus, antenna multiplier, missed points. |
@@ -1546,46 +1548,55 @@ Glass or blurred panels, gradient buttons, glow text, emoji, icons without label
 
 ### 13.2 Balance tests
 
-Run with bots, 300 seeds each. These are the targets the numbers are tuned to.
+In `src/Engine/Tests/Balance.test.ts`, on the real weeks, 300 seeds unless stated. These are the targets the numbers are tuned to. GreedyBot presses every useful instrument it can afford, CautiousBot keeps shield power in reserve, and PlannerBot searches the rest of each encounter and stands in for a careful player.
 
 | # | Check | Target |
 |---|---|---|
 | B1 | Starter loadout, July 2019, GreedyBot | Completes ≥ 95%. Banks 90–170 points. |
+| B1a | July 2019, the starter and an unshielded SmallSat (Camera, Spectrometer, Radar, one Solar Array) | Nothing is lost. |
+| B1b | Starter loadout, July 2019, PlannerBot against GreedyBot, 60 seeds | Careful play earns ≥ 20% more. |
 | B2 | Starter loadout, May 2024 | Lost ≥ 90%. A new player cannot walk through the storm. |
 | B3 | Best affordable Explorer loadout without a Magnetic Shield, May 2024 | Lost ≥ 60%. |
-| B4 | Explorer loadout with Magnetic Shield, May 2024, CautiousBot | Completes ≥ 85%. |
+| B4 | Explorer loadout with Magnetic Shield Mk I, May 2024, CautiousBot | Completes ≥ 85%. |
+| B4a | The same loadout, GreedyBot | Completes < 60%. May must not be safe for a player who spends the shield's power on instruments. |
 | B5 | For each week, the best loadout found by search differs from the best for the other weeks in at least two modules | True. No universal loadout. |
-| B6 | For each week, no single instrument accounts for more than 60% of points in the best loadout | True. |
+| B6 | For each week, no single instrument accounts for more than 60% of the data in the best Explorer loadout, or 80% on the SmallSat | True. **Loosened** for the SmallSat: on 60 $M the best autumn 2022 build carries one main instrument plus the High-Energy Detector for the gamma-ray burst, so the camera does three quarters of the work. That follows from the budget and the real week. |
 | B7 | A player following GreedyBot reaches rank 2 within 2 flights and rank 3 within 5 | True. |
-| B8 | No module is absent from every week's top five loadouts | True. No dead cards. |
+| B8 | Every module the lab sells by rank 2 appears in some week's top five loadouts | True. **Loosened** from "every module": the search runs at Mk I on the bus of each week's rank, so the rank-3 modules (Antenna, Repair Drone) are not required. They do appear in May's top five. |
+| B9 | Radar bought after flight one, best loadout each bot can fly, 60 seeds | A careful player (PlannerBot) earns ≥ 15% more on autumn 2022 and ≥ 5% more on July 2019; a careless one (GreedyBot) ≥ 15% more on autumn 2022. 15% is about one more asteroid recorded on all three channels per flight. |
 
 ### 13.3 What the engine shows so far
 
-Flown by the engine's test players on the real weeks, 300 flights per row.
+Flown by the engine's test players on the real weeks, 300 flights per row, on the numbers in section 5. Figures from `GameDesign.md` and the integration run of 15 November.
 
-| Loadout | Week | Player | Mean points | Completed |
-|---|---|---|---|---|
-| Starter | July 2019 | Greedy | 109 | 100% |
-| Camera, Spectrometer, Radar, one Solar Array, no shielding | July 2019 | Greedy | 208 | 98% |
-| Starter | Autumn 2022 | Greedy | 99 | 99% |
-| Camera, Spectrometer, Radar, one Solar Array, no shielding | Autumn 2022 | Greedy | 203 | 85% |
-| Starter | May 2024 | Greedy | 28 | 0% |
-| Medium, Magnetic Shield Mk II, two instruments | May 2024 | Cautious | 186 | 100% |
-| Medium, Magnetic Shield Mk I, one Solar Array, four instruments | May 2024 | Greedy | 129 | 15% |
-| The same | May 2024 | Cautious | 163 | 71% |
+| Loadout | Week | Greedy: points, completed | Planner: points, completed |
+|---|---|---|---|
+| Starter (six modules) | July 2019 | 162, 100% | 212, 100% |
+| Two arrays, two batteries, Camera, Spectrometer | July 2019 | 179, 100% | 222, 100% |
+| Solar Array, Battery, Camera, Spectrometer, Radar | July 2019 | 172, 100% | 251, 100% |
+| Starter | Autumn 2022 | 133, 100% | 233, 100% |
+| Solar Array, Battery, Camera, Spectrometer, Radar | Autumn 2022 | 159, 88% | 299, 98% |
+| Solar Array, Camera, Spectrometer, Radar, no shielding | Autumn 2022 | 187, 99% | 224, 98% |
+| Starter | May 2024 | 37, 0% | 41, 0% |
+| Medium: Magnetic Shield Mk I, one array, battery, Camera, Particle and High-Energy Detectors, shielding | May 2024 | 29% completed (Cautious 91%) | 82% completed |
+| Medium: Magnetic Shield, Battery, Solar Array, Shielding and Particle Detector at Mk II, Camera | May 2024 | 100% completed | 100% completed |
 
-On the sample weeks used by the unit tests, the same three instruments earn 147, 268 or 402 points depending only on how much power the spacecraft has.
+**First purchase, flight two.** Best loadout each player can fly with the starter modules plus one purchase, against the starter modules alone (Planner 224 on July 2019 and 240 on autumn 2022):
+
+| Bought | July 2019, careful | Autumn 2022, careful | Autumn 2022, careless |
+|---|---|---|---|
+| Radar Mk I | +13% | +26% | +50% |
+| Camera Mk II | +13% | +8% | −9% |
+| High-Energy Detector | +0% | +29% | −7% |
+| Magnetic Shield, Flight Computer, Spectrometer Mk II, Solar Array Mk II, Battery Mk II | +0% | +0% | +0 to 1% |
 
 What this says:
 
-- **Power is the real limit once you carry three instruments.**
-- **The first flight is safe and is not a puzzle.** The starter earns about 109 points, enough for one or two unlocks, and several of its modules do nothing on a quiet week. Swapping them out is the first design lesson: the same small spacecraft earns 208 with a spectrometer and a radar.
-- **Dropping the shielding has a price even on calm weeks.** It costs 2% of flights in July 2019 and 15% in autumn 2022, which has one moderate storm.
-- **May 2024 cannot be survived without the Magnetic Shield.**
-- **How you fly matters most in the storm.** On thin power, a player who saves charge for the shield completes 71% of flights. One who spends it all on instruments completes 15%.
-- **With plenty of power the storm is safe once you own the shield.** If playtests find that too easy, raise the shield's power cost before touching anything else.
-
-These are starting values. The balance targets in section 13.2 are checked in step 6.
+- **The first flight is safe and has a decision.** The starter's two instruments want 6 power a turn against 3 made, so a careful player who saves charge for the peak turn earns about 30% more than one who presses everything. Nothing is lost on July 2019.
+- **Power is the real limit once you carry three instruments.** The radar pays only because at 2 bay it fits in place of the Particle Detector and the shielding.
+- **Dropping the shielding has a price on autumn 2022,** which has one Kp 6 storm: 1 to 12% of flights are lost, after the storm, at low hull.
+- **May 2024 cannot be survived without the Magnetic Shield,** and on a Mk I shield with thin power how you fly decides it: 29% for a careless player, 82 to 91% for a careful one.
+- **The Magnetic Shield and the Flight Computer earn no points on a calm week.** Their worth is May 2024 and information. A player who buys one of them first will not see flight two change.
 
 ### 13.4 Manual checks before each merge
 
