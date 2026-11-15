@@ -369,7 +369,7 @@ Costs are in millions of dollars. "Bay" is bay units. A value of 0 unlock points
 
 ### 5.2 Modules
 
-Format for three marks: `I / II / III`. Every Mk II needs rank 2 and every Mk III needs rank 4, in addition to the module's own minimum rank.
+Format for three marks: `I / II / III`. Every Mk II needs rank 3 and every Mk III needs rank 4, in addition to the module's own minimum rank (`Rules.markRanks = [1, 3, 4]`).
 
 **Power (passive)**
 
@@ -402,7 +402,7 @@ Radar also enables Survey (section 4.3) at any mark.
 | Id | Priority | Min rank | Kind | Power | Cost | Bay | Effect | Unlock points |
 |---|---|---|---|---|---|---|---|---|
 | FlightComputer | Must | 1 | Passive | — | 6 / 10 / 16 | 1 / 1 / 1 | lookahead 1 / 2 / all | 40 / 100 / 240 |
-| Thrusters | S4 | 2 | Active | 2 | 10 / 16 / 26 | 2 / 2 / 3 | 2 / 3 / 4 burns per flight | 100 / 180 / 400 |
+| Thrusters | S4 | 2 | Active | 2 | 10 / 16 / 26 | 1 / 1 / 2 | 2 / 3 / 4 burns per flight | 100 / 180 / 400 |
 | Antenna | S4 | 3 | Passive | — | 8 / 14 / 22 | 1 / 2 / 2 | points ×1.10 / ×1.20 / ×1.35 | 120 / 220 / 460 |
 | RepairDrone | S4 | 3 | Active, once per flight | 3 | 9 / 15 / 24 | 1 / 1 / 2 | hull +6 / +9 / +12 | 110 / 200 / 420 |
 | CrewCapsule | Later | 6 | — | — | — | — | Shown locked | — |
@@ -420,9 +420,9 @@ All modules have `maxCopies = 1` except Solar Array and Battery.
 | Rank | Lifetime points | Title | Unlocks |
 |---|---|---|---|
 | 1 | 0 | Trainee | SmallSat, week July 2019. In the lab from the start: Radar, MagneticShield, FlightComputer |
-| 2 | 150 | Flight Controller | Week 2022, HighEnergyDetector, Thrusters, Mk II |
-| 3 | 400 | Mission Specialist | Explorer, Antenna, RepairDrone |
-| 4 | 900 | Flight Director | Week May 2024, Mk III |
+| 2 | 150 | Flight Controller | Week 2022, HighEnergyDetector, Thrusters |
+| 3 | 350 | Mission Specialist | Explorer, week May 2024, Antenna, RepairDrone, Mk II |
+| 4 | 900 | Flight Director | Mk III |
 | 5 | 1800 | Chief Scientist | Flagship |
 | 6 | 3500 | Programme Director | Destinations and crew, shown "in development" |
 
@@ -613,7 +613,7 @@ The real data gives 13 well-determined asteroids within 20 lunar distances: 1, 1
 
 Storm legs: whatever DONKI records for these dates.
 
-**MayTwentyFour — "The great storm"** (rank 4, S2)
+**MayTwentyFour — "The great storm"** (rank 3, S2; it opens with the Explorer, the smallest spacecraft that can carry a Magnetic Shield and still record)
 
 | Leg | Window (UT) | Pinned |
 |---|---|---|
@@ -1233,6 +1233,7 @@ interface GameState {
   togglePlan(key: string): void
   finishFlight(): void
   buy(moduleId: string): void
+  markHint(hint: string): void
   setLanguage(language: Language): void
   resetProgress(): void
 }
@@ -1241,6 +1242,8 @@ enum Screen { Home, Week, Hangar, Flight, Debrief, Lab, Logbook, Sources }
 ```
 
 `Flight` is mutable inside the engine. The store holds one instance and bumps `flightTick` after each `apply`.
+
+**Hints.** `State/HintBook.ts` decides whether a first-flight hint is wanted: not yet in the profile's `hintsSeen`, and the player is new. The Hangar, Scanner, Encounter and Radiation hints need `flights === 0`; the Debrief and Lab hints need `flights === 1` and the Hangar hint already seen, so a player who flew before hints existed never gets them. A hint is written to `hintsSeen` through `markHint` the moment it appears, so it never shows twice even if the player ignores it. Erasing progress resets the profile and with it the hints.
 
 ### 9.2 Saved data
 
@@ -1406,16 +1409,24 @@ Unlocking plays one short stamp animation on the card and updates the balance. P
 
 ### 10.9 Logbook and Sources
 
-**Logbook:** a grid of every event in the unlocked weeks. Unrecorded events show as dark cards with only their kind. Recorded ones show the photograph, real facts, the "what was learned" line and the source link. Complete ones carry a gold corner. A header shows totals.
+Both are reached from Home (quiet links beside Lab). The Debrief links to the Logbook, and the Logbook links to Sources.
 
-**Sources:** a plain table.
+**Logbook:** a header with "N of M events recorded" and how many have a full dataset, counted by the engine's `Logbook` over the weeks the rank can fly. Below it, a scrolling grid of cards, one per recorded event, in date order: the pixel picture with its caption and credit, the name, the date and week, "Full dataset" or "Part of the dataset" with the best points, and the "what was learned" line with its source link. Complete ones have a gold border. Events not yet recorded are only counted, never shown. An empty logbook says to fly a mission and has the button for it.
 
-| Section | Rows |
-|---|---|
-| Data | Each dataset: name, what the game takes from it, date retrieved, link |
-| Images | Each image: title, credit, link |
-| Game numbers | A statement that power costs, capacities and prices are game values chosen for play, and are not real engineering figures |
-| AI use | What AI was used for |
+**Sources:** one scrolling column of panels, read from the code at run time.
+
+| Panel | Content | From |
+|---|---|---|
+| Intro | Where the data comes from, and how many asteroid passes, storm legs, planets and rare events the weeks hold (counted at run time) | `WeekCatalog.shared` |
+| Data | Each dataset: name, what the game takes from it, date retrieved, number of saved requests, its home page and one real request | `GameData.sources` (the snapshot files) |
+| Event pictures | Each picture at 2x: title, caption, kind, NASA id, credit, link to the original | `Images.all` |
+| Checked lines | Each hand-written "what was learned" line: event, date checked, the page it was checked against | `LearnedSources.all` |
+| How the data is used | The two `Sources.Note` lines, and that power costs, capacities, budgets and prices are game values | strings |
+| The challenge's resource list | The challenge page's list, said to be for reference only (nothing from it is claimed yet, section 7.2.1) | `ChallengeResources` |
+| AI use | `Credits.Statement`, word for word | strings |
+| Use and credit | The Earth credit and the non-affiliation line | `Footer.*` |
+
+Every link opens in a new tab with `rel="noopener noreferrer"`.
 
 ### 10.10 Smaller screens
 
@@ -1428,11 +1439,16 @@ Unlocking plays one short stamp animation on the card and updates the balance. P
 
 ### 10.11 First-flight hints (S1)
 
-Three prompts, each shown once and stored in `hintsSeen`:
+Six callouts, each shown once (section 9.1). A callout is a small dark-blue panel with a stepped pointer, one or two sentences and a **Got it** button; Escape closes it, and so does Enter unless another control has focus. It never dims the screen, never covers the control it describes, and play goes on while it is open (in the encounter, keys 1–9 still work; the first Enter closes the hint, the next ends the turn). The text describes mechanics, never numbers, so balance changes cannot make it false. Keys are `Hint.*` in `StringsEn.json`.
 
-1. Hangar: "This week is mostly asteroids. A camera records them. Press Launch."
-2. First encounter: "Switch on the camera, then end the turn. Signal is strongest at closest approach."
-3. First debrief: "You missed points because you had no radar. The lab is where you fix that."
+| Hint | Where | When it closes on its own |
+|---|---|---|
+| Hangar | In the space between the spacecraft panel and the module list, pointing at the spacecraft panel: each instrument records one kind of data, compare Cannot record with the forecast, budget and bay, launch | Leaving the Hangar |
+| Scanner | In the scanner's footer, in place of the usual line, pointing up at the contacts: approach one contact a leg, what the bars mean, what holding does | Leaving the scanner |
+| Encounter | Above the module row on the first turn of the first encounter: switch modules on by click or keys 1–9, power and sunlit turns, End turn or Enter | The turn ends |
+| Radiation | Same place, the first turn whose radiation is above the spacecraft's shielding: damage shows above End turn, hull at zero loses the spacecraft | The turn ends |
+| Debrief | Inside What you missed, after the first flight: points buy modules and marks in the lab, what the missed line means | Leaving the Debrief |
+| Lab | Under the rank panel, after the first flight: unlock, then fit in the hangar, swap when the bay is full | Leaving the Lab |
 
 ### 10.12 Accessibility
 
@@ -1602,13 +1618,15 @@ In `src/Engine/Tests/Balance.test.ts`, on the real weeks, 300 seeds unless state
 | B4a | The same loadout, GreedyBot | Completes < 60%. May must not be safe for a player who spends the shield's power on instruments. |
 | B5 | For each week, the best loadout found by search differs from the best for the other weeks in at least two modules | True. No universal loadout. |
 | B6 | For each week, no single instrument accounts for more than 60% of the data in the best Explorer loadout, or 80% on the SmallSat | True. **Loosened** for the SmallSat: on 60 $M the best autumn 2022 build carries one main instrument plus the High-Energy Detector for the gamma-ray burst, so the camera does three quarters of the work. That follows from the budget and the real week. |
-| B7 | A player following GreedyBot reaches rank 2 within 2 flights and rank 3 within 5 | True. |
+| B7 | A player following GreedyBot reaches rank 2 within 2 flights and rank 3 within 3 | True. Tightened from "rank 3 within 5": rank 3 now opens the storm week. |
 | B8 | Every module the lab sells by rank 2 appears in some week's top five loadouts | True. **Loosened** from "every module": the search runs at Mk I on the bus of each week's rank, so the rank-3 modules (Antenna, Repair Drone) are not required. They do appear in May's top five. |
 | B9 | Radar bought after flight one, best loadout each bot can fly, 60 seeds | A careful player (PlannerBot) earns ≥ 15% more on autumn 2022 and ≥ 5% more on July 2019; a careless one (GreedyBot) ≥ 15% more on autumn 2022. 15% is about one more asteroid recorded on all three channels per flight. |
+| B10 | Campaigns: PlannerBot with the careful buying order (Radar, then Magnetic Shield) on seeds 1 to 3, GreedyBot with the default order on seeds 3 and 4 | Autumn 2022 opens after flight one and May 2024 after flight two for every careful campaign; May 2024 after flight three for the careless ones. May's rank gives the Explorer. The fit the careful player takes into May completes 75 to 97% for PlannerBot over 60 seeds (dangerous, not impossible, not free), and at least 10 points less for GreedyBot. |
+| B11 | Every Lab offer after flight one (rank 2, 230 points), best loadout with and without it, PlannerBot, 40 seeds | Each raises the next flight's points by ≥ 10% on July 2019 or autumn 2022, except the two storm modules. No offer gives 40% or more, and at least three give 10% or more. The Magnetic Shield takes the best May 2024 fit at rank 3 from ≤ 10% to ≥ 75% completed. The Flight Computer added to the B4 kit raises PlannerBot's May completion by ≥ 8 points (100 seeds). |
 
 ### 13.3 What the engine shows so far
 
-Flown by the engine's test players on the real weeks, 300 flights per row, on the numbers in section 5. Figures from `GameDesign.md` and the integration run of 15 November.
+Flown by the engine's test players on the real weeks, 300 flights per row unless stated, on the numbers in section 5. Figures from `GameDesign.md` (balance pass of 15 November, afternoon).
 
 | Loadout | Week | Greedy: points, completed | Planner: points, completed |
 |---|---|---|---|
@@ -1622,22 +1640,37 @@ Flown by the engine's test players on the real weeks, 300 flights per row, on th
 | Medium: Magnetic Shield Mk I, one array, battery, Camera, Particle and High-Energy Detectors, shielding | May 2024 | 29% completed (Cautious 91%) | 82% completed |
 | Medium: Magnetic Shield, Battery, Solar Array, Shielding and Particle Detector at Mk II, Camera | May 2024 | 100% completed | 100% completed |
 
-**First purchase, flight two.** Best loadout each player can fly with the starter modules plus one purchase, against the starter modules alone (Planner 224 on July 2019 and 240 on autumn 2022):
+**May 2024 when it opens (flight three).** The careful player's fit (Explorer, Solar Array, Battery, Camera, Spectrometer, Radar, Particle Detector, Radiation Shielding, Magnetic Shield, all Mk I), 100 seeds: Planner 188 points, 82% completed; Cautious 94%; Greedy 60%. Without a Magnetic Shield: 0%.
 
-| Bought | July 2019, careful | Autumn 2022, careful | Autumn 2022, careless |
-|---|---|---|---|
-| Radar Mk I | +13% | +26% | +50% |
-| Camera Mk II | +13% | +8% | −9% |
-| High-Energy Detector | +0% | +29% | −7% |
-| Magnetic Shield, Flight Computer, Spectrometer Mk II, Solar Array Mk II, Battery Mk II | +0% | +0% | +0 to 1% |
+**Flights until each week opens** (24 campaigns of five flights, `Tools/Balance/Study.probe.ts`):
+
+| Week (rank) | Careful player | Careless player |
+|---|---|---|
+| July 2019 (1) | flight 1 | flight 1 |
+| Autumn 2022 (2) | flight 2, 24 of 24 | flight 2, 21 of 24; flight 3, 3 |
+| May 2024 (3) | flight 3, 24 of 24 | flight 3, 19 of 24; flight 4, 5 |
+
+Before this pass (May at rank 4, rank 3 at 400) the careful player reached May 2024 on flight five.
+
+**The Lab after flight one** (rank 2, 230 points). Best loadout with the purchase against without it, 60 seeds (Planner 227 on July 2019 and 238 on autumn 2022 without):
+
+| Bought | July 2019, careful | Autumn 2022, careful | Autumn 2022, careless | May 2024, one flight later |
+|---|---|---|---|---|
+| Radar Mk I | +11% | +25% | +57% | in the careful fit |
+| High-Energy Detector | +0% | +18% | +0% | +41%, completion 87 → 100% |
+| Thrusters (bay 1) | +12% | +9% | +31% | — |
+| Magnetic Shield | +0% | +0% | +0% | completion 0 → 82% |
+| Flight Computer | +0% | +0% | +0% | completion 79 → 93% on the B4 kit |
+
+Mk II marks open at rank 3. After flight two, Particle Detector II (+26%), Battery II (+10%, completion 87 → 98%) and Magnetic Shield II (+9%) pay in May 2024 and Camera II (+10%) on July 2019; Solar Array II, Spectrometer II, Radar II, Radiation Shielding II and the Repair Drone measure +0%.
 
 What this says:
 
 - **The first flight is safe and has a decision.** The starter's two instruments want 6 power a turn against 3 made, so a careful player who saves charge for the peak turn earns about 30% more than one who presses everything. Nothing is lost on July 2019.
 - **Power is the real limit once you carry three instruments.** The radar pays only because at 2 bay it fits in place of the Particle Detector and the shielding.
 - **Dropping the shielding has a price on autumn 2022,** which has one Kp 6 storm: 1 to 12% of flights are lost, after the storm, at low hull.
-- **May 2024 cannot be survived without the Magnetic Shield,** and on a Mk I shield with thin power how you fly decides it: 29% for a careless player, 82 to 91% for a careful one.
-- **The Magnetic Shield and the Flight Computer earn no points on a calm week.** Their worth is May 2024 and information. A player who buys one of them first will not see flight two change.
+- **May 2024 opens on flight three and cannot be survived without the Magnetic Shield.** On a Mk I shield with thin power, how you fly decides it: 60% for a player who spends the shield's power on instruments, 82 to 94% for a careful one; with two arrays and two batteries it is safe.
+- **The Magnetic Shield and the Flight Computer earn no points on a calm week.** Their worth is May 2024, one flight after they can first be bought.
 
 ### 13.4 Manual checks before each merge
 
@@ -1699,4 +1732,4 @@ It is Saturday evening, 14 November. Submission closes Sunday 15 November at 23:
 1. The seven decisions in `Concept.md` section 15.
 2. Whether to take a NASA API key or run the script slowly on the demo key.
 3. Which of the image candidates to approve, once the list is produced in step 3.
-4. Whether the third week (May 2024) should be reachable sooner than rank 4 so that judges are more likely to see it.
+4. ~~Whether the third week (May 2024) should be reachable sooner than rank 4.~~ Done on 15 November: it opens at rank 3 (350 points), on the third flight for a careful player. See `GameDesign.md`.

@@ -179,8 +179,8 @@ describe('Space weather as downloaded', () => {
 })
 
 describe('Weeks built from real data', () => {
-  test('there are three, unlocking at ranks 1, 2 and 4', () => {
-    expect(weeks.all.map((week) => [week.id, week.minRank])).toEqual([['JulyNineteen', 1], ['AutumnTwentyTwo', 2], ['MayTwentyFour', 4]])
+  test('there are three, unlocking at ranks 1, 2 and 3', () => {
+    expect(weeks.all.map((week) => [week.id, week.minRank])).toEqual([['JulyNineteen', 1], ['AutumnTwentyTwo', 2], ['MayTwentyFour', 3]])
     expect(weeks.availableAt(1).map((week) => week.id)).toEqual(['JulyNineteen'])
     expect(Rank.unlocksAt(2, weeks).some((unlock) => unlock.id === 'AutumnTwentyTwo')).toBe(true)
   })

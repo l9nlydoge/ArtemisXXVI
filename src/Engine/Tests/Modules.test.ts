@@ -32,8 +32,8 @@ describe('Module catalog', () => {
   })
 
   test('a mark needs the higher of the module rank and the mark rank', () => {
-    expect(AllMarks.map((mark) => catalog.get('Camera').minRankFor(mark))).toEqual([1, 2, 4])
-    expect(AllMarks.map((mark) => catalog.get('HighEnergyDetector').minRankFor(mark))).toEqual([2, 2, 4])
+    expect(AllMarks.map((mark) => catalog.get('Camera').minRankFor(mark))).toEqual([1, 3, 4])
+    expect(AllMarks.map((mark) => catalog.get('HighEnergyDetector').minRankFor(mark))).toEqual([2, 3, 4])
     expect(AllMarks.map((mark) => catalog.get('Antenna').minRankFor(mark))).toEqual([3, 3, 4])
   })
 

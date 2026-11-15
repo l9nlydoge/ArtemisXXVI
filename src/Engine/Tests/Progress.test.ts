@@ -15,21 +15,21 @@ const state = (profile: Profile, moduleId: string) => lab.offers(profile).find((
 
 describe('Rank', () => {
   test('follows the thresholds in the spec', () => {
-    expect([0, 149, 150, 399, 400, 899, 900, 1799, 1800, 3499, 3500, 99999].map((points) => Rank.of(points))).toEqual([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6])
+    expect([0, 149, 150, 349, 350, 899, 900, 1799, 1800, 3499, 3500, 99999].map((points) => Rank.of(points))).toEqual([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6])
     expect(Rank.top).toBe(6)
   })
 
   test('reports progress to the next rank', () => {
     expect(Rank.progress(0)).toEqual({ rank: 1, into: 0, span: 150, toNext: 150, isTop: false })
-    expect(Rank.progress(210)).toEqual({ rank: 2, into: 60, span: 250, toNext: 190, isTop: false })
+    expect(Rank.progress(210)).toEqual({ rank: 2, into: 60, span: 200, toNext: 140, isTop: false })
     expect(Rank.progress(4000)).toEqual({ rank: 6, into: 500, span: 0, toNext: 0, isTop: true })
   })
 
   test('lists what each rank unlocks', () => {
     const at = (rank: number) => Rank.unlocksAt(rank, Fixtures.weeks).map((unlock) => `${unlock.kind}:${unlock.id}`)
     expect(at(1)).toEqual(['Bus:SmallSat', 'Week:Calm', 'Module:Radar', 'Module:MagneticShield', 'Module:FlightComputer'])
-    expect(at(2)).toEqual(['Module:HighEnergyDetector', 'Module:Thrusters', 'Mark:2'])
-    expect(at(3)).toEqual(['Bus:Explorer', 'Module:Antenna', 'Module:RepairDrone'])
+    expect(at(2)).toEqual(['Module:HighEnergyDetector', 'Module:Thrusters'])
+    expect(at(3)).toEqual(['Bus:Explorer', 'Module:Antenna', 'Module:RepairDrone', 'Mark:2'])
     expect(at(4)).toEqual(['Week:Storm', 'Mark:3'])
     expect(at(5)).toEqual(['Bus:Flagship'])
     expect(Rank.unlocksAt(6, Fixtures.weeks)).toEqual([{ kind: UnlockKind.Teaser, id: 'Destinations' }])
@@ -50,7 +50,7 @@ describe('Profile', () => {
   })
 
   test('survives a JSON round trip', () => {
-    const profile = lab.buy(withPoints(300), 'Spectrometer').withHintSeen('Hangar')
+    const profile = lab.buy(withPoints(400), 'Spectrometer').withHintSeen('Hangar')
     const restored = Profile.fromJson(JSON.parse(JSON.stringify(profile.toJson())))
     expect(restored.toJson()).toEqual(profile.toJson())
     expect(restored.hasSeen('Hangar')).toBe(true)
@@ -100,7 +100,7 @@ describe('Lab', () => {
   test('a new player sees what is too expensive, rank-locked and in development', () => {
     const profile = Profile.starter()
     expect(state(profile, 'Radar')).toMatchObject({ state: OfferState.TooExpensive, mark: 1, cost: 90, shortBy: 90 })
-    expect(state(profile, 'Camera')).toMatchObject({ state: OfferState.RankLocked, mark: 2, needsRank: 2, ownedMark: 1 })
+    expect(state(profile, 'Camera')).toMatchObject({ state: OfferState.RankLocked, mark: 2, needsRank: 3, ownedMark: 1 })
     expect(state(profile, 'HighEnergyDetector')).toMatchObject({ state: OfferState.RankLocked, mark: 1, needsRank: 2 })
     expect(state(profile, 'Antenna')).toMatchObject({ state: OfferState.RankLocked, needsRank: 3 })
     expect(state(profile, 'CrewCapsule')).toMatchObject({ state: OfferState.InDevelopment })
@@ -126,7 +126,7 @@ describe('Lab', () => {
     expect(lab.canBuy(withPoints(9999), 'Nope')).toBe(false)
   })
 
-  test('marks are bought in order, Mk II from rank 2 and Mk III from rank 4', () => {
+  test('marks are bought in order, Mk II from rank 3 and Mk III from rank 4', () => {
     let profile = withPoints(500)
     expect(profile.rank).toBe(3)
     expect(state(profile, 'Camera')).toMatchObject({ state: OfferState.Available, mark: 2, cost: 110 })

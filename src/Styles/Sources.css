@@ -1,0 +1,23 @@
+.SourcesScreen { overflow-y: auto; padding: 21px var(--Gutter) 30px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); }
+.SourcesColumn { width: min(100%, 780px); display: grid; gap: 21px; align-content: start; }
+.SourcesColumn > .ScreenHead { margin-bottom: -3px; }
+.SourcesPanel { display: grid; gap: 9px; padding: 15px 21px 18px; margin: var(--U); }
+.SourcesPanel > h2 { font-size: var(--Head); line-height: 30px; }
+.SourcesPanel p { max-width: 70ch; }
+.SourcesLead { color: var(--White); font-size: var(--Head); line-height: 30px; max-width: 34ch; }
+.SourcesList { display: grid; gap: 0; }
+.SourcesList > li { padding: 12px 0 12px; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.SourcesList > li:first-child { box-shadow: none; padding-top: 3px; }
+.SourceEntry { display: grid; gap: 3px; }
+.SourceMeta { display: flex; flex-wrap: wrap; gap: 0 18px; color: var(--Muted); }
+.SourceLinks { display: flex; flex-wrap: wrap; gap: 0 21px; align-items: baseline; }
+.PictureEntry { display: grid; grid-template-columns: 256px minmax(0, 1fr); gap: 0 18px; align-items: start; }
+.PictureEntry img { display: block; width: 256px; height: 144px; image-rendering: pixelated; background: var(--Black); box-shadow: 0 0 0 var(--U) var(--Hull1); margin: var(--U); }
+.PictureText { display: grid; gap: 3px; min-width: 0; }
+.CheckedList { display: grid; gap: 0; }
+.CheckedList li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 0 21px; align-items: baseline; padding: 6px 0; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
+.CheckedList li:first-child { box-shadow: none; }
+.CheckedName { color: var(--White); }
+.ResourceGroup { display: grid; gap: 3px; padding-top: 6px; }
+.ResourceGroup h3 { color: var(--Muted); }
+.ResourceGroup ul { display: grid; gap: 3px; }

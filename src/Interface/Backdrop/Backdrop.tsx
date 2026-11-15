@@ -35,6 +35,8 @@ const Framings: Readonly<Record<Screen, Framing>> = {
   [Screen.Flight]: { globe: Globe.Large, x: 0.54, y: 0.62, drift: [6, -18] },
   [Screen.Debrief]: { globe: Globe.Large, x: 0.5, y: 0.43, drift: [0, -8] },
   [Screen.Lab]: { globe: Globe.Small, x: 0.86, y: 0.49, drift: [16, -4] },
+  [Screen.Logbook]: { globe: Globe.Large, x: 0.5, y: 0.82, drift: [-6, -10] },
+  [Screen.Sources]: { globe: Globe.Small, x: 0.86, y: 0.62, drift: [12, -6] },
 }
 
 interface Place {

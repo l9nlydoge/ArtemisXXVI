@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Rules } from '../../Engine/Core/Rules'
 import { EventKind } from '../../Engine/Events/SpaceEvent'
 import type { Contact } from '../../Engine/Flight/Contact'
@@ -13,6 +13,7 @@ import type { InstalledModule } from '../../Engine/Spacecraft/InstalledModule'
 import { LearnedSources } from '../../Data/Curated/LearnedSources'
 import { useWording, type Wording } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
+import { Hint } from '../../State/HintBook'
 import { ChannelBars } from '../Cards/ChannelBars'
 import { EventPhoto } from '../Cards/EventPhoto'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
@@ -24,6 +25,7 @@ import { TurnClock, useTurnTimer } from '../Scene/TurnClock'
 import { useTravelBeat, type Travel } from '../Scene/UseTravelBeat'
 import { useLaunch } from '../Scene/UseLaunch'
 import { useCountUp } from '../Scene/UseCountUp'
+import { HintSlot } from '../Shared/HintSlot'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -135,7 +137,10 @@ function ScannerView({ flight }: { flight: Flight }) {
       </section>
       <footer className="FlightFoot Panel">
         <StatusMeters flight={flight} />
-        <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
+        <div className="FootMiddle">
+          <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
+          <HintSlot candidates={[{ hint: Hint.Scanner }]} pointer="Up" place="IsInline" />
+        </div>
         <div className="FootActions">
           {flight.craft.hasRadar && (
             <button type="button" disabled={!flight.can(Commands.survey)} onClick={() => send(Commands.survey)}>{wording.t('Flight.Survey', { cost: Rules.surveyCost })}</button>
@@ -208,7 +213,8 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
   const visible = encounter.visible
   const recording = [...preview.gains.values()].reduce((sum, gain) => sum + gain, 0)
   const result = over ? encounter.result() : undefined
-  const timer = useTurnTimer(`${flight.legIndex}:${encounter.event.id}:${encounter.turnIndex}`, paused || over, () => {
+  const [hintOpen, setHintOpen] = useState(false)
+  const timer = useTurnTimer(`${flight.legIndex}:${encounter.event.id}:${encounter.turnIndex}`, paused || over || hintOpen, () => {
     const current = useGameStore.getState().plan
     send(Commands.commit(encounter.preview(current).valid ? current.list : []))
   })
@@ -244,7 +250,17 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
           </div>
         </article>
 
-        <div className="EncounterStage" role="img" aria-label={wording.t('Hangar.Spacecraft')} />
+        <div className="EncounterStage" role="img" aria-label={wording.t('Hangar.Spacecraft')}>
+          <HintSlot
+            candidates={[
+              { hint: Hint.Encounter, when: !over && encounter.turnIndex === 0 },
+              { hint: Hint.Radiation, when: !over && encounter.current.radiation > craft.passiveShield },
+            ]}
+            pointer="Down"
+            place="IsStageFoot"
+            onShow={setHintOpen}
+          />
+        </div>
 
         <ol className="TurnTrack Panel" aria-label={wording.t('Turn.Label', { turn: encounter.turnIndex + 1 })}>
           {visible.map((condition, index) => {
@@ -329,7 +345,7 @@ function EncounterView({ flight, encounter, paused }: { flight: Flight; encounte
                 <li className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</li>
               </ul>
               {preview.lost && <p className="LethalLine">{wording.t('Encounter.Lethal')}</p>}
-              <TurnClock timer={timer} paused={paused} />
+              <TurnClock timer={timer} paused={paused || hintOpen} />
               <button type="button" className="Primary IsLarge" disabled={!preview.valid} onClick={() => send(Commands.commit(plan.list))}>{wording.t('Encounter.EndTurn')}</button>
             </div>
           </>
