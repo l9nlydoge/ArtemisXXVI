@@ -18,6 +18,8 @@ Lights = Hex('#ffcf6b')
 Surface = Night + Ocean + Cloud + Land + Dusk
 Palette = [(0, 0, 0)] + Surface + [Lights]
 LightShare = 24
+LargeSource = 'Pacific'
+LargeView = (0.75, -0.05, 0.13)
 Haze = 0.7
 HazeStart = 0.86
 Tint = (52, 112, 206)
@@ -63,23 +65,36 @@ def Despeckle(grid, size, keep):
     return out
 
 
-def Render(still, lights, diameter, keepRows=None):
+def Render(still, lights, diameter, keepRows=None, view=None):
     radius = diameter / 2
     pad = 3
     size = diameter + pad * 2
-    span = SourceRadius * 2
     box = (SourceCentre - SourceRadius, SourceCentre - SourceRadius, SourceCentre + SourceRadius, SourceCentre + SourceRadius)
     small = still.resize((diameter, diameter), Image.BOX, box=box).load()
     lit = lights.resize((diameter, diameter), Image.BOX, box=box).load()
     grid = [[None] * size for _ in range(size)]
-    step = span / diameter
+    if view:
+        zoom, shiftX, shiftY = view
+        factor = SourceRadius * zoom / radius
+        scaled = (round(still.size[0] / factor), round(still.size[1] / factor))
+        small = still.resize(scaled, Image.BOX).load()
+        lit = lights.resize(scaled, Image.BOX).load()
+        sample = lambda x, y: (int((SourceCentre + shiftX * SourceRadius) / factor + x - pad + 0.5 - radius), int((SourceCentre + shiftY * SourceRadius) / factor + y - pad + 0.5 - radius))
+    else:
+        sample = lambda x, y: (x - pad, y - pad)
     for y in range(size):
         for x in range(size):
             dx, dy = x - pad + 0.5 - radius, y - pad + 0.5 - radius
             distance = (dx * dx + dy * dy) ** 0.5
             if distance < radius:
-                colour = Dehaze(small[x - pad, y - pad], distance / radius)
-                if lit[x - pad, y - pad] > LightShare and sum(colour) < 150:
+                at = sample(x, y)
+                colour = small[at] if view else Dehaze(small[at], distance / radius)
+                edge = radius - distance
+                if view and edge < 1.6:
+                    grid[y][x] = Ocean[3]
+                elif view and edge < 4.6 and Bayer[y % 4][x % 4] < (8 if edge < 3.1 else 4):
+                    grid[y][x] = Ocean[2]
+                elif lit[at] > LightShare and sum(colour) < 150:
                     grid[y][x] = Lights
                 else:
                     grid[y][x] = Quantise(colour, x, y)
@@ -121,8 +136,8 @@ def RemoveGlint(still):
 
 def Main():
     Target.mkdir(parents=True, exist_ok=True)
-    for name, source, diameter, keep in (('EarthLarge', 'Americas', 500, 170), ('EarthMedium', 'Pacific', 250, None), ('EarthSmall', 'Pacific', 140, None)):
-        image = Render(*Prepare(source), diameter, keep)
+    for name, source, diameter, keep, view in (('EarthLarge', LargeSource, 500, 170, LargeView), ('EarthMedium', 'Pacific', 250, None, None), ('EarthSmall', 'Pacific', 140, None, None)):
+        image = Render(*Prepare(source), diameter, keep, view)
         image.save(Target / f'{name}.png', optimize=True, transparency=0)
         print(name, image.size)
 
