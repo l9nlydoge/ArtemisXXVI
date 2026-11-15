@@ -23,7 +23,7 @@ export interface LaunchCut {
   length: number
 }
 
-export const LongCut: LaunchCut = { hold: 1500, climbPower: 5.6, cut: 6500, pitchFrom: 6800, pitchTo: 8000, separation: 8100, earthGone: 8900, fairing: 9300, unfold: 1300, earthBack: 10100, length: 11200 }
+export const LongCut: LaunchCut = { hold: 1500, climbPower: 0.703, cut: 11500, pitchFrom: 11800, pitchTo: 13000, separation: 13100, earthGone: 13900, fairing: 14300, unfold: 1300, earthBack: 15100, length: 16200 }
 export const ShortCut: LaunchCut = { hold: 350, climbPower: 1300, cut: 1150, pitchFrom: 1150, pitchTo: 1450, earthGone: 1600, fairing: 1650, unfold: 800, earthBack: 1950, length: 2950 }
 
 interface Point {
