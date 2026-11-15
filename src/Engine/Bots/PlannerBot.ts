@@ -62,7 +62,7 @@ export class PlannerBot extends FlightBot {
     chase: true,
     beamWidth: 40,
     chargeValue: 0.5,
-    stormHullValue: 2,
+    stormHullValue: 12,
     calmHullValue: 0.1,
     death: 400,
   }
@@ -86,18 +86,42 @@ export class PlannerBot extends FlightBot {
 
   values(flight: Flight): PlannerValues {
     const last = flight.legIndex >= Rules.legsPerFlight - 1
-    const stormsAhead = flight.week.legs.some((leg, index) => index > flight.legIndex && leg.storm !== undefined)
+    const need = last ? 0 : PlannerBot.hullNeed(flight)
     return {
       charge: last ? 0 : this.settings.chargeValue,
       cruise: last ? 0 : Rules.cruiseTurns * flight.craft.generation,
-      hull: last ? 0 : stormsAhead ? this.settings.stormHullValue : this.settings.calmHullValue,
+      hull: last ? 0 : this.settings.calmHullValue,
+      hullNeed: need,
+      hullShort: need > 0 ? this.settings.stormHullValue : 0,
       death: this.settings.death,
     }
   }
 
+  static hullNeed(flight: Flight): number {
+    const craft = flight.craft
+    const shield = craft.magneticShield
+    let need = 0
+    let ahead = false
+    flight.week.legs.forEach((leg, index) => {
+      if (index <= flight.legIndex || !leg.storm) return
+      ahead = true
+      const hits = leg.storm.turns.map((turn) => Math.max(0, turn.radiation - craft.passiveShield)).sort((a, b) => b - a)
+      const energy = craft.capacity + craft.generation * hits.length * 0.75
+      let shielded = shield ? Math.floor(energy / shield.card.powerCost) : 0
+      for (const hit of hits) {
+        if (shielded > 0 && shield) {
+          need += Math.max(0, hit - shield.value)
+          shielded -= 1
+        } else need += hit
+      }
+    })
+    return ahead ? need + 3 : 0
+  }
+
   private idleValue(flight: Flight, charge: number): number {
     const values = this.values(flight)
-    return values.charge * Math.min(flight.craft.capacity, charge + values.cruise) + values.hull * flight.state.hull
+    const hull = flight.state.hull
+    return values.charge * Math.min(flight.craft.capacity, charge + values.cruise) + values.hullShort * Math.min(hull, values.hullNeed) + values.hull * Math.max(0, hull - values.hullNeed)
   }
 
   contactValue(flight: Flight, contact: Contact, charge = flight.state.charge, burnsLeft = flight.state.burnsLeft): number {

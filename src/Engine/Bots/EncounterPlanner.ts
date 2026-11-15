@@ -21,6 +21,8 @@ export interface PlannerValues {
   charge: number
   cruise: number
   hull: number
+  hullNeed: number
+  hullShort: number
   death: number
 }
 
@@ -75,7 +77,7 @@ interface Node {
 }
 
 export class EncounterPlanner {
-  private static readonly unknownSunlight = 1 - Rules.shadowChance * 0.8
+  static unknownSunlight = 1
   private readonly slots: ActiveSlot[]
   private readonly capacities: number[]
 
@@ -165,7 +167,11 @@ export class EncounterPlanner {
 
   private score(node: Node): number {
     if (node.dead) return this.points(node.recorded) * Rules.lostShare - this.values.death
-    return this.points(node.recorded) + this.chargeWorth(node.charge) + this.values.hull * node.hull
+    return this.points(node.recorded) + this.chargeWorth(node.charge) + this.hullWorth(node.hull)
+  }
+
+  hullWorth(hull: number): number {
+    return this.values.hullShort * Math.min(hull, this.values.hullNeed) + this.values.hull * Math.max(0, hull - this.values.hullNeed)
   }
 
   chargeWorth(charge: number): number {
