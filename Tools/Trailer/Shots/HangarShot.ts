@@ -34,8 +34,8 @@ export class HangarShot extends Shot {
       const row = Math.floor(index / Columns)
       const x = Left + column * (CellWidth + Gap)
       const y = Top + row * (CellHeight + RowGap)
-      this.slot(context, x, y)
       const since = t - HangarShot.arrival(index)
+      this.slot(context, x, y, since < 0 ? Palette.Hull1 : since * Fps < 3 ? Palette.White : Palette.Foil1)
       if (since < 0) return
       fitted++
       const frame = Math.floor(since * Fps + 1e-6)
@@ -66,8 +66,8 @@ export class HangarShot extends Shot {
     for (let y = 40; y < 1080; y += 40) for (let x = 40; x < 1920; x += 40) context.fillRect(x, y, 4, 4)
   }
 
-  private slot(context: CanvasRenderingContext2D, x: number, y: number) {
-    context.fillStyle = Palette.Hull1
+  private slot(context: CanvasRenderingContext2D, x: number, y: number, colour: string) {
+    context.fillStyle = colour
     for (let at = 0; at < CellWidth; at += 24) {
       context.fillRect(x + at - 12, y - 12, 12, 4)
       context.fillRect(x + at - 12, y + CellHeight + 8, 12, 4)
