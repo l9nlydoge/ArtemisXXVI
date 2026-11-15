@@ -1,3 +1,4 @@
+import { Sound, type LaunchControl } from '../Sound/Sound'
 import type { FlightScene, ScenePart } from './FlightScene'
 import { RocketPainter, RocketPiece } from './RocketPainter'
 import type { SceneView } from './SceneView'
@@ -47,16 +48,24 @@ export class LaunchPart implements ScenePart {
   private separated = false
   private opened = false
   private finished = false
+  private readonly sound: LaunchControl
+  private readonly beats: [number, (sound: LaunchControl) => void][]
 
-  constructor(private readonly started: number, readonly long: boolean, private readonly onDone: () => void) {}
+  constructor(private readonly started: number, readonly long: boolean, private readonly onDone: () => void) {
+    this.sound = Sound.launch({ manual: true })
+    this.beats = long
+      ? [[100, (sound) => sound.liftoff()], [1800, (sound) => sound.climb(3)], [3200, (sound) => sound.stageSeparation()], [4400, (sound) => sound.fairingRelease()], [6000, (sound) => sound.deploy()]]
+      : [[0, (sound) => sound.climb(1)], [1000, (sound) => sound.fairingRelease()], [2300, (sound) => sound.deploy()]]
+  }
 
   get length(): number {
     return this.long ? LaunchLong : LaunchShort
   }
 
-  finish(scene: FlightScene) {
+  finish(scene: FlightScene, skipped = false) {
     if (this.finished) return
     this.finished = true
+    if (skipped) this.sound.stop()
     scene.craft.visible = true
     scene.craft.unfold = 1
     this.onDone()
@@ -64,6 +73,7 @@ export class LaunchPart implements ScenePart {
 
   paint(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene) {
     const t = now - this.started
+    while (this.beats.length > 0 && t >= this.beats[0][0]) this.beats.shift()![1](this.sound)
     if (t >= this.length) {
       this.finish(scene)
       return

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Flight } from '../../Engine/Flight/Flight'
 import { MotionPreference } from '../Shared/MotionPreference'
+import { Sound } from '../Sound/Sound'
 import { FlightScene } from './FlightScene'
 import { LaunchPart } from './LaunchPart'
 
@@ -11,6 +12,10 @@ export class LaunchCue {
     LaunchCue.pending = true
   }
 
+  static {
+    Sound.sceneDrives('Launch')
+  }
+
   static take(): boolean {
     const asked = LaunchCue.pending
     LaunchCue.pending = false
@@ -19,7 +24,11 @@ export class LaunchCue {
 }
 
 export function useLaunch(flight: Flight | undefined, firstFlight: boolean): boolean {
-  const [launching, setLaunching] = useState(() => flight !== undefined && flight.log.length === 0 && LaunchCue.take() && !MotionPreference.reduced)
+  const [launching, setLaunching] = useState(() => {
+    const asked = flight !== undefined && flight.log.length === 0 && LaunchCue.take()
+    if (asked && MotionPreference.reduced) Sound.play('Deploy')
+    return asked && !MotionPreference.reduced
+  })
 
   useEffect(() => {
     if (!launching) return
@@ -33,7 +42,7 @@ export function useLaunch(flight: Flight | undefined, firstFlight: boolean): boo
     })
     const skip = (event: Event) => {
       event.preventDefault()
-      part?.finish(scene)
+      part?.finish(scene, true)
       setLaunching(false)
     }
     window.addEventListener('keydown', skip, true)

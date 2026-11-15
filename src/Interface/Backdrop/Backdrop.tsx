@@ -5,6 +5,7 @@ import { Orbit, OrbitPace } from '../Scene/Orbit'
 import { SceneClock } from '../Scene/SceneClock'
 import { SceneLayers, type SceneView } from '../Scene/SceneView'
 import { MotionPreference } from '../Shared/MotionPreference'
+import { Sound } from '../Sound/Sound'
 import { EarthMap, GlobePad, GlobeRenderer } from './GlobeRenderer'
 import { Starfield } from './Starfield'
 
@@ -70,8 +71,10 @@ class BackdropScene {
   private move?: Move
   private signature = ''
   private disposed = false
+  private orbitLevel = -1
 
   constructor(private readonly canvas: HTMLCanvasElement, screen: Screen) {
+    Sound.sceneDrives('OrbitSpeed')
     this.context = canvas.getContext('2d')!
     this.screen = screen
     this.aimOrbit()
@@ -144,6 +147,7 @@ class BackdropScene {
 
   private frame(now: number, delta: number) {
     this.orbit.update(delta)
+    this.voiceOrbit()
     if (this.move) {
       const progress = Math.min(1, (now - this.move.started) / TravelMs)
       const eased = 1 - (1 - progress) ** 3
@@ -162,6 +166,14 @@ class BackdropScene {
     if (signature === this.signature && !layersWant) return
     this.signature = signature
     this.paint(view, twinkle, now)
+  }
+
+  private voiceOrbit() {
+    if (this.screen !== Screen.Flight) return
+    const level = Math.round((0.25 + 0.75 * Math.sqrt(Math.max(0, this.orbit.pace) / OrbitPace.Travel)) * 50) / 50
+    if (level === this.orbitLevel) return
+    this.orbitLevel = level
+    Sound.setOrbitSpeed(Math.min(1, level))
   }
 
   private get streak(): number {

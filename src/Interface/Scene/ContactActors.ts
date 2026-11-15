@@ -3,6 +3,7 @@ import { ExoplanetTarget, ObservingMode } from '../../Engine/Events/ExoplanetTar
 import { EventKind, type SpaceEvent } from '../../Engine/Events/SpaceEvent'
 import type { Encounter } from '../../Engine/Flight/Encounter'
 import { MotionPreference } from '../Shared/MotionPreference'
+import { Sound } from '../Sound/Sound'
 import type { FlightScene } from './FlightScene'
 import { PassExit, PassPath } from './PassPath'
 import { RockFrames, RockPainter } from './RockPainter'
@@ -47,9 +48,11 @@ export abstract class ContactActor {
     this.turnStarted = now
     if (this.over) {
       this.glide.set(PassExit, now, reduced)
+      if (this.passes && !reduced) Sound.play('ObjectPass', { duration: LeaveMs / 1000 })
       return
     }
     this.glide.set(this.path.stop(this.turn), now, reduced)
+    if (this.passes && !reduced && this.turn === this.path.peak) Sound.play('ObjectPass', { duration: 1.6 })
   }
 
   position(now: number): number {
@@ -72,6 +75,10 @@ export abstract class ContactActor {
     const x = stage.left - 34 + f * (width + 68)
     const y = Math.max(stage.top + 10, top - 10 - 38 * (2 * f - 1) ** 2)
     return { x: Math.round(x), y: Math.round(y) }
+  }
+
+  protected get passes(): boolean {
+    return true
   }
 
   abstract point(scene: FlightScene, now: number): Point
@@ -200,6 +207,10 @@ export class DartContact extends ContactActor {
 }
 
 export class BurstContact extends ContactActor {
+  protected override get passes(): boolean {
+    return false
+  }
+
   point(scene: FlightScene): Point {
     const stage = scene.stageArt()
     return { x: Math.round(stage.left + (stage.right - stage.left) * 0.2), y: Math.round(stage.top + (stage.bottom - stage.top) * 0.1) }
@@ -228,6 +239,10 @@ export class BurstContact extends ContactActor {
 }
 
 export class PlanetContact extends ContactActor {
+  protected override get passes(): boolean {
+    return false
+  }
+
   private readonly mode: ObservingMode
 
   constructor(event: ExoplanetTarget, encounter: Encounter, now: number, hidden: boolean) {
@@ -282,6 +297,10 @@ interface Particle {
 }
 
 export class StormContact extends ContactActor {
+  protected override get passes(): boolean {
+    return false
+  }
+
   private readonly particles: Particle[]
 
   constructor(event: SpaceEvent, encounter: Encounter, now: number, hidden: boolean) {

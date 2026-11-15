@@ -1572,6 +1572,68 @@ The flight screens are a scene, not a backdrop with panels on it. Everything bel
 **Small effects.** Power cells fill one by one, cells the plan will spend blink, points count up in steps, a module card gives a one-step thunk when switched on, the timeline node flashes as a leg completes. Each is under 400 ms and never blocks input.
 
 **Reduced motion.** The Earth does not turn, contacts step between their stops, the launch and travel beat are cut, the stepped flashes and blinks are off; the turn clock still runs and shows.
+
+### 11.10 Sound
+
+**Principle.** Calm, spacious and tactile: a quiet observatory, not an arcade. Every sound is synthesised at run time with the Web Audio API (oscillators, noise buffers filled once, filters, envelopes, gentle FM bells, a generated reverb). No audio files, no samples, no dependencies. Ambience sits about 20 dB under the loudest effect; interface ticks are quiet enough to hear a hundred times; every important sound has content between 300 Hz and 4 kHz so it reads on laptop speakers. Repeated sounds vary slightly in pitch, level and timing.
+
+**Code** (`src/Interface/Sound/`). `SoundEngine` owns one context: ambience, effects and interface buses into a master with glue compression, a limiter and a soft clip trimmed to stay under -1 dBFS, plus a reverb send. `Voice` is one playing sound and cleans its nodes up when it ends; `Cue` is the base class, one small class per sound in `Cues/`; `CueLibrary` names them. `Ambience/` holds six evolving beds and the `AmbienceMixer` that cross-fades them over 1.2 s. `Sound` (in `Sound.ts`) is the public API. `Direction/` turns store changes into cues: `GameSnapshot` reads plain values from the store and `CueRules` (pure, tested) diffs two snapshots into cues. `InputFeedback` gives every control hover, press and release from document-level listeners. `SoundLayer` mounts all of it and the mute button from one line in `App.tsx`.
+
+**Rules.** The context is created on the first pointer or key gesture and suspended while the tab is hidden or sound is off. Anything that throws fails silent and the game runs as before. At most 28 voices play at once. Reduced motion does not mute anything.
+
+**Public API.**
+
+```ts
+Sound.play('CardOn')
+Sound.play('RadiationHit', { amount: 4 })
+Sound.play('Travel', { duration: 3 }, 0.2)   // optional delay in seconds
+Sound.ambience('Flight')                      // Home, Hangar, Flight, Storm, Debrief, Lab, Silent
+Sound.setOrbitSpeed(0.4)                      // 0..1, the orbit bed's filter and air follow it
+Sound.setStorm(0.6)                           // 0..1, crackle density on the storm bed
+const launch = Sound.launch({ manual: true }) // automatic when manual is false
+launch.liftoff(); launch.climb(4); launch.stageSeparation(); launch.fairingRelease(); launch.deploy(); launch.stop()
+Sound.startTurnTimer(30); Sound.stopTurnTimer()
+Sound.sceneDrives('Travel')                   // the director stops playing this cue; also 'Launch' and 'OrbitSpeed'
+```
+
+| Cue | Parameters | When | Who calls it |
+|---|---|---|---|
+| Hover | | Pointer enters an enabled control | Input listeners |
+| Press | | Pointer down on an enabled control | Input listeners |
+| Release | | Click on a control when nothing louder answered it | Input listeners |
+| Denied | | Pointer down on a disabled control; any refused action | Input listeners where the browser delivers the event; call it for other refusals |
+| CardOn, CardOff | | A module switched on or off for this turn | Director (plan change) |
+| ScreenForward, ScreenBack | | Screen change, by the order Home, Week, Hangar, Flight, Debrief, Lab | Director |
+| Purchase | | Something bought in the Lab | Director |
+| RankUp | | Rank rises; 0.7 s after arriving at the debrief | Director |
+| ModuleFit, ModuleRemove | | A module fitted or taken out in the Hangar | Director |
+| MarkChange | `direction` ±1 | A fitted module changes mark | Director |
+| OverLimit | | The loadout goes over budget or bay | Director |
+| `Sound.launch()` | `manual` | Launch pressed | Director plays the automatic version (ignition, liftoff 1.1 s, separation 3.6 s, fairing 4.9 s, deploy chime 6.3 s); the scene takes over with `sceneDrives('Launch')` and the handle |
+| Ignition, StageSeparation, FairingRelease, Deploy | | Launch parts on their own | Launch handle or scene |
+| ScannerPing | | The scanner sweeps | Director after each cruise and on survey |
+| ContactFound | `amount` contacts | Contacts appear | Director after launch, cruise and survey |
+| Approach | | A contact is chosen or chased | Director |
+| EndTurn | | A turn is committed | Director |
+| Camera, Spectrometer, Radar, ParticleDetector, HighEnergyDetector | | Each switched-on instrument fires | Director, staggered 0.16 s after EndTurn; the scene may take them over to sync with its animation |
+| ShieldEngage | | The magnetic shield is used | Director |
+| ShieldDeflect | `amount` blocked | The shield stops radiation | Director |
+| RadiationHit | `amount` damage | Radiation reaches the hull | Director |
+| Thrusters, RepairDrone | | Used this turn (thrusters also on a chase) | Director |
+| DataRecorded | `amount` units | Data banked this turn; one tick per unit | Director |
+| PowerLow | | Charge falls below 20 % during an encounter | Director |
+| ObjectPass | `duration` 1–8 s | Something slides past the spacecraft | Scene |
+| Travel | `duration` up to 5 s | The cruise between legs | Director plays 2.6 s on Continue or Hold; the scene takes over with `sceneDrives('Travel')` |
+| TimerTick, TimerUrgent, TimeOut | | A 30-second turn timer: silent 20 s, ticks for 10, double ticks for the last 5, then time out | `Sound.startTurnTimer()` and `stopTurnTimer()` from whoever shows the timer |
+| FlightComplete | | All legs flown | Director |
+| SpacecraftLost | | Hull reaches zero | Director |
+
+**Ambience.** Home and Week: warm still chord with air. Hangar: clean-room tone and a faint 100 Hz hum with its harmonics. Flight: the orbit drone, its filter following the orbit speed (the director sets 0.3 scanning, 0.55 rising each turn in an encounter, 0.4 after it, 0.15 at the end). Storm legs: the same bed darker, with rumble, a thin whistle and crackle grains whose density follows the turn's radiation. Debrief: resolved and quiet. Lab: soft and higher. Each bed's levels, filters and detuning wander slowly at random, noise playback rates drift so the buffers never loop audibly, and a distant bell shimmers every 8 to 26 seconds.
+
+**Mute.** A pixel speaker button sits in the bottom-left gutter on every screen, with a tooltip and the M key. Sound is on by default; the choice is saved in `localStorage` under `Artemis26.Sound`.
+
+**Checking without ears.** `node Tools/RenderSounds.mjs <folder>` renders every cue, thirty seconds of each bed and a one-minute session offline in headless Chrome, writes 16-bit WAVs, `Measurements.json`, an audition `index.html` and spectrograms (`Tools/MakeSpectrogram.py`). `node Tools/CaptureSoundFlight.mjs <width> <height> <folder>` flies a full first flight in the real page and reports the context state before and after the first click, console errors and every cue the director fired (development builds keep a log on `window.Artemis26Sound`).
+
 ---
 
 ## 12. Text and languages

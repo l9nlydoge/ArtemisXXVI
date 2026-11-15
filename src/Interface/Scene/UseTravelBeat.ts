@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Flight } from '../../Engine/Flight/Flight'
 import { MotionPreference } from '../Shared/MotionPreference'
+import { Sound } from '../Sound/Sound'
 import { Orbit, OrbitPace } from './Orbit'
 import { SceneClock } from './SceneClock'
 import { TravelBeat, TravelUsual } from './TravelBeat'
@@ -11,10 +12,13 @@ export interface Travel {
   skip: () => void
 }
 
+Sound.sceneDrives('Travel')
+
 export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
   const leg = flight?.legIndex ?? 0
   const lastLeg = useRef(leg)
   const lastCharge = useRef(flight?.state.charge ?? 0)
+  const voiced = useRef(-1)
   const [travel, setTravel] = useState<{ gain: number; full: boolean; started: number } | undefined>(undefined)
 
   useEffect(() => {
@@ -30,6 +34,8 @@ export function useTravelBeat(flight: Flight | undefined): Travel | undefined {
     if (!travel) return
     const orbit = Orbit.shared
     const beat = new TravelBeat(TravelUsual, OrbitPace.Travel, OrbitPace.Scan)
+    if (voiced.current !== travel.started) Sound.play('Travel', { duration: beat.length / 1000 })
+    voiced.current = travel.started
     const finish = () => {
       orbit.hold(undefined)
       orbit.aim(OrbitPace.Scan)
