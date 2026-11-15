@@ -42,7 +42,7 @@ function everyMarkOne(rank: number): Ownership {
 const searches: Record<string, { busId: string; rank: number }> = {
   JulyNineteen: { busId: 'SmallSat', rank: 1 },
   AutumnTwentyTwo: { busId: 'SmallSat', rank: 2 },
-  MayTwentyFour: { busId: 'Explorer', rank: 4 },
+  MayTwentyFour: { busId: 'Explorer', rank: 3 },
 }
 const ranked: Record<string, LoadoutScore[]> = {}
 
