@@ -13,13 +13,13 @@ const starterProfile = Profile.starter()
 const kinds = (loadout: Loadout, owner = Fixtures.everything) => loadout.issues(owner).map((issue) => issue.kind)
 
 describe('Loadout', () => {
-  test('the starter loadout costs 35 of 60 and fills 6 of 8 bay units', () => {
+  test('the starter loadout costs 49 of 60 and fills all 8 bay units', () => {
     const starter = Loadout.starter()
     expect(starter.bus.id).toBe('SmallSat')
-    expect(starter.costMusd).toBe(35)
-    expect(starter.bayUsed).toBe(6)
-    expect(starter.budgetLeft).toBe(25)
-    expect(starter.bayLeft).toBe(2)
+    expect(starter.costMusd).toBe(49)
+    expect(starter.bayUsed).toBe(8)
+    expect(starter.budgetLeft).toBe(11)
+    expect(starter.bayLeft).toBe(0)
     expect(starter.issues(starterProfile)).toEqual([])
     expect(starter.isValid(starterProfile)).toBe(true)
   })
@@ -75,11 +75,11 @@ describe('Loadout', () => {
 
   test('changes return a new loadout and leave the old one alone', () => {
     const before = Loadout.starter()
-    const after = before.install(modules.get('Spectrometer'), 1)
-    expect(before.has('Spectrometer')).toBe(false)
-    expect(after.has('Spectrometer')).toBe(true)
-    expect(after.remove('Spectrometer#1').toJson()).toEqual(before.toJson())
-    expect(after.setMark('Spectrometer#1', 3).costMusd).toBe(before.costMusd + 38)
+    const after = before.install(modules.get('Radar'), 1)
+    expect(before.has('Radar')).toBe(false)
+    expect(after.has('Radar')).toBe(true)
+    expect(after.remove('Radar#1').toJson()).toEqual(before.toJson())
+    expect(after.setMark('Radar#1', 3).costMusd).toBe(before.costMusd + 40)
   })
 
   test('modules are kept in catalog order whatever order they were added in', () => {
@@ -99,7 +99,7 @@ describe('Loadout', () => {
 describe('Spacecraft', () => {
   test('the starter spacecraft has the values in the spec', () => {
     const craft = new Spacecraft(Loadout.starter())
-    expect(craft.generation).toBe(4)
+    expect(craft.generation).toBe(3)
     expect(craft.capacity).toBe(12)
     expect(craft.maxHull).toBe(16)
     expect(craft.passiveShield).toBe(1)
@@ -107,8 +107,8 @@ describe('Spacecraft', () => {
     expect(craft.pointsMultiplier).toBe(1)
     expect(craft.burns).toBe(0)
     expect(craft.hasRadar).toBe(false)
-    expect(craft.actives.map((module) => module.key)).toEqual(['Camera#1', 'ParticleDetector#1'])
-    expect(craft.channels).toEqual([Channel.Visible, Channel.Particles])
+    expect(craft.actives.map((module) => module.key)).toEqual(['Camera#1', 'Spectrometer#1', 'ParticleDetector#1'])
+    expect(craft.channels).toEqual([Channel.Visible, Channel.Spectrum, Channel.Particles])
   })
 
   test('copies and marks add up', () => {

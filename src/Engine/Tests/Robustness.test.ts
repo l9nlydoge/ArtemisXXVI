@@ -109,7 +109,7 @@ describe('Starting a flight checks its setup', () => {
     setup.seed = 1
     setup.loadout.modules.length = 0
     expect(flight.setup.seed).toBe(9)
-    expect(flight.setup.loadout.modules).toHaveLength(5)
+    expect(flight.setup.loadout.modules).toHaveLength(6)
     expect(flight.setup.weekSignature).toBe(Fixtures.calmWeek.signature)
     flight.apply(Commands.choose(0))
     const command = { type: CommandType.Commit as const, keys: ['Camera#1'] }
@@ -131,7 +131,7 @@ describe('Starting a flight checks its setup', () => {
   test('with an owner given, modules and buses the player has not unlocked are refused', () => {
     const owner = Profile.starter()
     expect(() => Flight.begin(Fixtures.setup(starter, 'Calm', 1), { ...options, owner })).not.toThrow()
-    expect(() => Flight.begin(Fixtures.setup(starter.install(ModuleCatalog.shared.get('Spectrometer'), 1), 'Calm', 1), { ...options, owner })).toThrow(LoadoutIssueKind.NotOwned)
+    expect(() => Flight.begin(Fixtures.setup(Fixtures.loadout('SmallSat', [['Camera', 1], ['Radar', 1]]), 'Calm', 1), { ...options, owner })).toThrow(LoadoutIssueKind.NotOwned)
     expect(() => Flight.begin(Fixtures.setup(Fixtures.loadout('Explorer', [['Camera', 1]]), 'Calm', 1), { ...options, owner })).toThrow(LoadoutIssueKind.BusLocked)
   })
 

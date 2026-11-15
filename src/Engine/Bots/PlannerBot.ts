@@ -41,6 +41,7 @@ export interface TurnRecord {
   shieldOn: boolean
   instrumentsOn: number
   wantedBoth: boolean
+  wanted: number
 }
 
 export interface ScanRecord {
@@ -230,6 +231,7 @@ export class PlannerBot extends FlightBot {
       shieldOn: shield !== undefined && result.best.keys.includes(shield.key),
       instrumentsOn: result.best.keys.filter((key) => craft.instruments.some((module) => module.key === key)).length,
       wantedBoth: shieldWanted && wantedInstruments > 0 && usefulCost > flight.state.charge,
+      wanted: wantedInstruments,
     })
   }
 }

@@ -15,6 +15,7 @@ export enum ObservationHistory {
 export class AsteroidFlyby extends SpaceEvent {
   readonly kind = EventKind.Asteroid
   private static readonly images = ['AsteroidA', 'AsteroidB', 'AsteroidC']
+  private static readonly baseCapacity = { visible: 6, spectrum: 6, radar: 8 }
 
   private constructor(readonly record: AsteroidRecord, pinned: boolean) {
     const diameter = AsteroidFlyby.diameterM(record)
@@ -22,10 +23,10 @@ export class AsteroidFlyby extends SpaceEvent {
     const words = { name: record.name, km: Math.round(record.missKm), lunar: Number(record.missLunar.toFixed(2)), first: record.firstObserved, last: record.lastObserved }
     const size = AsteroidFlyby.sizeStep(diameter)
     const channels = new Map<Channel, ChannelSpec>([
-      [Channel.Visible, { capacity: 6 + size, minMark: 1 }],
-      [Channel.Spectrum, { capacity: 6, minMark: 1 }],
+      [Channel.Visible, { capacity: AsteroidFlyby.baseCapacity.visible + size, minMark: 1 }],
+      [Channel.Spectrum, { capacity: AsteroidFlyby.baseCapacity.spectrum, minMark: 1 }],
     ])
-    if (record.missLunar < 10) channels.set(Channel.Radar, { capacity: 8 + size, minMark: 1 })
+    if (record.missLunar < 10) channels.set(Channel.Radar, { capacity: AsteroidFlyby.baseCapacity.radar + size, minMark: 1 })
     super({
       id: AsteroidFlyby.idFor(record.id),
       label: TextRef.literal(record.name),

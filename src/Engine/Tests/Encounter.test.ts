@@ -26,29 +26,29 @@ const starter: [string, Mark][] = [['SolarArray', 1], ['Battery', 1], ['Camera',
 
 describe('Charging', () => {
   test('the battery charges at the start of a sunlit turn, up to capacity', () => {
-    expect(start(starter, [[1, 0]], { charge: 5 }).state.charge).toBe(9)
+    expect(start(starter, [[1, 0]], { charge: 5 }).state.charge).toBe(8)
     expect(start(starter, [[1, 0]], { charge: 10 }).state.charge).toBe(12)
   })
 
   test('a turn in shadow does not charge', () => {
     const { state, encounter } = start(starter, [[1, 0], [1, 0, true], [1, 0]], { charge: 2 })
-    expect(state.charge).toBe(6)
+    expect(state.charge).toBe(5)
     encounter.commit(plan('Camera#1'))
-    expect(state.charge).toBe(4)
+    expect(state.charge).toBe(3)
     encounter.commit(plan())
-    expect(state.charge).toBe(8)
+    expect(state.charge).toBe(6)
   })
 })
 
 describe('Planning a turn', () => {
   test('a plan that costs more than the charge is refused', () => {
     const { encounter, state } = start([['Camera', 1], ['Radar', 1]], [[1, 0]], { charge: 0 })
-    expect(state.charge).toBe(2)
+    expect(state.charge).toBe(1)
     const preview = encounter.preview(plan('Radar#1'))
     expect(preview.valid).toBe(false)
     expect(preview.problem).toBe(PlanProblem.NotEnoughCharge)
     expect(() => encounter.commit(plan('Radar#1'))).toThrow()
-    expect(state.charge).toBe(2)
+    expect(state.charge).toBe(1)
     expect(encounter.turnIndex).toBe(0)
   })
 

@@ -6,7 +6,7 @@ export class Rules {
   static readonly chaseCost = 2
   static readonly shadowChance = 0.3
   static readonly anomalyChance = 0.15
-  static readonly anomalyRadiation = 2
+  static readonly anomalyRadiation = 1
   static readonly unidentifiedNotableChance = 0.3
   static readonly channelBonus = 3
   static readonly fullBonus = 5

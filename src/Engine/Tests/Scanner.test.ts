@@ -257,7 +257,7 @@ describe('Turn conditions', () => {
     expect(shadows / turns).toBeLessThan(0.3)
   })
 
-  test('the anomaly adds 2 radiation on about 15% of quiet turns and never during a storm', () => {
+  test('the anomaly adds 1 radiation on about 15% of quiet turns and never during a storm', () => {
     let hits = 0
     let turns = 0
     for (const seed of seeds) {
@@ -265,7 +265,7 @@ describe('Turn conditions', () => {
       for (const condition of quiet) {
         turns += 1
         if (condition.anomaly) hits += 1
-        expect(condition.radiation).toBe(condition.anomaly ? 2 : 0)
+        expect(condition.radiation).toBe(condition.anomaly ? 1 : 0)
       }
       const stormy = new ConditionRoller(new SeededRandom(seed)).roll(Fixtures.planets[0], storm.stormOn(5), true)
       expect(stormy.some((condition) => condition.anomaly)).toBe(false)

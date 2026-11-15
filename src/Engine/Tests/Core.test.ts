@@ -85,7 +85,7 @@ describe('Tables match the spec', () => {
     expect(row('Battery')).toEqual({ rank: 1, power: 0, cost: [6, 10, 18], bay: [1, 1, 2], value: [6, 10, 16], unlock: [0, 70, 220] })
     expect(row('Camera')).toEqual({ rank: 1, power: 2, cost: [10, 18, 30], bay: [2, 2, 3], value: [3, 4, 6], unlock: [0, 110, 320] })
     expect(row('ParticleDetector')).toEqual({ rank: 1, power: 1, cost: [6, 10, 16], bay: [1, 1, 1], value: [2, 3, 5], unlock: [0, 80, 240] })
-    expect(row('Spectrometer')).toEqual({ rank: 1, power: 3, cost: [14, 24, 38], bay: [2, 3, 3], value: [4, 6, 8], unlock: [60, 140, 360] })
+    expect(row('Spectrometer')).toEqual({ rank: 1, power: 4, cost: [14, 24, 38], bay: [2, 3, 3], value: [4, 6, 8], unlock: [0, 140, 360] })
     expect(row('Radar')).toEqual({ rank: 1, power: 4, cost: [16, 26, 40], bay: [3, 3, 4], value: [5, 7, 10], unlock: [90, 170, 400] })
     expect(row('HighEnergyDetector')).toEqual({ rank: 2, power: 3, cost: [18, 28, 44], bay: [2, 2, 3], value: [4, 6, 9], unlock: [120, 200, 440] })
     expect(row('RadiationShielding')).toEqual({ rank: 1, power: 0, cost: [5, 9, 15], bay: [1, 2, 3], value: [1, 2, 3], unlock: [0, 80, 240] })
@@ -98,7 +98,7 @@ describe('Tables match the spec', () => {
 
   test('buses', () => {
     expect(BusCatalog.shared.all.map((bus) => ({ id: bus.id, ...bus.spec }))).toEqual([
-      { id: 'SmallSat', minRank: 1, budgetMusd: 60, bayUnits: 8, hull: 16, baseGeneration: 2, baseCapacity: 6 },
+      { id: 'SmallSat', minRank: 1, budgetMusd: 60, bayUnits: 8, hull: 16, baseGeneration: 1, baseCapacity: 6 },
       { id: 'Explorer', minRank: 3, budgetMusd: 110, bayUnits: 12, hull: 22, baseGeneration: 2, baseCapacity: 8 },
       { id: 'Flagship', minRank: 5, budgetMusd: 200, bayUnits: 18, hull: 30, baseGeneration: 3, baseCapacity: 10 },
     ])
@@ -106,6 +106,6 @@ describe('Tables match the spec', () => {
   })
 
   test('flight rules', () => {
-    expect({ ...Rules }).toMatchObject({ legsPerFlight: 6, contactsPerLeg: 2, cruiseTurns: 2, surveyCost: 3, chaseCost: 2, shadowChance: 0.3, anomalyChance: 0.15, anomalyRadiation: 2, unidentifiedNotableChance: 0.3, channelBonus: 3, fullBonus: 5, lostShare: 0.5 })
+    expect({ ...Rules }).toMatchObject({ legsPerFlight: 6, contactsPerLeg: 2, cruiseTurns: 2, surveyCost: 3, chaseCost: 2, shadowChance: 0.3, anomalyChance: 0.15, anomalyRadiation: 1, unidentifiedNotableChance: 0.3, channelBonus: 3, fullBonus: 5, lostShare: 0.5 })
   })
 })

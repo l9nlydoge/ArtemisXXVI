@@ -91,7 +91,7 @@ describe('Hold and cruise', () => {
     playOut(flight)
     flight.state.charge = 1
     flight.apply(Commands.proceed)
-    expect(flight.state.charge).toBe(9)
+    expect(flight.state.charge).toBe(7)
     flight.apply(Commands.choose(0))
     playOut(flight)
     flight.state.charge = 10

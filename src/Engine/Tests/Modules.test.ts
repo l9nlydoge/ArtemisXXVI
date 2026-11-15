@@ -15,8 +15,8 @@ describe('Module catalog', () => {
     ])
   })
 
-  test('the player starts with five modules', () => {
-    expect(catalog.starters.map((card) => card.id)).toEqual(['SolarArray', 'Battery', 'Camera', 'ParticleDetector', 'RadiationShielding'])
+  test('the player starts with six modules', () => {
+    expect(catalog.starters.map((card) => card.id)).toEqual(['SolarArray', 'Battery', 'Camera', 'Spectrometer', 'ParticleDetector', 'RadiationShielding'])
   })
 
   test('marks never get cheaper, smaller or weaker', () => {

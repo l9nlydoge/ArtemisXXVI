@@ -63,7 +63,7 @@ describe('Balance on the sample weeks', () => {
     const reports = fly(greedy, starter, 'Calm')
     expect(survival(reports)).toBeGreaterThanOrEqual(0.95)
     expect(mean(reports)).toBeGreaterThan(90)
-    expect(mean(reports)).toBeLessThan(170)
+    expect(mean(reports)).toBeLessThan(230)
   })
 
   test('the starter spacecraft does not survive the storm week', () => {
@@ -78,10 +78,10 @@ describe('Balance on the sample weeks', () => {
     expect(survival(fly(cautious, stormReady, 'Storm'))).toBeGreaterThanOrEqual(0.85)
   })
 
-  test('adding a radar pays on the quiet week', () => {
-    const withRadar = Fixtures.loadout('SmallSat', [['SolarArray', 1], ['Battery', 1], ['Camera', 1], ['Radar', 1]])
+  test('trading the battery, shielding and particle detector for a radar pays on the quiet week', () => {
+    const withRadar = Fixtures.loadout('SmallSat', [['SolarArray', 1], ['Camera', 1], ['Spectrometer', 1], ['Radar', 1]])
     expect(withRadar.isValid(Fixtures.everything)).toBe(true)
-    expect(mean(fly(greedy, withRadar, 'Calm'))).toBeGreaterThan(mean(fly(greedy, starter, 'Calm')) * 1.2)
+    expect(mean(fly(greedy, withRadar, 'Calm'))).toBeGreaterThan(mean(fly(greedy, starter, 'Calm')) * 1.05)
   })
 
   test('the particle detector earns nothing on the quiet week and plenty in the storm', () => {

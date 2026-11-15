@@ -27,7 +27,7 @@ describe('Rank', () => {
 
   test('lists what each rank unlocks', () => {
     const at = (rank: number) => Rank.unlocksAt(rank, Fixtures.weeks).map((unlock) => `${unlock.kind}:${unlock.id}`)
-    expect(at(1)).toEqual(['Bus:SmallSat', 'Week:Calm', 'Module:Spectrometer', 'Module:Radar', 'Module:MagneticShield', 'Module:FlightComputer'])
+    expect(at(1)).toEqual(['Bus:SmallSat', 'Week:Calm', 'Module:Radar', 'Module:MagneticShield', 'Module:FlightComputer'])
     expect(at(2)).toEqual(['Module:HighEnergyDetector', 'Module:Thrusters', 'Mark:2'])
     expect(at(3)).toEqual(['Bus:Explorer', 'Module:Antenna', 'Module:RepairDrone'])
     expect(at(4)).toEqual(['Week:Storm', 'Mark:3'])
@@ -37,7 +37,7 @@ describe('Rank', () => {
 })
 
 describe('Profile', () => {
-  test('a new player has no points, rank 1 and the five starter modules at Mk I', () => {
+  test('a new player has no points, rank 1 and the six starter modules at Mk I', () => {
     const profile = Profile.starter()
     expect(profile.points).toBe(0)
     expect(profile.lifetimePoints).toBe(0)
@@ -99,7 +99,7 @@ describe('Profile', () => {
 describe('Lab', () => {
   test('a new player sees what is too expensive, rank-locked and in development', () => {
     const profile = Profile.starter()
-    expect(state(profile, 'Spectrometer')).toMatchObject({ state: OfferState.TooExpensive, mark: 1, cost: 60, shortBy: 60 })
+    expect(state(profile, 'Radar')).toMatchObject({ state: OfferState.TooExpensive, mark: 1, cost: 90, shortBy: 90 })
     expect(state(profile, 'Camera')).toMatchObject({ state: OfferState.RankLocked, mark: 2, needsRank: 2, ownedMark: 1 })
     expect(state(profile, 'HighEnergyDetector')).toMatchObject({ state: OfferState.RankLocked, mark: 1, needsRank: 2 })
     expect(state(profile, 'Antenna')).toMatchObject({ state: OfferState.RankLocked, needsRank: 3 })
@@ -108,15 +108,15 @@ describe('Lab', () => {
   })
 
   test('unlocking spends points and leaves lifetime points and rank alone', () => {
-    const before = withPoints(100)
-    expect(lab.canBuy(before, 'Spectrometer')).toBe(true)
-    const after = lab.buy(before, 'Spectrometer')
+    const before = withPoints(130)
+    expect(lab.canBuy(before, 'Radar')).toBe(true)
+    const after = lab.buy(before, 'Radar')
     expect(after.points).toBe(40)
-    expect(after.lifetimePoints).toBe(100)
-    expect(after.owns('Spectrometer', 1)).toBe(true)
-    expect(before.owns('Spectrometer', 1)).toBe(false)
+    expect(after.lifetimePoints).toBe(130)
+    expect(after.owns('Radar', 1)).toBe(true)
+    expect(before.owns('Radar', 1)).toBe(false)
     expect(lab.canBuy(after, 'FlightComputer')).toBe(true)
-    expect(lab.canBuy(after, 'Radar')).toBe(false)
+    expect(lab.canBuy(after, 'MagneticShield')).toBe(false)
   })
 
   test('what cannot be bought is refused', () => {
