@@ -10,7 +10,7 @@ const CellWidth = 192
 const CellHeight = 120
 const Columns = 3
 const Left = 160
-const Gap = 112
+const Gap = 96
 const Top = 400
 const RowGap = 168
 const Drop = [-48, -30, -12, 6, 0]
@@ -58,7 +58,7 @@ export class HangarShot extends Shot {
     const sprite = steps[index][Math.floor(t / Beat.Length) % 2]
     const since = t - HangarShot.arrival(index)
     const shown = since * Fps < 1 ? SpriteImage.silhouette(sprite, Palette.Cloud1) : sprite
-    Pixels.blit(context, shown.canvas, 1460, 560, 5)
+    Pixels.blit(context, shown.canvas, 1420, 560, 6)
   }
 
   private grid(context: CanvasRenderingContext2D) {

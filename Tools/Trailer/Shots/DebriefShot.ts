@@ -7,7 +7,7 @@ import { Shot } from '../Kit/Timeline'
 
 export const Found = Beat.at(2)
 
-const Panel = { x: 160, y: 520, w: 1000, h: 360 }
+const Panel = { x: 160, y: 520, w: 880, h: 360 }
 
 export class DebriefShot extends Shot {
   private ghost?: HTMLCanvasElement
@@ -21,6 +21,20 @@ export class DebriefShot extends Shot {
     Type.reveal(context, 'Find out what you', 160, 250, t - 0.05, { size: 160 })
     Type.reveal(context, 'should have packed.', 160, 400, t - Beat.at(1), { size: 160, colour: Palette.Foil3 })
     this.panel(context, t)
+  }
+
+  private hero(context: CanvasRenderingContext2D, since: number) {
+    const x = 1460
+    const y = 700
+    const scale = 12
+    if (since < 0) {
+      Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(32, 20, (c) => c.drawImage(this.ghost!, 0, 0)), Palette.Hull1).canvas, x, y, scale)
+      return
+    }
+    const frame = Math.floor(since * Fps)
+    const lift = [24, 12, 0][Math.min(2, frame)]
+    if (frame < 2) Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(34, 22, (c) => c.drawImage(this.bright!, 0, 0)), Palette.White).canvas, x, y - lift, scale)
+    else Pixels.blit(context, this.bright!, x, y - lift, scale)
   }
 
   private panel(context: CanvasRenderingContext2D, t: number) {
@@ -43,6 +57,7 @@ export class DebriefShot extends Shot {
     if (since < 0) Pixels.blit(context, this.ghost, iconX, iconY, 6, false)
     else if (since * Fps < 2) Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(34, 22, (c) => c.drawImage(this.bright!, 0, 0)), Palette.White).canvas, iconX - 6, iconY - 6, 6, false)
     else Pixels.blit(context, this.bright, iconX - 6, iconY - 6, 6, false)
+    this.hero(context, since)
     const name = Assets.word('Module.Radar.Name')
     Type.reveal(context, name, iconX + 260, iconY + 90, since, { size: 120, colour: Palette.White })
   }
