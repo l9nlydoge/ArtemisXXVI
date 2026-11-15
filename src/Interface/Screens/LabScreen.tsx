@@ -3,9 +3,11 @@ import { ModuleFamily } from '../../Engine/Modules/ModuleFamily'
 import { Lab, OfferState, type LabOffer } from '../../Engine/Progress/Lab'
 import { useWording } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
+import { Hint } from '../../State/HintBook'
 import { Screen } from '../../State/Screen'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { ModuleWording } from '../Cards/ModuleWording'
+import { HintSlot } from '../Shared/HintSlot'
 import { RankBadge } from '../Shared/RankBadge'
 
 const lab = new Lab()
@@ -61,7 +63,10 @@ export function LabScreen() {
         <button type="button" className="Primary" onClick={() => go(Screen.Week)}>{wording.t('Home.Fly')}</button>
       </header>
       <div className="LabBody">
-        <aside className="Panel LabRank"><RankBadge /></aside>
+        <div className="LabSide">
+          <aside className="Panel LabRank"><RankBadge /></aside>
+          <HintSlot candidates={[{ hint: Hint.Lab }]} pointer="Left" />
+        </div>
         <div className="LabScroll">
           <ul className="OfferGrid">
             {Families.flatMap((family) => offers.filter((offer) => offer.card.family === family)).map((offer) => <OfferCard key={offer.card.id} offer={offer} />)}

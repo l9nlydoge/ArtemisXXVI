@@ -9,11 +9,13 @@ import { Spacecraft } from '../../Engine/Spacecraft/Spacecraft'
 import { WeekCatalog } from '../../Engine/Weeks/WeekCatalog'
 import { useWording } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
+import { Hint } from '../../State/HintBook'
 import { Screen } from '../../State/Screen'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { ModuleWording } from '../Cards/ModuleWording'
 import { Meter } from '../Meters/Meter'
 import { ForecastLines } from '../Shared/ForecastLines'
+import { HintSlot } from '../Shared/HintSlot'
 import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
 
 const Families = [ModuleFamily.Power, ModuleFamily.Instrument, ModuleFamily.Protection, ModuleFamily.Mobility, ModuleFamily.Utility, ModuleFamily.Crew]
@@ -174,6 +176,7 @@ export function HangarScreen() {
 
       <div className="HangarStage">
         <SpacecraftSprite loadout={loadout} maxScale={4} label={wording.t('Hangar.Spacecraft')} />
+        <HintSlot candidates={[{ hint: Hint.Hangar }]} pointer="Left" place="IsStageFoot" />
       </div>
 
       <aside className="Panel HangarModules">

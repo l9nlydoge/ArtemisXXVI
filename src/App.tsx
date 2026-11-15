@@ -5,6 +5,8 @@ import { FlightScreen } from './Interface/Screens/FlightScreen'
 import { HangarScreen } from './Interface/Screens/HangarScreen'
 import { HomeScreen } from './Interface/Screens/HomeScreen'
 import { LabScreen } from './Interface/Screens/LabScreen'
+import { LogbookScreen } from './Interface/Screens/LogbookScreen'
+import { SourcesScreen } from './Interface/Screens/SourcesScreen'
 import { WeekScreen } from './Interface/Screens/WeekScreen'
 import { useGameStore } from './State/GameStore'
 import { Screen } from './State/Screen'
@@ -22,6 +24,10 @@ function CurrentScreen(): ReactNode {
       return <DebriefScreen />
     case Screen.Lab:
       return <LabScreen />
+    case Screen.Logbook:
+      return <LogbookScreen />
+    case Screen.Sources:
+      return <SourcesScreen />
     default:
       return <HomeScreen />
   }

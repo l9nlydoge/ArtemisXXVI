@@ -5,7 +5,9 @@ import { Rank, UnlockKind, type RankUnlock } from '../../Engine/Progress/Rank'
 import { WeekCatalog } from '../../Engine/Weeks/WeekCatalog'
 import { useWording, type Wording } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
+import { Hint } from '../../State/HintBook'
 import { Screen } from '../../State/Screen'
+import { HintSlot } from '../Shared/HintSlot'
 import { RankBadge } from '../Shared/RankBadge'
 
 function unlockText(unlock: RankUnlock, wording: Wording): string {
@@ -65,6 +67,7 @@ export function DebriefScreen() {
             ))}
           </ul>
         )}
+        <HintSlot candidates={[{ hint: Hint.Debrief }]} place="IsInline" />
       </section>
 
       <section className="Panel DebriefRank">
@@ -113,6 +116,7 @@ export function DebriefScreen() {
         </ol>
         <footer className="DebriefActions">
           <button type="button" className="Quiet" onClick={() => go(Screen.Home)}>{wording.t('Debrief.Home')}</button>
+          <button type="button" className="Quiet" onClick={() => go(Screen.Logbook)}>{wording.t('Debrief.Logbook')}</button>
           <button type="button" onClick={() => pickWeek(summary.weekId)}>{wording.t('Debrief.Again')}</button>
           <button type="button" className="Primary IsLarge" onClick={() => go(Screen.Lab)}>{wording.t('Debrief.GoLab')}</button>
         </footer>

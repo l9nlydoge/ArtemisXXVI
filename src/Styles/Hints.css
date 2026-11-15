@@ -1,0 +1,36 @@
+.HangarStage, .EncounterStage { position: relative; }
+
+.HintCallout {
+  --Ring: var(--Ocean2);
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  max-width: 390px;
+  padding: 12px 12px 6px 18px;
+  color: var(--White);
+  background: var(--Space1);
+  line-height: 22px;
+  box-shadow: inset 0 var(--U) 0 var(--Space2), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 3) 0 var(--Black);
+  animation: Arrive 90ms steps(3, end) backwards;
+}
+.HintCallout p { max-width: 62ch; }
+.HintCallout button { justify-self: end; white-space: nowrap; line-height: 22px; padding: 3px 12px; }
+.HintCallout::after { content: ''; position: absolute; background: var(--Ring); }
+.HintCallout.PointNone::after { display: none; }
+.HintCallout.PointDown::after { top: calc(100% + var(--U)); left: 45px; width: 18px; height: 9px; clip-path: polygon(0 0, 18px 0, 18px 3px, 15px 3px, 15px 6px, 12px 6px, 12px 9px, 6px 9px, 6px 6px, 3px 6px, 3px 3px, 0 3px); }
+.HintCallout.PointUp::after { bottom: calc(100% + var(--U)); left: 45px; width: 18px; height: 9px; clip-path: polygon(6px 0, 12px 0, 12px 3px, 15px 3px, 15px 6px, 18px 6px, 18px 9px, 0 9px, 0 6px, 3px 6px, 3px 3px, 6px 3px); }
+.HintCallout.PointLeft::after { right: calc(100% + var(--U)); top: 21px; width: 9px; height: 18px; clip-path: polygon(0 6px, 3px 6px, 3px 3px, 6px 3px, 6px 0, 9px 0, 9px 18px, 6px 18px, 6px 15px, 3px 15px, 3px 12px, 0 12px); }
+
+.HintCallout.IsStageFoot { position: absolute; bottom: 6px; left: 0; right: 0; margin-inline: auto; width: min(390px, calc(100% - 24px)); }
+.HangarStage .HintCallout.IsStageFoot { left: 15px; right: auto; margin: 0; }
+.HintCallout.IsInline { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 15px; max-width: 640px; padding-block: 9px 6px; margin: var(--U); }
+.HintCallout.IsInline button { margin-block: 0 6px; }
+
+.FootMiddle { display: grid; gap: 9px; min-width: 0; }
+.FootMiddle:has(.HintCallout) .FootHint { display: none; }
+.DebriefMissed .HintCallout { margin-top: 9px; }
+
+.LabSide { grid-column: 2; grid-row: 1; display: grid; gap: 24px; align-content: start; min-height: 0; }
+.LabSide .LabRank { grid-column: auto; grid-row: auto; }
+.LabSide .HintCallout { margin: 0 var(--U); }

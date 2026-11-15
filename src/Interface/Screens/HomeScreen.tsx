@@ -18,6 +18,8 @@ export function HomeScreen() {
             {wording.t(flight ? 'Home.Resume' : 'Home.Fly')}
           </button>
           <button type="button" className="Quiet" onClick={() => go(Screen.Lab)}>{wording.t('Home.Lab')}</button>
+          <button type="button" className="Quiet" onClick={() => go(Screen.Logbook)}>{wording.t('Home.Logbook')}</button>
+          <button type="button" className="Quiet" onClick={() => go(Screen.Sources)}>{wording.t('Home.Sources')}</button>
         </div>
       </section>
       <div className="HomeFoot">
