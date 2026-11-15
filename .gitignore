@@ -9,3 +9,9 @@ coverage
 *.tsbuildinfo
 Tools/.cache
 .claude/worktrees
+
+Concept.md
+GameDesign.md
+ImplementationSpec.md
+Docs/Submission.md
+Docs/VideoScript.md
