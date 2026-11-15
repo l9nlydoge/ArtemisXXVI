@@ -1,5 +1,5 @@
-export const TravelLongest = 5000
-export const TravelUsual = 3000
+export const TravelLongest = 8000
+export const TravelUsual = 6000
 const RiseShare = 0.3
 const FallShare = 0.4
 

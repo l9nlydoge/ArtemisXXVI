@@ -290,7 +290,7 @@ export class TravelCue extends Cue {
   override readonly length = 1.6
 
   protected build(voice: Voice, params: CueParams): void {
-    const seconds = Math.max(1, Math.min(5, params.duration ?? 3))
+    const seconds = Math.max(1, Math.min(8, params.duration ?? 6))
     const rise = seconds * 0.78
     const settle = seconds - rise + 0.6
     const flutter = voice.gain(1)
