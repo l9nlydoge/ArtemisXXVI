@@ -3,7 +3,7 @@
   "Home.Pitch": "Build the spacecraft. Fly a week that really happened. Find out what you should have packed.",
   "Footer.Disclaimer": "Uses public NASA data and imagery. Not affiliated with or endorsed by NASA.",
   "Footer.Earth": "Earth imagery: Solar System Scope, CC BY 4.0.",
-  "Credits.Art": "AI-assisted: code, interface and pixel art produced with Claude. Event pictures are redrawn from NASA images.",
+  "Credits.Art": "AI-assisted: code, interface, pixel art and sound produced with Claude. Event pictures are redrawn from NASA images.",
   "Text.Literal": "{text}",
   "Event.Storm.Name": "Geomagnetic storm, Kp {kp}",
   "Fact.Speed": "{speed} km/s",
@@ -296,7 +296,7 @@
   "Home.Logbook": "Logbook",
   "Home.Sources": "Sources",
   "Debrief.Logbook": "Logbook",
-  "Credits.Statement": "The idea and the gameplay loop are the team's own: a deck-building spacecraft game where you fit modules, fly a real week and record real events. The team designed the game and directed every step. The project is AI-assisted: the code (engine and interface), the interface design and the pixel art were produced with Claude under the team's direction. All mission data is real NASA data.",
+  "Credits.Statement": "The idea and the gameplay loop are the team's own: a deck-building spacecraft game where you fit modules, fly a real week and record real events. The team designed the game and directed every step. The project is AI-assisted: the code (engine and interface), the interface design, the pixel art and the sound were produced with Claude under the team's direction. All mission data is real NASA data.",
   "SourcesScreen.Title": "Sources",
   "SourcesScreen.Back": "Home",
   "SourcesScreen.Intro": "Every asteroid pass, storm and planet in the game comes from a public NASA record. The records were downloaded once and ship with the game; nothing is fetched while you play.",
@@ -339,5 +339,8 @@
   "Logbook.Complete": "Full dataset",
   "Logbook.Partial": "Part of the dataset",
   "Logbook.Best": "Best: {points} points",
-  "Logbook.Fly": "Fly a mission"
+  "Logbook.Fly": "Fly a mission",
+  "Sound.Label": "Sound",
+  "Sound.TurnOff": "Turn sound off (M)",
+  "Sound.TurnOn": "Turn sound on (M)"
 }

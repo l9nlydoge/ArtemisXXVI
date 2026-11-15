@@ -8,6 +8,7 @@ import { LabScreen } from './Interface/Screens/LabScreen'
 import { LogbookScreen } from './Interface/Screens/LogbookScreen'
 import { SourcesScreen } from './Interface/Screens/SourcesScreen'
 import { WeekScreen } from './Interface/Screens/WeekScreen'
+import { SoundLayer } from './Interface/Sound/SoundLayer'
 import { useGameStore } from './State/GameStore'
 import { Screen } from './State/Screen'
 
@@ -41,6 +42,7 @@ export function App() {
       <div className={`Interface On${screen}`}>
         <CurrentScreen />
       </div>
+      <SoundLayer />
     </>
   )
 }
