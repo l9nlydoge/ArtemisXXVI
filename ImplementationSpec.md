@@ -1573,6 +1573,8 @@ The flight screens are a scene, not a backdrop with panels on it. Everything bel
 
 **Reduced motion.** The Earth does not turn, contacts step between their stops, the launch and travel beat are cut, the stepped flashes and blinks are off; the turn clock still runs and shows.
 
+**Sound (11.10).** The scene drives the cues it times: the launch handle at the frames that show liftoff, climb, separation, fairing and deploy (stopped on skip; only the deploy chime under reduced motion), the orbit drone's speed from the same orbit pace as the picture, the travel cue with the beat's real length, `ObjectPass` at a contact's closest pass and when it leaves, and the turn timer's ticks, stopped and restarted with the remaining seconds whenever the clock pauses. Instrument signatures, hits, shield, data and storm intensity stay with the director.
+
 ### 11.10 Sound
 
 **Principle.** Calm, spacious and tactile: a quiet observatory, not an arcade. Every sound is synthesised at run time with the Web Audio API (oscillators, noise buffers filled once, filters, envelopes, gentle FM bells, a generated reverb). No audio files, no samples, no dependencies. Ambience sits about 20 dB under the loudest effect; interface ticks are quiet enough to hear a hundred times; every important sound has content between 300 Hz and 4 kHz so it reads on laptop speakers. Repeated sounds vary slightly in pitch, level and timing.
