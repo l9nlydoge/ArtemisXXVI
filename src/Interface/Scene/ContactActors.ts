@@ -85,6 +85,8 @@ export abstract class ContactActor {
 
   protected abstract draw(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene): void
 
+  paintBack(_context: CanvasRenderingContext2D, _view: SceneView, _now: number, _scene: FlightScene): void {}
+
   paint(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene) {
     if (now < this.revealAt) {
       const at = this.point(scene, now)
@@ -325,9 +327,8 @@ export class StormContact extends ContactActor {
     return { x: stage.right - 8, y: Math.round(scene.craft.y.at(now)) }
   }
 
-  protected draw(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene) {
+  protected draw(context: CanvasRenderingContext2D, view: SceneView, now: number) {
     const radiation = this.radiation
-    const peak = Math.max(...this.encounter.contact.conditions.map((condition) => condition.radiation))
     if (MotionPreference.reduced) return
     const count = Math.min(this.particles.length, Math.round(14 + radiation * 12))
     const top = 0
@@ -341,6 +342,12 @@ export class StormContact extends ContactActor {
       Dots.px(context, x, y, particle.colour, 1, 1)
       Dots.px(context, x + 1, y, '#b9741c', particle.length, 1)
     }
+  }
+
+  override paintBack(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene) {
+    if (MotionPreference.reduced || now < this.revealAt) return
+    const radiation = this.radiation
+    const peak = Math.max(...this.encounter.contact.conditions.map((condition) => condition.radiation))
     const fronts = radiation >= 6 ? 3 : radiation >= 3 ? 2 : 1
     for (let front = 0; front < fronts; front++) {
       const period = 4200

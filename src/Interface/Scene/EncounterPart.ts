@@ -63,7 +63,8 @@ export class EncounterPart implements ScenePart {
     this.actor.paint(context, view, now, scene)
   }
 
-  paintBack(context: CanvasRenderingContext2D, _view: SceneView, now: number, scene: FlightScene) {
+  paintBack(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene) {
+    this.actor?.paintBack(context, view, now, scene)
     this.beams(context, now, scene)
   }
 
