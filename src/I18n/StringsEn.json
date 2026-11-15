@@ -238,7 +238,7 @@
   "Debrief.LossBare": "Radiation reached {radiation} on that turn. Your shielding stops {shielding}, and you had no Magnetic Shield.",
   "Debrief.LossShield": "Radiation reached {radiation} on that turn. Your shielding stops {shielding}. The Magnetic Shield was fitted but not raised, or not strong enough.",
   "Debrief.Missed": "What you missed",
-  "Debrief.MissedLine": "{count} targets needed a {module}: {points} points missed",
+  "Debrief.MissedLine": "No {module}: {points} points missed, in {count} of your encounters",
   "Debrief.NothingMissed": "Your instruments covered everything you met.",
   "Debrief.SeeLab": "See it in the lab",
   "Debrief.Encounters": "This flight",
