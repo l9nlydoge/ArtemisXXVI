@@ -42,6 +42,7 @@ export function useLaunch(flight: Flight | undefined, firstFlight: boolean): boo
     })
     const skip = (event: Event) => {
       event.preventDefault()
+      if (event.type === 'keydown') event.stopImmediatePropagation()
       part?.finish(scene, true)
       setLaunching(false)
     }
