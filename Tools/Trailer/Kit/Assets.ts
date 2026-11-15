@@ -4,6 +4,7 @@ import { BusCatalog } from '../../../src/Engine/Spacecraft/BusCatalog'
 import { InstalledModule } from '../../../src/Engine/Spacecraft/InstalledModule'
 import { Loadout } from '../../../src/Engine/Spacecraft/Loadout'
 import Strings from '../../../src/I18n/StringsEn.json'
+import Weather from '../../../src/Data/Snapshot/SpaceWeather.json'
 import { EarthMap } from '../../../src/Interface/Backdrop/GlobeRenderer'
 import { SourceFigures } from '../../../src/Interface/Screens/SourceFigures'
 import { SpriteImage } from '../../../src/Interface/Scene/SpriteImage'
@@ -22,6 +23,8 @@ export class Assets {
   static craftSteps: SpriteImage[][] = []
   static craftScale = 6
   static events = new Map<string, HTMLImageElement>()
+  static stormCount = 0
+  static donkiStorms = 0
   static figures: Record<string, number>
   static wording: Record<string, string> = Strings as Record<string, string>
   static rock = { name: '', missKm: 0, date: '' }
@@ -54,6 +57,8 @@ export class Assets {
       return frames.map((pixels) => SpriteImage.fromPixels(pixels, box))
     })
     Assets.figures = new SourceFigures(GameData.weeks.all).params
+    Assets.stormCount = new Set(GameData.weeks.all.flatMap((week) => week.storms.map((storm) => storm.id))).size
+    Assets.donkiStorms = Weather.storms.length
     const record = GameData.asteroids.find((entry) => entry.name === '2019 OK')!
     Assets.rock = { name: record.name, missKm: record.missKm, date: record.dateUtc }
   }

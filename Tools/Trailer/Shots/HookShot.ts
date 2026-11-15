@@ -19,7 +19,8 @@ export class HookShot extends Shot {
     const centreY = Math.round(Motion.mix(480, 352, rise))
     this.globe.paint(stage.context, 352, centreY, 0.18 + t * 0.006)
     Pixels.present(context, stage)
-    Type.reveal(context, 'Every week in space', 160, 300, t - Beat.at(2), { size: 160 })
-    Type.reveal(context, 'really happened.', 160, 450, t - Beat.at(3), { size: 160, colour: Palette.Foil3 })
+    Type.reveal(context, 'Real asteroids.', 160, 300, t - Beat.at(1), { size: 160 })
+    Type.reveal(context, 'Real storms.', 160, 450, t - Beat.at(3), { size: 160 })
+    Type.reveal(context, 'Your mission.', 160, 600, t - Beat.at(5), { size: 160, colour: Palette.Foil3 })
   }
 }

@@ -27,7 +27,7 @@ export class HangarShot extends Shot {
     context.fillStyle = Palette.Space0
     context.fillRect(0, 0, 1920, 1080)
     this.grid(context)
-    Type.reveal(context, 'Build the spacecraft.', Left, 250, t - 0.05, { size: 160 })
+    Type.reveal(context, 'Build it.', Left, 250, t - 0.05, { size: 160 })
     let fitted = 0
     Fit.forEach((id, index) => {
       const column = index % Columns
@@ -43,8 +43,8 @@ export class HangarShot extends Shot {
       const sprite = frame < 2 ? this.flash(id) : Assets.modules.get(id)!
       Pixels.blit(context, sprite, x, y + offset, Scale, false)
     })
-    this.meter(context, 'Budget', 900 - 60, t, fitted, Palette.Foil2, 11)
-    this.meter(context, 'Bay space', 900 + 40, t, fitted, Palette.Ocean2, 12)
+    this.meter(context, 900 - 60, t, fitted, Palette.Foil2, 11)
+    this.meter(context, 900 + 40, t, fitted, Palette.Ocean2, 12)
     this.preview(context, t)
   }
 
@@ -78,9 +78,8 @@ export class HangarShot extends Shot {
     }
   }
 
-  private meter(context: CanvasRenderingContext2D, label: string, y: number, t: number, fitted: number, colour: string, final: number) {
-    Type.plain(context, label, Left, y + 30, 40, Palette.Hull4)
-    const left = 440
+  private meter(context: CanvasRenderingContext2D, y: number, t: number, fitted: number, colour: string, final: number) {
+    const left = Left
     const width = 92
     const gap = 8
     const before = Math.round((final * Math.max(0, fitted - 1)) / Fit.length)
