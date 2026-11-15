@@ -7,6 +7,7 @@ import type { Encounter } from '../../Engine/Flight/Encounter'
 import { FlightPhase, type Flight } from '../../Engine/Flight/Flight'
 import { Commands } from '../../Engine/Flight/FlightCommand'
 import { Scoring } from '../../Engine/Flight/Scoring'
+import type { TurnCondition } from '../../Engine/Flight/TurnCondition'
 import type { TurnPreview } from '../../Engine/Flight/TurnPreview'
 import { Instrument } from '../../Engine/Modules/Instrument'
 import type { InstalledModule } from '../../Engine/Spacecraft/InstalledModule'
@@ -78,6 +79,8 @@ function ContactCard({ flight, contact, index }: { flight: Flight; contact: Cont
           <p className="Muted">{wording.t('Contact.UnknownAbout')}</p>
           <p className="ContactMeta">{wording.t('Contact.Turns', { turns: contact.turnCount })}</p>
           {band}
+        </div>
+        <div className="ContactAction">
           <button type="button" className="Primary" disabled={contact.played} onClick={() => send(Commands.choose(index))}>{wording.t('Contact.Choose')}</button>
         </div>
       </li>
@@ -100,8 +103,10 @@ function ContactCard({ flight, contact, index }: { flight: Flight; contact: Cont
         <ChannelBars event={event} craft={flight.craft} />
         <p className="ContactPoints">
           <strong>{wording.t('Contact.PointsYours', { points: potential.reachable })}</strong>
-          {potential.total > potential.reachable && <span className="Muted"> · {wording.t('Contact.PointsAll', { points: potential.total })}</span>}
+          {potential.total > potential.reachable && <span className="Muted ContactPointsAll">{wording.t('Contact.PointsAll', { points: potential.total })}</span>}
         </p>
+      </div>
+      <div className="ContactAction">
         <button type="button" className="Primary" disabled={contact.played} onClick={() => send(Commands.choose(index))}>
           {contact.played ? wording.t('Contact.Played') : isStorm ? wording.t('Contact.StormRide') : wording.t('Contact.Choose')}
         </button>
@@ -124,6 +129,7 @@ function ScannerView({ flight }: { flight: Flight }) {
       </section>
       <footer className="FlightFoot Panel">
         <StatusMeters flight={flight} />
+        <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
         <div className="FootActions">
           {flight.craft.hasRadar && (
             <button type="button" disabled={!flight.can(Commands.survey)} onClick={() => send(Commands.survey)}>{wording.t('Flight.Survey', { cost: Rules.surveyCost })}</button>
@@ -154,6 +160,14 @@ function effectText(module: InstalledModule, encounter: Encounter, flight: Fligh
   }
   const heal = Math.min(module.value, craft.maxHull - flight.state.hull)
   return { text: wording.t('Use.Heals', { amount: heal }), idle: heal === 0 }
+}
+
+function conditionText(condition: TurnCondition, wording: Wording): string {
+  return [
+    wording.t('Encounter.BriefSignal', { signal: signalText(condition.signal) }),
+    wording.t(condition.inShadow ? 'Encounter.BriefShadow' : 'Encounter.BriefSun'),
+    condition.radiation > 0 ? wording.t('Encounter.BriefRadiation', { amount: condition.radiation }) : wording.t('Encounter.BriefQuiet'),
+  ].join(', ')
 }
 
 function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encounter }) {
@@ -195,7 +209,7 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
           <EventPhoto imageId={event.imageId} />
           <div className="EventBody">
             <h1>{wording.text(event.label)}</h1>
-            <ul className="FactList">
+            <ul className="FactList IsScrolling">
               {event.facts.map((fact, at) => <li key={at}>{wording.text(fact)}</li>)}
             </ul>
             <ChannelBars event={event} craft={craft} recorded={encounter.recorded} pending={over ? undefined : preview.gains} />
@@ -247,35 +261,44 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
                   {wording.t('Result.Chase', { cost: Rules.chaseCost })}: {contact.identified ? wording.text(contact.event.label) : wording.t('Contact.Unknown')}
                 </button>
               ))}
-              {flight.phase === FlightPhase.EncounterDone && <button type="button" className="Primary" onClick={() => send(Commands.proceed)}>{wording.t('Result.Continue')}</button>}
+              {flight.phase === FlightPhase.EncounterDone && <button type="button" className="Primary IsLarge" onClick={() => send(Commands.proceed)}>{wording.t('Result.Continue')}</button>}
             </div>
           </div>
         ) : (
           <>
-            <ul className="ActionRow">
-              {craft.actives.map((module, index) => {
-                const selected = plan.has(module.key)
-                const problem = encounter.problemWith(module.key, plan)
-                const use = effectText(module, encounter, flight, boosted, wording)
-                return (
-                  <li key={module.key}>
-                    <button type="button" className={`ActionCard ${selected ? 'IsOn' : ''} ${use.idle ? 'IsIdle' : ''}`} aria-pressed={selected} disabled={!selected && problem !== undefined} onClick={() => togglePlan(module.key)}>
-                      <span className="ActionKey" aria-hidden="true">{index + 1}</span>
-                      <ModuleDrawing moduleId={module.card.id} />
-                      <span className="ActionName">{wording.t(`Module.${module.card.id}.Name`)} <span className="ActionMark">{wording.t(`Mark.${module.mark}`)}</span></span>
-                      <span className="ActionCost">{wording.t('Stat.Power', { power: module.card.powerCost })}</span>
-                      <span className="ActionUse">{!selected && problem ? wording.t(`Problem.${problem}`) : use.text}</span>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-            <div className="TurnCommit">
-              <p className={`PreviewLine ${preview.lost ? 'IsLethal' : ''}`}>
-                {wording.t('Encounter.Uses', { power: preview.powerCost })}, {wording.t('Encounter.Records', { data: recording })},{' '}
-                <span className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</span>
-                {preview.lost && <strong> {wording.t('Encounter.Lethal')}</strong>}
+            <div className="TurnPlanArea">
+              <p className="TurnBrief">
+                <strong>{wording.t('Encounter.Brief', { turn: encounter.turnIndex + 1, count: encounter.turnCount })}</strong>{' '}
+                {conditionText(encounter.current, wording)}. <span className="Muted">{wording.t('Encounter.Instruction')}</span>
               </p>
+              <ul className="ActionRow">
+                {craft.actives.map((module, index) => {
+                  const selected = plan.has(module.key)
+                  const problem = encounter.problemWith(module.key, plan)
+                  const use = effectText(module, encounter, flight, boosted, wording)
+                  return (
+                    <li key={module.key}>
+                      <button type="button" className={`ActionCard ${selected ? 'IsOn' : ''} ${use.idle ? 'IsIdle' : ''}`} aria-pressed={selected} aria-keyshortcuts={String(index + 1)} disabled={!selected && problem !== undefined} onClick={() => togglePlan(module.key)}>
+                        <span className="ActionTop">
+                          <ModuleDrawing moduleId={module.card.id} />
+                          <kbd className="ActionKey" aria-hidden="true">{index + 1}</kbd>
+                        </span>
+                        <span className="ActionName">{wording.t(`Module.${module.card.id}.Name`)}</span>
+                        <span className="ActionCost">{wording.t(`Mark.${module.mark}`)} · {wording.t('Stat.Power', { power: module.card.powerCost })}</span>
+                        <span className="ActionUse">{!selected && problem ? wording.t(`Problem.${problem}`) : use.text}</span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+            <div className="TurnCommit">
+              <ul className="PreviewLine" aria-live="polite">
+                <li>{wording.t('Encounter.Uses', { power: preview.powerCost })}</li>
+                <li>{wording.t('Encounter.Records', { data: recording })}</li>
+                <li className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</li>
+              </ul>
+              {preview.lost && <p className="LethalLine">{wording.t('Encounter.Lethal')}</p>}
               <button type="button" className="Primary IsLarge" disabled={!preview.valid} onClick={() => send(Commands.commit(plan.list))}>{wording.t('Encounter.EndTurn')}</button>
             </div>
           </>
@@ -305,7 +328,7 @@ export function FlightScreen() {
       </header>
       {encounter ? <EncounterView flight={flight} encounter={encounter} /> : flight.isOver ? <div /> : <ScannerView flight={flight} />}
       {flight.isOver && (
-        <div className="FlightEnd Panel" role="dialog" aria-label={wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}>
+        <div className={`FlightEnd Panel ${flight.phase === FlightPhase.Lost ? 'IsLost' : ''}`} role="dialog" aria-label={wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}>
           <h2>{wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}</h2>
           <p>{wording.t('Flight.Points', { points: flight.pointsEarned })}</p>
           <button type="button" className="Primary IsLarge" autoFocus onClick={finishFlight}>{wording.t('Flight.ToDebrief')}</button>

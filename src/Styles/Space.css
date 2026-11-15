@@ -75,15 +75,21 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .WeekAbout { font-size: 0.95rem; }
 .WeekBody .Primary { justify-self: start; margin-top: 6px; }
 .WeekLogged { font-size: 0.85rem; }
-.WeekCard.IsLocked img { filter: grayscale(1) brightness(0.45); }
+.WeekCard.IsLocked img { filter: grayscale(1) brightness(0.72); }
 .WeekCard.IsLocked .WeekBody > :not(.WeekLock):not(h2):not(.WeekDates) { color: var(--Muted); }
-.WeekLock { font-weight: 600; color: var(--Muted); margin-top: 6px; }
+.WeekLock { font-weight: 600; color: var(--Text); margin-top: 6px; }
 
 .HangarScreen { display: grid; grid-template-columns: minmax(300px, 380px) 1fr minmax(380px, 470px); grid-template-rows: auto 1fr; gap: 14px 18px; padding: 18px var(--Gutter) 20px; }
 .HangarScreen .ScreenHead { grid-column: 1 / -1; }
 .HangarLeft { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 0; }
 .HangarForecast, .HangarCraft { padding: 14px 16px; display: grid; gap: 9px; }
 .HangarCraft p { font-size: 0.95rem; }
+.HangarInstruction { flex-basis: 100%; color: var(--Muted); font-size: 0.95rem; margin-top: -8px; }
+.HangarLimits { display: grid; gap: 12px; padding: 4px 0 8px; border-bottom: 1px solid var(--Line); margin-bottom: 2px; }
+.HangarLimits .MeterHead { font-size: 1rem; }
+.HangarLimits .MeterLabel { color: var(--Text); font-weight: 600; }
+.HangarLimits .MeterText { font-size: 1.1rem; }
+.HangarLimits .MeterTrack { height: 8px; }
 .RecordLists { display: grid; gap: 6px; font-size: 0.95rem; }
 .RecordLists dt { color: var(--Muted); font-size: 0.82rem; }
 .RecordLists dd { display: flex; flex-wrap: wrap; gap: 2px 12px; }
@@ -107,6 +113,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ModuleControls .Quiet { font-size: 0.82rem; padding: 2px 6px; }
 .MarkStepper { display: flex; }
 .MarkStepper button { min-width: 34px; padding: 5px 8px; border-radius: 0; margin-left: -1px; font-weight: 600; letter-spacing: 0.08em; }
+.MarkStepper button:disabled { opacity: 0.35; }
 .MarkStepper button[aria-pressed='true'] { background: var(--Foil); border-color: var(--Foil); color: #14100a; position: relative; }
 .HangarLaunch { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--Line); }
 .IssueLine { color: var(--NoGo); font-size: 0.92rem; font-weight: 500; }
@@ -145,16 +152,19 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 
 .ScannerView { display: grid; grid-template-rows: auto 1fr; gap: 10px; min-height: 0; }
 .ViewTitle { font-size: 1rem; font-weight: 500; color: var(--Muted); }
-.ContactRow { display: flex; justify-content: center; align-items: start; gap: 16px; min-height: 0; }
-.ContactCard { width: min(100%, 390px); display: grid; grid-template-rows: auto 1fr; max-height: 100%; overflow: hidden; }
+.ContactRow { display: flex; justify-content: center; align-items: stretch; gap: 16px; min-height: 0; max-height: 100%; align-self: start; }
+.ContactCard { width: min(100%, 390px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; }
+.ContactAction { padding: 4px 14px 14px; }
 .ContactRow[data-count="3"] .ContactCard { width: min(100%, 360px); }
-.ContactBody { display: grid; gap: 7px; padding: 12px 14px 14px; align-content: start; overflow-y: auto; scrollbar-width: thin; }
+.ContactBody { display: flex; flex-direction: column; gap: 7px; padding: 12px 14px 8px; overflow-y: auto; scrollbar-width: thin; }
 .ContactBody h2 { font-size: 1.2rem; }
-.ContactBody .Primary { justify-self: start; margin-top: 4px; }
+.ContactPoints { display: flex; flex-wrap: wrap; gap: 0 10px; }
+.ContactPointsAll { white-space: nowrap; }
 .ContactMeta { font-size: 0.88rem; color: var(--Muted); }
 .ContactBand { font-size: 0.9rem; font-weight: 600; color: var(--Caution); }
 .ContactBand.IsSevere, .ContactBand.IsHigh { color: var(--NoGo); }
 .ContactPoints { font-size: 0.9rem; }
+.ContactBody > * { flex: none; }
 .ContactCard.IsPlayed { opacity: 0.55; }
 .UnknownField { height: clamp(84px, 15vh, 130px); background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 5px), radial-gradient(60% 90% at 50% 50%, rgba(255, 255, 255, 0.1), transparent 70%); border-bottom: 1px solid var(--Line); }
 .EmptyNote { padding: 16px; justify-self: center; }
@@ -179,8 +189,9 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ChannelBar.IsClosed .ChannelTrack { background: repeating-linear-gradient(90deg, var(--Line) 0 4px, transparent 4px 8px); }
 
 .EncounterView { display: grid; grid-template-columns: minmax(300px, 400px) 1fr minmax(250px, 310px); gap: 16px; min-height: 0; align-items: start; }
-.EventCard { grid-column: 1; display: grid; grid-template-rows: auto 1fr; max-height: 100%; overflow: hidden; }
-.EventBody { display: grid; gap: 8px; padding: 12px 14px 14px; overflow-y: auto; scrollbar-width: thin; align-content: start; }
+.EventCard { grid-column: 1; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: 100%; overflow: hidden; }
+.EventBody { display: grid; grid-template-rows: auto minmax(0, auto) auto; gap: 8px; padding: 12px 14px 14px; min-height: 0; align-content: start; }
+.FactList.IsScrolling { overflow-y: auto; scrollbar-width: thin; min-height: 2.6em; }
 .EventBody h1 { font-size: 1.35rem; font-weight: 700; }
 .TurnTrack { grid-column: 3; display: grid; gap: 0; }
 .TurnCell { display: grid; grid-template-columns: auto 1fr; gap: 1px 12px; padding: 8px 12px; border-left: 3px solid transparent; font-size: 0.86rem; color: var(--Muted); }
@@ -194,32 +205,40 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .TurnUnknown { grid-row: span 3; align-self: center; }
 .TurnHint { padding: 8px 12px; font-size: 0.8rem; color: var(--Muted); border-top: 1px solid var(--Line); }
 
-.FlightFoot { display: grid; grid-template-columns: minmax(200px, 250px) 1fr; align-items: center; gap: 18px; padding: 12px 16px; }
-.FlightFoot.IsEncounter { grid-template-columns: minmax(200px, 250px) 1fr auto; }
+.FlightFoot { display: grid; grid-template-columns: minmax(200px, 250px) 1fr auto; align-items: center; gap: 22px; padding: 12px 18px; }
+.FlightFoot.IsEncounter { min-height: 188px; }
+.FootHint { color: var(--Muted); font-size: 0.95rem; max-width: 34rem; }
 .StatusMeters { display: grid; gap: 10px; }
 .FootActions { display: flex; justify-content: flex-end; gap: 10px; }
-.ActionRow { display: flex; gap: 8px; flex-wrap: wrap; }
-.ActionCard { position: relative; width: 148px; display: grid; gap: 1px; justify-items: start; text-align: left; padding: 8px 10px 9px; background: var(--Plate); border-left-width: 3px; transition: transform 120ms var(--Ease), border-color 120ms, background-color 120ms; }
-.ActionCard .ModuleDrawing { width: 54px; height: 32px; }
-.ActionKey { position: absolute; top: 6px; right: 8px; font-size: 0.74rem; color: var(--Muted); }
-.ActionName { font-size: 0.9rem; font-weight: 600; line-height: 1.15; }
-.ActionMark { font-weight: 400; color: var(--Muted); }
-.ActionCost { font-size: 0.8rem; color: var(--Muted); }
-.ActionUse { font-size: 0.86rem; }
-.ActionCard.IsIdle .ActionUse { color: var(--Muted); }
+.TurnPlanArea { display: grid; gap: 10px; min-width: 0; align-self: stretch; align-content: center; }
+.TurnBrief { font-size: 0.95rem; }
+.ActionRow { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 186px); gap: 10px; }
+.ActionRow li { display: grid; min-width: 0; }
+.ActionCard { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 2px; text-align: left; padding: 8px 12px 10px; background: var(--Plate); border-left-width: 3px; transition: transform 120ms var(--Ease), border-color 120ms, background-color 120ms; }
+.ActionTop { display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px; }
+.ActionCard .ModuleDrawing { width: 50px; height: 28px; }
+.ActionKey { font: inherit; font-size: 0.78rem; font-weight: 600; line-height: 1; min-width: 20px; padding: 3px 5px; text-align: center; border: 1px solid var(--LineStrong); border-radius: 2px; color: var(--Muted); }
+.ActionName { font-size: 0.95rem; font-weight: 600; line-height: 1.15; }
+.ActionCost { font-size: 0.82rem; color: var(--Muted); }
+.ActionUse { font-size: 1rem; font-weight: 600; line-height: 1.2; align-self: end; padding-top: 4px; }
+.ActionCard.IsIdle { border-style: dashed; border-left-style: solid; }
+.ActionCard.IsIdle .ActionUse { color: var(--Muted); font-weight: 400; font-size: 0.9rem; }
 .ActionCard.IsOn { border-color: var(--Foil); background: rgba(232, 168, 56, 0.12); transform: translateY(-4px); }
-.ActionCard.IsOn .ActionCost { color: var(--Foil); }
-.TurnCommit { display: grid; gap: 8px; justify-items: end; max-width: 260px; }
-.PreviewLine { font-size: 0.9rem; text-align: right; }
+.ActionCard.IsOn .ActionCost, .ActionCard.IsOn .ActionKey { color: var(--Foil); border-color: var(--Foil); }
+.TurnCommit { display: grid; gap: 10px; justify-items: end; min-width: 190px; }
+.PreviewLine { display: grid; gap: 1px; font-size: 0.92rem; text-align: right; }
+.PreviewLine li { white-space: nowrap; }
 .PreviewLine .IsDamage { color: var(--NoGo); font-weight: 600; }
-.PreviewLine.IsLethal strong { display: block; color: var(--NoGo); }
+.LethalLine { color: var(--NoGo); font-weight: 600; font-size: 0.92rem; text-align: right; max-width: 14rem; }
 .ResultStrip { grid-column: 2 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 18px; align-items: center; }
 .ResultPoints { font-size: 1.5rem; font-weight: 700; color: var(--Foil); grid-row: span 2; }
 .ResultState { font-weight: 600; }
-.ResultLearned { grid-column: 2; font-size: 0.9rem; color: var(--Muted); max-width: 46rem; }
+.ResultLearned { grid-column: 2; font-size: 0.9rem; color: var(--Muted); max-width: 50rem; hyphens: manual; }
 .ResultActions { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 8px; align-items: center; }
 .FlightEnd { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; gap: 10px; justify-items: center; padding: 26px 40px; text-align: center; }
-.FlightEnd h2 { font-size: 1.6rem; }
+.FlightEnd { border-top: 3px solid var(--Go); min-width: 320px; }
+.FlightEnd.IsLost { border-top-color: var(--NoGo); }
+.FlightEnd h2 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
 
 .ContactCard { animation: Deal 420ms var(--Ease) backwards; }
 .ContactCard:nth-child(2) { animation-delay: 110ms; }
@@ -235,32 +254,64 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 @keyframes Arrive { from { opacity: 0; transform: translateY(8px); } }
 @keyframes Hit { 0% { opacity: 0; background-position: 0 0, 0 0; } 12% { opacity: 1; } 100% { opacity: 0; background-position: 90px 0, 0 0; } }
 
+@media (max-height: 760px) {
+  .FlightFoot.IsEncounter { min-height: 172px; }
+  .EventPhoto img { height: clamp(110px, 19vh, 150px); }
+  .ActionCard { padding: 6px 10px 8px; }
+  .ActionTop { margin-bottom: 0; }
+  .ActionCard .ModuleDrawing { width: 36px; height: 20px; }
+  .ActionName { font-size: 0.9rem; }
+  .ActionUse { font-size: 0.92rem; }
+  .TurnPlanArea { gap: 6px; }
+  .ScannerView { gap: 6px; }
+  .ContactBody { gap: 4px; padding: 10px 12px 6px; }
+  .ContactBody h2 { font-size: 1.1rem; }
+  .FactList, .ContactMeta { font-size: 0.85rem; }
+  .ContactAction { padding: 4px 12px 10px; }
+  .ChannelBars { gap: 4px; }
+  .FlightFoot { padding-block: 10px; }
+  .StatusMeters { gap: 6px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .RadiationHit { display: none; }
   * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
   .ActionCard.IsOn { transform: none; }
 }
 
-.DebriefScreen { display: grid; grid-template-columns: minmax(340px, 460px) minmax(0, 560px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 18px; padding: 22px var(--Gutter) 20px; align-content: start; }
-.DebriefVerdict { grid-row: 1 / span 2; align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
+.DebriefScreen { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr) minmax(250px, 310px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 16px; padding: 22px var(--Gutter) 20px; }
+.DebriefVerdict { align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
 .DebriefVerdict.IsLost { border-top-color: var(--NoGo); }
 .DebriefVerdict h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
 .BankedPoints { font-size: 1.3rem; font-weight: 600; color: var(--Foil); }
 .LossWhy { color: var(--NoGo); }
-.DebriefVerdict .RankBadge { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--Line); width: 100%; }
+.DebriefRank { align-self: start; padding: 18px; display: grid; gap: 12px; }
+.DebriefRank .RankBadge { width: 100%; }
 .RankUp { padding: 10px 12px; border: 1px solid var(--Foil); display: grid; gap: 2px; }
 .RankUpTitle { font-weight: 700; color: var(--Foil); }
-.DebriefMissed, .DebriefFlight { padding: 14px 18px; display: grid; gap: 8px; align-content: start; min-height: 0; }
-.DebriefFlight { overflow-y: auto; scrollbar-width: thin; align-self: start; max-height: 100%; }
-.MissList { display: grid; gap: 6px; }
+.DebriefMissed { padding: 16px 20px; display: grid; gap: 10px; align-content: start; align-self: start; }
+.MissList { display: grid; gap: 8px; }
 .MissList button { white-space: nowrap; }
 .MissList li { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 0.95rem; color: var(--Muted); }
-.MissList li.IsBiggest { font-size: 1.1rem; font-weight: 600; color: var(--Text); }
-.EncounterList { display: grid; }
-.EncounterList li { display: grid; grid-template-columns: 6.4rem 1fr auto auto; gap: 12px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--Line); font-size: 0.93rem; }
-.EncounterList li:first-child { border-top: 0; }
-.IsComplete { color: var(--Go); font-size: 0.85rem; }
-.DebriefActions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; }
+.MissList li.IsBiggest { font-size: 1.15rem; font-weight: 600; color: var(--Text); }
+.DebriefLog { grid-column: 1 / -1; grid-row: 3; padding: 14px 18px 0; display: grid; gap: 10px; }
+.LegLog { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.LegEntry { display: grid; gap: 4px; align-content: start; padding: 10px 14px 12px; border-top: 3px solid var(--Line); min-width: 0; }
+.LegEntry + .LegEntry { border-left: 1px solid var(--Line); }
+.LegEntry.IsComplete { border-top-color: var(--Go); }
+.LegEntry.IsPartial { border-top-color: var(--Foil); }
+.LegEntry.IsLostHere { border-top-color: var(--NoGo); }
+.LegEntry.IsNotFlown { border-top-style: dashed; }
+.LegDate { font-size: 0.85rem; color: var(--Muted); }
+.LegEvent { display: grid; gap: 1px; }
+.LegEvent + .LegEvent { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--Line); }
+.LegName { font-weight: 600; font-size: 1.02rem; overflow-wrap: anywhere; }
+.LegName.IsQuiet { font-weight: 400; color: var(--Muted); }
+.LegState { font-size: 0.85rem; color: var(--Muted); }
+.LegEntry.IsComplete .LegState { color: var(--Go); }
+.LegPoints { font-size: 1.15rem; font-weight: 700; color: var(--Foil); margin-top: 2px; }
+.LegLost { font-size: 0.88rem; font-weight: 600; color: var(--NoGo); }
+.DebriefActions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin: 0 -18px; padding: 12px 18px; border-top: 1px solid var(--Line); }
 .DebriefActions .Primary { margin-left: 6px; }
 
 .LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px var(--Gutter) 18px; }
@@ -269,17 +320,19 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 16px; }
 .LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; display: grid; gap: 6px; align-content: start; }
 .OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-.OfferFamily { font-size: 0.74rem; color: var(--Muted); }
-.OfferCard { display: grid; grid-template-rows: auto auto auto 1fr auto auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
+.OfferFamily { font-size: 0.8rem; color: var(--Muted); }
+.OfferCard { display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
 .OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.OfferCard h3 { font-size: 1.02rem; }
-.OwnedMark { font-size: 0.78rem; color: var(--Muted); white-space: nowrap; }
-.OfferCard .ModuleDrawing { width: 100%; height: 46px; margin: 2px 0; }
+.OfferCard h3 { font-size: 1.05rem; }
+.OwnedMark { font-size: 0.8rem; color: var(--Muted); white-space: nowrap; }
+.OwnedMark.IsOwned { color: var(--Text); }
+.OfferCard .ModuleDrawing { width: 100%; height: 58px; margin: 4px 0; opacity: 0.9; }
 .OfferEffect { font-size: 0.88rem; }
 .OfferMark { font-weight: 700; }
 .OfferCard footer { padding-top: 6px; border-top: 1px solid var(--Line); font-size: 0.86rem; min-height: 2.5rem; display: flex; align-items: center; }
 .OfferCard .Primary { width: 100%; font-size: 0.9rem; padding: 7px 8px; }
-.OfferCard.IsRankLocked, .OfferCard.IsInDevelopment { color: var(--Muted); }
-.OfferCard.IsRankLocked .ModuleDrawing, .OfferCard.IsInDevelopment .ModuleDrawing { opacity: 0.35; }
+.OfferCard.IsInDevelopment { color: var(--Muted); }
+.OfferCard.IsRankLocked .ModuleDrawing, .OfferCard.IsInDevelopment .ModuleDrawing { opacity: 0.4; }
+.OfferCard.IsRankLocked .OfferEffect, .OfferCard.IsRankLocked .ModuleStats { color: var(--Muted); }
 .OfferCard.IsTop { border-color: var(--Foil); }
 .IsMaxed { color: var(--Foil); font-weight: 600; }

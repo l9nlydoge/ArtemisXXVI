@@ -76,7 +76,7 @@ function ModuleRow({ card }: { card: ModuleCard }) {
           <div className="ModuleControls">
             <div className="MarkStepper" role="group" aria-label={words.name(card)}>
               {AllMarks.map((mark) => (
-                <button key={mark} type="button" aria-pressed={module.mark === mark} disabled={mark > owned} title={mark > owned ? wording.t('Hangar.MarkLocked') : undefined} onClick={() => editLoadout((current) => current.setMark(module.key, mark))}>
+                <button key={mark} type="button" aria-pressed={module.mark === mark} disabled={mark > owned} title={mark > owned ? `${words.mark(mark)}: ${wording.t('Hangar.MarkLocked')}` : words.mark(mark)} aria-label={words.mark(mark)} onClick={() => editLoadout((current) => current.setMark(module.key, mark))}>
                   {'I'.repeat(mark)}
                 </button>
               ))}
@@ -118,6 +118,7 @@ export function HangarScreen() {
         <button type="button" className="Quiet" onClick={() => go(Screen.Week)}>‹ {wording.t('Hangar.Back')}</button>
         <h1>{wording.t(`Week.${week.id}.Name`)}</h1>
         <p className="Muted">{wording.dayRange(week.startUtc, week.endUtc)} {new Date(week.startUtc).getUTCFullYear()}</p>
+        <p className="HangarInstruction">{wording.t('Hangar.Instruction')}</p>
       </header>
 
       <div className="HangarLeft">
@@ -128,8 +129,10 @@ export function HangarScreen() {
 
         <section className="Panel HangarCraft">
           <h2>{wording.t('Hangar.Spacecraft')}: {wording.t(`Bus.${loadout.bus.id}`)}</h2>
-          <Meter label={wording.t('Hangar.Budget')} value={loadout.costMusd} max={loadout.bus.budgetMusd} text={wording.t('Hangar.BudgetValue', { used: loadout.costMusd, limit: loadout.bus.budgetMusd })} tone={loadout.costMusd > loadout.bus.budgetMusd ? 'Danger' : 'Foil'} />
-          <Meter label={wording.t('Hangar.Bay')} value={loadout.bayUsed} max={loadout.bus.bayUnits} text={wording.t('Hangar.BayValue', { used: loadout.bayUsed, limit: loadout.bus.bayUnits })} tone={loadout.bayUsed > loadout.bus.bayUnits ? 'Danger' : 'Foil'} />
+          <div className="HangarLimits">
+            <Meter label={wording.t('Hangar.Budget')} value={loadout.costMusd} max={loadout.bus.budgetMusd} text={wording.t('Hangar.BudgetValue', { used: loadout.costMusd, limit: loadout.bus.budgetMusd })} tone={loadout.costMusd > loadout.bus.budgetMusd ? 'Danger' : 'Foil'} />
+            <Meter label={wording.t('Hangar.Bay')} value={loadout.bayUsed} max={loadout.bus.bayUnits} text={wording.t('Hangar.BayValue', { used: loadout.bayUsed, limit: loadout.bus.bayUnits })} tone={loadout.bayUsed > loadout.bus.bayUnits ? 'Danger' : 'Foil'} />
+          </div>
           <p>{wording.t('Hangar.Power', { generation: craft.generation, capacity: craft.capacity })}</p>
           <p>{craft.passiveShield > 0 ? wording.t('Hangar.Hull', { hull: craft.maxHull, shield: craft.passiveShield }) : wording.t('Hangar.HullBare', { hull: craft.maxHull })}</p>
           <dl className="RecordLists">

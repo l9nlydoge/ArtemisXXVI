@@ -1,6 +1,7 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { CubeCamera, HalfFloatType, Vector3, WebGLCubeRenderTarget, type Group } from 'three'
+import { FlightPhase } from '../Engine/Flight/Flight'
 import { Spacecraft } from '../Engine/Spacecraft/Spacecraft'
 import { useGameStore } from '../State/GameStore'
 import { Screen } from '../State/Screen'
@@ -24,7 +25,7 @@ const Framings: Readonly<Record<Screen, Framing>> = {
   [Screen.Week]: { x: 0, y: -1.72, scale: 1.55 },
   [Screen.Hangar]: { x: -0.1, y: -1.5, scale: 1.5 },
   [Screen.Flight]: { x: 0.15, y: -1.62, scale: 1.7 },
-  [Screen.Debrief]: { x: 1.05, y: 0.42, scale: 0.62 },
+  [Screen.Debrief]: { x: 0.05, y: -1.36, scale: 1.55 },
   [Screen.Lab]: { x: 1.28, y: -0.62, scale: 0.6 },
 }
 
@@ -63,17 +64,21 @@ interface Station {
 }
 
 const Stations: Partial<Record<Screen, Station>> = {
-  [Screen.Hangar]: { x: 0.02, y: 0.1, size: 0.52 },
+  [Screen.Hangar]: { x: 0.02, y: 0.12, size: 0.6 },
   [Screen.Flight]: { x: 0.06, y: 0.12, size: 0.4 },
 }
 const CraftDepth = 1.1
 const ReflectEvery = 24
+const BaseYaw = 0.35
+const SwingYaw = 0.45
+const SwingPerSecond = 0.22
 
 function Craft() {
   const loadout = useGameStore((state) => state.loadout)
   const blueprint = useMemo(() => new SpacecraftBlueprint(new Spacecraft(loadout)), [loadout])
   const group = useRef<Group>(null)
   const frames = useRef(0)
+  const swing = useRef(0)
   const { gl, scene } = useThree()
   const reflection = useMemo(() => {
     const target = new WebGLCubeRenderTarget(128, { type: HalfFloatType })
@@ -93,17 +98,18 @@ function Craft() {
     const craft = group.current
     if (!craft) return
     const game = useGameStore.getState()
-    const station = game.screen === Screen.Flight && !game.flight?.encounter ? undefined : Stations[game.screen]
+    const station = game.screen === Screen.Flight && (!game.flight?.encounter || game.flight.phase === FlightPhase.Lost) ? undefined : Stations[game.screen]
     const step = Math.min(delta, 0.1)
     const blend = MotionPreference.reduced ? 1 : 1 - Math.exp(-2.2 * step)
-    const size = craft.scale.x + ((station?.size ?? 0) - craft.scale.x) * blend
+    const size = !station && game.screen !== Screen.Flight ? 0 : craft.scale.x + ((station?.size ?? 0) - craft.scale.x) * blend
     craft.scale.setScalar(size)
-    craft.visible = size > 0.01
+    craft.visible = size > 0.04
     if (station) {
       craft.position.x += (station.x - craft.position.x) * blend
       craft.position.y += (station.y - craft.position.y) * blend
     }
-    if (!MotionPreference.reduced) craft.rotation.y += step * 0.16
+    if (!MotionPreference.reduced) swing.current += step * SwingPerSecond
+    craft.rotation.y = BaseYaw + Math.sin(swing.current) * SwingYaw
     if (craft.visible && frames.current++ % ReflectEvery === 0) {
       craft.visible = false
       reflection.camera.position.copy(craft.position)
@@ -117,7 +123,7 @@ function Craft() {
       <ambientLight intensity={0.03} />
       <directionalLight position={SunDirection.clone().multiplyScalar(8)} intensity={3.4} />
       <directionalLight position={[0, -4, 1.5]} intensity={0.55} color="#9bb6ff" />
-      <group ref={group} position={[0, 0.1, CraftDepth]} scale={0} rotation={[0.42, 0.6, 0.12]}>
+      <group ref={group} position={[0, 0.1, CraftDepth]} scale={0} rotation={[0.42, BaseYaw, 0.12]}>
         <SpacecraftModel key={blueprint.key} blueprint={blueprint} />
       </group>
     </>
