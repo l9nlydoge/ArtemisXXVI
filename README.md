@@ -2,7 +2,7 @@
 
 Artemis 26 is a pixel-art browser game about designing a small science mission. You fit a spacecraft from module cards (power, instruments, protection) within a budget and a fixed bay, then fly one real week in space: July 2019, autumn 2022 or May 2024. The asteroids that pass, the solar storms that hit and the flares behind them are taken from NASA records for those dates. Each contact you approach can be recorded only by the instrument that matches it, so what you packed decides what you bring home. After the flight the debrief names what you missed and which module would have recorded it, and the lab is where you buy it for the next try.
 
-Play it here: PLAY_URL
+Play it here: https://l9nlydoge.github.io/ArtemisXXVI/
 
 Made for the 2026 NASA Space Apps Challenge, "Space Mission Design Game" challenge, by team Artemis 26 in Ankara.
 
@@ -113,14 +113,14 @@ python3 Tools/MakePixelArt.py [contactSheet] [only] # event pictures from Art/So
 python3 Tools/MakeModuleSprites.py [preview]       # module sprite sheet into public/Art/ModuleSprites.png
 node Tools/CaptureScreens.mjs 1440 900 outFolder [only] [baseUrl]   # screenshots of a running game with headless Chrome
 node Tools/RenderSounds.mjs [outFolder] [only]     # render each sound cue to a file for listening
-npx vitest run --config Tools/Balance/vitest.config.ts   # the long balance probes behind GameDesign.md
+npx vitest run --config Tools/Balance/vitest.config.ts   # the long balance probes
 ```
 
 The Python scripts need Pillow. The capture and sound tools need Google Chrome.
 
 ### Tests
 
-314 tests in 20 files, run with `npm test`. They cover the engine rules (loadout, scanner, encounters, scoring, flights, lab and ranks, determinism and malformed input); data honesty (no key in any saved request, every asteroid in a leg of its week, no roughly known pass, only near-Earth detections, every picture credited, "Representative" captions where they belong, hand-written lines tied to the page they were checked against); the balance targets in `GameDesign.md`, played by bots on the real weeks; and the hints, the flight scene, the turn timer and the sound cues.
+314 tests in 20 files, run with `npm test`. They cover the engine rules (loadout, scanner, encounters, scoring, flights, lab and ranks, determinism and malformed input); data honesty (no key in any saved request, every asteroid in a leg of its week, no roughly known pass, only near-Earth detections, every picture credited, "Representative" captions where they belong, hand-written lines tied to the page they were checked against); the balance targets, played by bots on the real weeks; and the hints, the flight scene, the turn timer and the sound cues.
 
 ## Credits and licences
 
@@ -135,5 +135,3 @@ The Python scripts need Pillow. The capture and sound tools need Google Chrome.
 ## Team
 
 Artemis 26, Ankara.
-
-TEAM_MEMBERS
