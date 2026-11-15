@@ -177,7 +177,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 
 .EventPhoto { display: grid; }
 .EventPhoto img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 216px; }
-.EventPhoto.IsCompact img { height: 126px; }
+.EventPhoto.IsCompact img { height: 144px; padding-inline: max(0px, round(down, calc((100% - 256px) / 2), 1px)); }
 .EventPhoto figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 5px 14px; font-size: 0.72rem; line-height: 1.3; color: var(--Muted); border-bottom: 1px solid var(--Line); }
 .EventPhoto .Credit { text-align: right; flex: none; max-width: 45%; }
 

@@ -114,6 +114,18 @@ class Picture:
                 placed += 1
         return self
 
+    def Night(self, band, ground):
+        band = {Hex(code) for code in band}
+        limb = [max([y for y in range(ArtHeight) if self.Art.getpixel((x, y)) in band], default=None) for x in range(ArtWidth)]
+        known = [x for x in range(ArtWidth) if limb[x] is not None]
+        for x in range(ArtWidth):
+            nearest = min(known, key=lambda k: abs(k - x))
+            edge = limb[nearest] + (abs(nearest - x) // 6 if nearest != x else 0)
+            for y in range(edge + 1, ArtHeight):
+                if self.Art.getpixel((x, y)) == Black:
+                    self.Art.putpixel((x, y), Hex(ground))
+        return self
+
     def Place(self, box, x, y):
         return round((x - box[0]) / (box[2] - box[0]) * ArtWidth), round((y - box[1]) / (box[3] - box[1]) * ArtHeight)
 
@@ -153,7 +165,7 @@ def AsteroidA():
 
 
 def AsteroidB():
-    picture = Picture('AsteroidB', (-160, 190, 1440, 1090), Contrast(1.25, 1.05))
+    picture = Picture('AsteroidB', (-382, 65, 1662, 1215), Contrast(1.25, 1.05))
     picture.Ramp(Rock, spread=0.55, floor=0.05, gamma=0.95).Clean().Outline(RockEdge)
     return picture.Starfield(10, 2).Save()
 
@@ -167,10 +179,13 @@ def AsteroidC():
 def Storm():
     def adjust(image):
         image = ImageEnhance.Brightness(image).enhance(1.35)
-        image = ImageEnhance.Color(image).enhance(1.7)
-        return ImageEnhance.Contrast(image).enhance(1.25)
+        vivid = ImageEnhance.Contrast(ImageEnhance.Color(image).enhance(1.9)).enhance(1.25)
+        dull = ImageEnhance.Color(image).enhance(0.15)
+        mask = image.convert('L').point(lambda value: 255 if value > 70 else 0 if value < 40 else (value - 40) * 8)
+        return Image.composite(vivid, dull, mask)
     picture = Picture('Storm', (0, 120, 1280, 840), adjust)
-    picture.Nearest(['#000000', '#070b1a', '#0e1630', '#1b2a4e', '#1f4d2c', '#1f7a4d', '#3ecf85', '#6a3fb8', '#b06cf0', '#7a1f2b', '#c8323f', '#eef3f7'], spread=30, floor=26)
+    picture.Nearest(['#000000', '#070b1a', '#0e1630', '#1b2a4e', '#1f7a4d', '#3ecf85', '#6a3fb8', '#b06cf0', '#7a1f2b', '#c8323f', '#eef3f7'], spread=30, floor=26)
+    picture.Night(['#3ecf85', '#1f7a4d', '#b06cf0', '#6a3fb8', '#c8323f'], '#070b1a')
     return picture.Starfield(8, 4).Save()
 
 
@@ -187,7 +202,7 @@ def Grb221009A():
 
 
 def ExoplanetVisible():
-    box = (60, 330, 860, 780)
+    box = (0, 238, 800, 688)
     picture = Picture('ExoplanetVisible', box, Contrast(1.2))
     picture.Ramp(['#000000', '#1c0606', '#3a0e0c', '#7a1f2b', '#a8301e', '#d2502a', '#e8a838', '#ffd27a'], floor=0.04, gamma=1.1, channel=lambda r, g, b: (0.6 * r + 0.4 * g) / 255)
     for x, y in ((521, 649), (565, 662), (750, 786), (874, 825)):
