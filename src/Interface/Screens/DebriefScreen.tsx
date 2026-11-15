@@ -49,7 +49,7 @@ export function DebriefScreen() {
         {lost && report.loss && (
           <p className="LossWhy">{wording.t(report.loss.hadActiveShield ? 'Debrief.LossShield' : 'Debrief.LossBare', { radiation: report.loss.radiation, shielding: report.loss.shielding })}</p>
         )}
-        <RankBadge />
+        <RankBadge from={summary.lifetimeBefore} />
         {rankUps.map((rank) => (
           <div key={rank} className="RankUp">
             <p className="RankUpTitle">{wording.t('Debrief.RankUp', { rank, title: wording.t(`Rank.${rank}`) })}</p>

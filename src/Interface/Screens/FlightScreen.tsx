@@ -290,11 +290,14 @@ export function FlightScreen() {
   const flight = useGameStore((state) => state.flight)
   useGameStore((state) => state.flightTick)
   const finishFlight = useGameStore((state) => state.finishFlight)
+  const tick = useGameStore((state) => state.flightTick)
   if (!flight) return null
   const encounter = flight.encounter
+  const hit = flight.lastOutcome?.incoming ?? 0
 
   return (
     <main className={`FlightScreen ${flight.isStormLeg ? 'IsStormLeg' : ''}`}>
+      {hit > 0 && <div key={tick} className={`RadiationHit ${hit >= 6 ? 'IsHeavy' : ''}`} aria-hidden="true" />}
       <header className="FlightHead">
         <p className="LegLabel">{wording.t('Flight.Leg', { leg: flight.legIndex + 1, count: Rules.legsPerFlight })}</p>
         <FlightTrack flight={flight} />

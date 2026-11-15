@@ -221,7 +221,22 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .FlightEnd { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; gap: 10px; justify-items: center; padding: 26px 40px; text-align: center; }
 .FlightEnd h2 { font-size: 1.6rem; }
 
+.ContactCard { animation: Deal 420ms var(--Ease) backwards; }
+.ContactCard:nth-child(2) { animation-delay: 110ms; }
+.ContactCard:nth-child(3) { animation-delay: 220ms; }
+.EventCard, .TurnTrack { animation: Arrive 360ms var(--Ease) backwards; }
+.TurnTrack { animation-delay: 120ms; }
+.ResultStrip { animation: Arrive 300ms var(--Ease) backwards; }
+.FlightEnd { animation: Arrive 360ms var(--Ease) backwards; }
+.FlightScreen.IsStormLeg { box-shadow: inset 0 3px 0 var(--NoGo); }
+.RadiationHit { position: fixed; inset: 0; z-index: 3; pointer-events: none; animation: Hit 700ms ease-out forwards; background: repeating-linear-gradient(112deg, transparent 0 46px, rgba(255, 82, 99, 0.16) 46px 48px), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(255, 82, 99, 0.3) 100%); }
+.RadiationHit.IsHeavy { background: repeating-linear-gradient(112deg, transparent 0 30px, rgba(255, 82, 99, 0.26) 30px 33px), radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(255, 82, 99, 0.48) 100%); }
+@keyframes Deal { from { opacity: 0; transform: translateY(22px); } }
+@keyframes Arrive { from { opacity: 0; transform: translateY(8px); } }
+@keyframes Hit { 0% { opacity: 0; background-position: 0 0, 0 0; } 12% { opacity: 1; } 100% { opacity: 0; background-position: 90px 0, 0 0; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .RadiationHit { display: none; }
   * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
   .ActionCard.IsOn { transform: none; }
 }
