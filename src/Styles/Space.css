@@ -365,6 +365,13 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 @keyframes Arrive { from { opacity: 0; transform: translateY(6px); } }
 @keyframes Hit { 0% { opacity: 1; background-position: 0 0; } 100% { opacity: 0; background-position: 96px 0; } }
 
+@media (max-height: 960px) {
+  .EventPhoto.IsCompact { justify-items: center; padding-top: 6px; background: var(--Hull0); }
+  .EventPhoto.IsCompact img { width: 256px; height: 144px; padding-inline: 0; box-shadow: 0 0 0 var(--U) var(--Black); }
+  .EventPhoto.IsCompact figcaption { justify-self: stretch; margin-top: 6px; padding-block: 3px 6px; line-height: 18px; }
+  .UnknownField { height: 153px; }
+}
+
 @media (max-height: 860px) {
   .EventPhoto { justify-items: center; padding-top: 6px; background: var(--Hull0); }
   .EventPhoto img, .EventPhoto.IsCompact img { width: 256px; height: 144px; padding-inline: 0; box-shadow: 0 0 0 var(--U) var(--Black); }
