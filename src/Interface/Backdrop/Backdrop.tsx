@@ -1,7 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '../../State/GameStore'
 import { Screen } from '../../State/Screen'
+import { Orbit, OrbitPace } from '../Scene/Orbit'
+import { SceneClock } from '../Scene/SceneClock'
+import { SceneLayers, type SceneView } from '../Scene/SceneView'
 import { MotionPreference } from '../Shared/MotionPreference'
+import { EarthMap, GlobePad, GlobeRenderer } from './GlobeRenderer'
 import { Starfield } from './Starfield'
 
 enum Globe {
@@ -14,6 +18,7 @@ const GlobeRadius: Readonly<Record<Globe, number>> = { [Globe.Large]: 250, [Glob
 const ArtRows = 225
 const TravelMs = 850
 const TwinkleMs = 650
+const StarRate = 0.14
 
 interface Framing {
   globe: Globe
@@ -39,79 +44,82 @@ interface Place {
   driftY: number
 }
 
+interface Move {
+  from: Place
+  to: Place
+  started: number
+}
+
 class BackdropScene {
   private readonly context: CanvasRenderingContext2D
-  private readonly images = new Map<Globe, HTMLImageElement>()
+  private readonly globes = new Map<Globe, GlobeRenderer>()
   private readonly stars = new Starfield()
+  private readonly orbit = Orbit.shared
+  private readonly clock = SceneClock.shared
+  private readonly stopListening: () => void
   private width = 0
   private height = 0
   private scale = 4
+  private ratio = 1
   private screen: Screen
-  private current: Place = { x: 0, y: 0, radius: GlobeRadius[Globe.Medium], driftX: 0, driftY: 0 }
-  private frame = 0
-  private twinkle = 0
-  private animation = 0
-  private twinkleTimer = 0
+  private target: Place = { x: 0, y: 0, radius: GlobeRadius[Globe.Medium], driftX: 0, driftY: 0 }
+  private current: Place = this.target
+  private move?: Move
+  private signature = ''
+  private disposed = false
 
   constructor(private readonly canvas: HTMLCanvasElement, screen: Screen) {
     this.context = canvas.getContext('2d')!
     this.screen = screen
-    for (const globe of Object.values(Globe)) {
-      const image = new Image()
-      image.onload = () => this.draw()
-      image.src = `${import.meta.env.BASE_URL}Backdrop/Earth${globe}.png`
-      this.images.set(globe, image)
+    this.aimOrbit()
+    const maps: [Globe, string][] = [[Globe.Large, 'EarthMapLarge'], [Globe.Medium, 'EarthMapMedium'], [Globe.Small, 'EarthMapSmall']]
+    for (const [globe, file] of maps) {
+      EarthMap.load(`${import.meta.env.BASE_URL}Backdrop/${file}.png`).then((map) => {
+        if (this.disposed) return
+        this.globes.set(globe, new GlobeRenderer(GlobeRadius[globe], map))
+        this.signature = ''
+      })
     }
     this.resize()
-    if (!MotionPreference.reduced) this.twinkleTimer = window.setInterval(() => this.tick(), TwinkleMs)
+    this.stopListening = this.clock.listen((now, delta) => this.frame(now, delta))
   }
 
   dispose() {
-    cancelAnimationFrame(this.animation)
-    clearInterval(this.twinkleTimer)
+    this.disposed = true
+    this.stopListening()
   }
 
   resize() {
-    const ratio = window.devicePixelRatio || 1
-    this.scale = Math.max(2, Math.round((window.innerHeight * ratio) / ArtRows))
-    this.width = Math.ceil((window.innerWidth * ratio) / this.scale)
-    this.height = Math.ceil((window.innerHeight * ratio) / this.scale)
+    this.ratio = window.devicePixelRatio || 1
+    this.scale = Math.max(2, Math.round((window.innerHeight * this.ratio) / ArtRows))
+    this.width = Math.ceil((window.innerWidth * this.ratio) / this.scale)
+    this.height = Math.ceil((window.innerHeight * this.ratio) / this.scale)
     this.canvas.width = this.width
     this.canvas.height = this.height
-    this.canvas.style.width = `${(this.width * this.scale) / ratio}px`
-    this.canvas.style.height = `${(this.height * this.scale) / ratio}px`
-    this.context.imageSmoothingEnabled = false
-    cancelAnimationFrame(this.animation)
-    this.current = this.place(this.screen)
-    this.draw()
+    this.canvas.style.width = `${(this.width * this.scale) / this.ratio}px`
+    this.canvas.style.height = `${(this.height * this.scale) / this.ratio}px`
+    this.move = undefined
+    this.target = this.place(this.screen)
+    this.current = this.target
+    this.signature = ''
   }
 
   show(screen: Screen) {
     if (screen === this.screen) return
     this.screen = screen
-    const target = this.place(screen)
-    cancelAnimationFrame(this.animation)
+    this.aimOrbit()
+    this.target = this.place(screen)
     if (MotionPreference.reduced) {
-      this.current = target
-      this.draw()
-      return
+      this.move = undefined
+      this.current = this.target
+    } else {
+      this.move = { from: { ...this.current }, to: this.target, started: this.clock.now }
     }
-    const from = { ...this.current }
-    const started = performance.now()
-    const step = (now: number) => {
-      const progress = Math.min(1, (now - started) / TravelMs)
-      const eased = 1 - (1 - progress) ** 3
-      const mix = (a: number, b: number) => a + (b - a) * eased
-      this.current = progress < 1 ? { x: mix(from.x, target.x), y: mix(from.y, target.y), radius: mix(from.radius, target.radius), driftX: mix(from.driftX, target.driftX), driftY: mix(from.driftY, target.driftY) } : target
-      this.draw()
-      if (progress < 1) this.animation = requestAnimationFrame(step)
-    }
-    this.animation = requestAnimationFrame(step)
+    this.signature = ''
   }
 
-  private tick() {
-    this.twinkle = (this.twinkle + 1) % 3
-    this.draw()
+  private aimOrbit() {
+    this.orbit.aim(this.screen === Screen.Flight ? OrbitPace.Scan : OrbitPace.Still)
   }
 
   private place(screen: Screen): Place {
@@ -127,32 +135,79 @@ class BackdropScene {
     }
   }
 
-  private source(radius: number): Globe {
-    const globes = Object.values(Globe)
-    return globes.reduce((best, globe) => (Math.abs(Math.log(radius / GlobeRadius[globe])) < Math.abs(Math.log(radius / GlobeRadius[best])) ? globe : best), globes[0])
+  private globeFor(radius: number): Globe | undefined {
+    return (Object.keys(GlobeRadius) as Globe[]).find((globe) => GlobeRadius[globe] === radius)
   }
 
-  private draw() {
-    if (this.frame) return
-    this.frame = requestAnimationFrame(() => {
-      this.frame = 0
-      this.paint()
-    })
+  private frame(now: number, delta: number) {
+    this.orbit.update(delta)
+    if (this.move) {
+      const progress = Math.min(1, (now - this.move.started) / TravelMs)
+      const eased = 1 - (1 - progress) ** 3
+      const { from, to } = this.move
+      const mix = (a: number, b: number) => a + (b - a) * eased
+      this.current = progress < 1 ? { x: mix(from.x, to.x), y: mix(from.y, to.y), radius: mix(from.radius, to.radius), driftX: mix(from.driftX, to.driftX), driftY: mix(from.driftY, to.driftY) } : to
+      if (progress >= 1) this.move = undefined
+    }
+    const view = this.view
+    const twinkle = MotionPreference.reduced ? 0 : Math.floor(now / TwinkleMs) % 3
+    const globe = this.globeFor(this.current.radius)
+    const turnStep = Math.floor(this.orbit.turn * 1600)
+    const signature = this.move ? `move ${now}` : `${twinkle} ${turnStep} ${Math.floor(this.orbit.offset * StarRate)} ${globe}`
+    const layersWant = [...SceneLayers.shared.all].some((layer) => layer.needsPaint(now))
+    if (signature === this.signature && !layersWant) return
+    this.signature = signature
+    this.paint(view, twinkle, now)
   }
 
-  private paint() {
+  private get view(): SceneView {
+    return {
+      width: this.width,
+      height: this.height,
+      scale: this.scale,
+      ratio: this.ratio,
+      earth: { x: this.current.x, y: this.current.y, radius: this.current.radius },
+      settled: !this.move,
+    }
+  }
+
+  private paint(view: SceneView, twinkle: number, now: number) {
     const { context, current } = this
+    context.imageSmoothingEnabled = false
     context.fillStyle = '#000000'
     context.fillRect(0, 0, this.width, this.height)
-    this.stars.paint(context, this.width, this.height, Math.round(current.driftX), Math.round(current.driftY), this.twinkle)
-    const globe = this.source(current.radius)
-    const image = this.images.get(globe)
-    if (!image?.complete || !image.naturalWidth) return
-    const size = Math.round(image.naturalWidth * (current.radius / GlobeRadius[globe]))
-    const left = Math.round(current.x - size / 2)
-    const top = Math.round(current.y - size / 2)
-    if (top >= this.height || left >= this.width || left + size <= 0) return
-    context.drawImage(image, left, top, size, size)
+    const starShift = Math.floor(this.orbit.offset * StarRate)
+    this.stars.paint(context, this.width, this.height, Math.round(current.driftX) + starShift, Math.round(current.driftY), twinkle)
+    this.paintEarth()
+    for (const layer of SceneLayers.shared.all) layer.paint(context, view, now)
+  }
+
+  private paintEarth() {
+    const { context, current } = this
+    const settled = this.globeFor(current.radius)
+    const turn = this.orbit.turn
+    if (!this.move && settled) {
+      const renderer = this.globes.get(settled)
+      if (!renderer) return
+      const left = current.x - current.radius - GlobePad
+      const top = current.y - current.radius - GlobePad
+      if (top >= this.height || left >= this.width || left + renderer.size <= 0) return
+      const image = renderer.draw(turn, -top, this.height - top)
+      context.drawImage(image, left, top)
+      return
+    }
+    const large = this.globes.get(Globe.Large)
+    if (!large) return
+    const left = Math.round(current.x - current.radius)
+    const right = Math.round(current.x + current.radius)
+    const top = Math.round(current.y - current.radius)
+    const bottom = Math.round(current.y + current.radius)
+    if (top >= this.height || left >= this.width || right <= 0) return
+    const image = large.draw(turn)
+    context.imageSmoothingEnabled = true
+    context.imageSmoothingQuality = 'high'
+    context.drawImage(image, GlobePad, GlobePad, large.radius * 2, large.radius * 2, left, top, right - left, bottom - top)
+    context.imageSmoothingEnabled = false
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Rules } from '../../Engine/Core/Rules'
 import { EventKind } from '../../Engine/Events/SpaceEvent'
 import type { Contact } from '../../Engine/Flight/Contact'
@@ -17,7 +17,8 @@ import { ChannelBars } from '../Cards/ChannelBars'
 import { EventPhoto } from '../Cards/EventPhoto'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { Meter } from '../Meters/Meter'
-import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
+import { SceneMode } from '../Scene/FlightScene'
+import { useSceneStage } from '../Scene/SceneStage'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -173,7 +174,6 @@ function conditionText(condition: TurnCondition, wording: Wording): string {
 function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encounter }) {
   const wording = useWording()
   const plan = useGameStore((state) => state.plan)
-  const loadout = useGameStore((state) => state.loadout)
   const togglePlan = useGameStore((state) => state.togglePlan)
   const clearPlan = useGameStore((state) => state.clearPlan)
   const send = useGameStore((state) => state.send)
@@ -217,9 +217,7 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
           </div>
         </article>
 
-        <div className="EncounterStage">
-          <SpacecraftSprite loadout={loadout} active={over ? undefined : plan.keys} maxScale={3} label={wording.t('Hangar.Spacecraft')} />
-        </div>
+        <div className="EncounterStage" role="img" aria-label={wording.t('Hangar.Spacecraft')} />
 
         <ol className="TurnTrack Panel" aria-label={wording.t('Turn.Label', { turn: encounter.turnIndex + 1 })}>
           {visible.map((condition, index) => {
@@ -319,12 +317,17 @@ export function FlightScreen() {
   useGameStore((state) => state.flightTick)
   const finishFlight = useGameStore((state) => state.finishFlight)
   const tick = useGameStore((state) => state.flightTick)
+  const plan = useGameStore((state) => state.plan)
+  const loadout = useGameStore((state) => state.loadout)
+  const root = useRef<HTMLElement>(null)
+  const encounter = flight?.encounter
+  const mode = !flight || flight.isOver ? (encounter ? SceneMode.Encounter : SceneMode.Scanner) : encounter ? SceneMode.Encounter : SceneMode.Scanner
+  useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}`)
   if (!flight) return null
-  const encounter = flight.encounter
   const hit = flight.lastOutcome?.incoming ?? 0
 
   return (
-    <main className={`FlightScreen ${flight.isStormLeg ? 'IsStormLeg' : ''}`}>
+    <main ref={root} className={`FlightScreen ${flight.isStormLeg ? 'IsStormLeg' : ''}`}>
       {hit > 0 && <div key={tick} className={`RadiationHit ${hit >= 6 ? 'IsHeavy' : ''}`} aria-hidden="true" />}
       <header className="FlightHead">
         <p className="LegLabel">{wording.t('Flight.Leg', { leg: flight.legIndex + 1, count: Rules.legsPerFlight })}</p>

@@ -1,12 +1,13 @@
+import math
+import random
 import sys
 from pathlib import Path
 from PIL import Image, ImageEnhance
 
 Root = Path(__file__).resolve().parent
-Source = Root / 'Source' / 'GlobeStill.jpg'
+DayFile = Root / 'Source' / 'EarthDay.jpg'
+NightFile = Root / 'Source' / 'EarthNight.jpg'
 Target = Path(sys.argv[1]) if len(sys.argv) > 1 else Root.parent / 'public' / 'Backdrop'
-SourceCentre = 1060
-SourceRadius = 1004
 
 Hex = lambda value: tuple(int(value[i:i + 2], 16) for i in (1, 3, 5))
 Night = [Hex(c) for c in ('#070b1a', '#0e1630', '#1b2a4e')]
@@ -14,129 +15,102 @@ Ocean = [Hex(c) for c in ('#173a73', '#1f5aa8', '#3b7dd8', '#7db8f2')]
 Cloud = [Hex(c) for c in ('#c5d2e0', '#eef3f7', '#ffffff')]
 Land = [Hex(c) for c in ('#1f4d2c', '#3a7a3a', '#6aa84f', '#c9a45c', '#8a6a3a')]
 Dusk = [Hex('#6b4410')]
-Lights = Hex('#ffcf6b')
 Surface = Night + Ocean + Cloud + Land + Dusk
-Palette = [(0, 0, 0)] + Surface + [Lights]
-LightShare = 24
-Sun = (0.82 / 1.0, 0.3, 0.49)
-Glint = (1598, 832)
-GlintRadius = 125
-GlintOcean = (14, 62, 140)
-Bayer = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+Maps = (('EarthMapLarge', 1600), ('EarthMapMedium', 800), ('EarthMapSmall', 400))
+CloudSeed = 26
 
 
 def Distance(a, b):
     return 2 * (a[0] - b[0]) ** 2 + 4 * (a[1] - b[1]) ** 2 + 3 * (a[2] - b[2]) ** 2
 
 
-def Quantise(colour, x, y):
-    ranked = sorted(Surface, key=lambda candidate: Distance(colour, candidate))
+Memo = {}
+
+
+def Quantise(colour):
+    key = (colour[0] >> 2, colour[1] >> 2, colour[2] >> 2)
+    if key in Memo:
+        return Memo[key]
+    ranked = sorted(range(len(Surface)), key=lambda at: Distance(colour, Surface[at]))
     first, second = ranked[0], ranked[1]
-    axis = [second[i] - first[i] for i in range(3)]
+    a, b = Surface[first], Surface[second]
+    axis = [b[i] - a[i] for i in range(3)]
     length = sum(v * v for v in axis) or 1
-    along = sum((colour[i] - first[i]) * axis[i] for i in range(3)) / length
+    along = sum((colour[i] - a[i]) * axis[i] for i in range(3)) / length
     share = min(0.5, max(0.0, (along - 0.22) / 0.28 * 0.5))
-    threshold = (Bayer[y % 4][x % 4] + 0.5) / 16
-    return second if threshold < share else first
+    Memo[key] = (first, second, round(share * 16))
+    return Memo[key]
 
 
-def Despeckle(grid, size, keep):
-    out = [row[:] for row in grid]
-    for y in range(1, size - 1):
-        for x in range(1, size - 1):
-            here = grid[y][x]
-            if here is None or here in keep:
-                continue
-            if any(grid[y + dy][x + dx] == here for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
-                continue
-            around = [grid[y + dy][x + dx] for dy in (-1, 0, 1) for dx in (-1, 0, 1) if dx or dy]
-            common = max(set(around), key=around.count)
-            if common is not None and around.count(common) >= 6:
-                out[y][x] = common
-    return out
+def Noise(width, height, cells, stretch, seed):
+    generator = random.Random(seed)
+    columns = max(2, round(cells * stretch))
+    rows = max(2, cells)
+    small = Image.new('L', (columns, rows))
+    small.putdata([generator.randrange(256) for _ in range(columns * rows)])
+    tiled = Image.new('L', (columns * 3, rows))
+    for at in range(3):
+        tiled.paste(small, (at * columns, 0))
+    big = tiled.resize((width * 3, height), Image.BICUBIC)
+    return big.crop((width, 0, width * 2, height))
 
 
-def Daylight(dx, dy, radius):
-    u, v = dx / radius, -dy / radius
-    depth = max(0.0, 1 - u * u - v * v) ** 0.5
-    return u * Sun[0] + v * Sun[1] + depth * Sun[2]
+def Clouds(width, height):
+    octaves = [(6, 3.2, 0.42), (12, 3.0, 0.24), (24, 2.6, 0.16), (48, 2.4, 0.1), (96, 2.2, 0.08)]
+    layers = [Noise(width, height, cells, stretch, CloudSeed + at).load() for at, (cells, stretch, _) in enumerate(octaves)]
+    weights = [weight for _, _, weight in octaves]
+    field = Image.new('L', (width, height))
+    data = field.load()
+    for y in range(height):
+        latitude = 90 - (y + 0.5) * 180 / height
+        band = abs(latitude)
+        cover = 0.4 + 0.1 * math.exp(-((band - 4) / 7) ** 2) + 0.12 * math.exp(-((band - 55) / 14) ** 2) - 0.12 * math.exp(-((band - 24) / 9) ** 2)
+        cover -= 0.25 if band > 72 else 0
+        for x in range(width):
+            value = sum(layer[x, y] * weight for layer, weight in zip(layers, weights)) / 255
+            density = (value - (1 - cover)) / 0.07
+            data[x, y] = max(0, min(255, round(density * 255)))
+    return field
 
 
-def Render(still, lights, diameter):
-    radius = diameter / 2
-    pad = 3
-    size = diameter + pad * 2
-    box = (SourceCentre - SourceRadius, SourceCentre - SourceRadius, SourceCentre + SourceRadius, SourceCentre + SourceRadius)
-    small = still.resize((diameter, diameter), Image.BOX, box=box).load()
-    lit = lights.resize((diameter, diameter), Image.BOX, box=box).load()
-    grid = [[None] * size for _ in range(size)]
-    for y in range(size):
-        for x in range(size):
-            dx, dy = x - pad + 0.5 - radius, y - pad + 0.5 - radius
-            distance = (dx * dx + dy * dy) ** 0.5
-            day = Daylight(dx, dy, radius)
-            threshold = Bayer[y % 4][x % 4]
-            if distance < radius:
-                colour = small[x - pad, y - pad]
-                edge = radius - distance
-                if edge < 1.6 and day > 0.02:
-                    grid[y][x] = Ocean[3] if day > 0.12 or threshold < 8 else Night[2]
-                elif edge < 4.6 and day > 0.12 and threshold < (8 if edge < 3.1 else 4):
-                    grid[y][x] = Ocean[2]
-                elif edge < 1.6:
-                    grid[y][x] = Night[2] if threshold < 8 else Night[1]
-                elif lit[x - pad, y - pad] > LightShare and sum(colour) < 150:
-                    grid[y][x] = Lights
-                else:
-                    grid[y][x] = Quantise(colour, x, y)
-            elif distance < radius + 1 and day > 0.12 and (x + y) % 2 == 0:
-                grid[y][x] = Ocean[2]
-    grid = Despeckle(grid, size, {Lights})
-    index = {colour: at for at, colour in enumerate(Palette)}
-    image = Image.new('P', (size, size), 0)
-    flat = Palette + [(0, 0, 0)] * (256 - len(Palette))
-    image.putpalette([channel for colour in flat for channel in colour])
-    data = image.load()
-    for y in range(size):
-        for x in range(size):
-            if grid[y][x] is not None:
-                data[x, y] = index[grid[y][x]]
+def Day(width, height):
+    day = Image.open(DayFile).convert('RGB').resize((width, height), Image.BOX)
+    day = ImageEnhance.Color(day).enhance(1.35).point(lambda v: round(255 * (v / 255) ** 0.78))
+    return day
+
+
+def Lights(width, height):
+    night = Image.open(NightFile).convert('L').resize((width, height), Image.BOX)
+    return night.load()
+
+
+def MakeMap(name, width):
+    height = width // 2
+    day = Day(width, height).load()
+    clouds = Clouds(width, height).load()
+    lights = Lights(width, height)
+    generator = random.Random(width)
+    image = Image.new('RGB', (width, height))
+    out = image.load()
+    for y in range(height):
+        for x in range(width):
+            colour = day[x, y]
+            alpha = clouds[x, y] / 255
+            if alpha > 0:
+                tone = (232, 238, 244) if alpha > 0.55 else (196, 210, 224)
+                colour = tuple(round(colour[i] * (1 - alpha) + tone[i] * alpha) for i in range(3))
+            first, second, share = Quantise(colour)
+            lit = 1 if lights[x, y] > 70 and alpha < 0.4 and generator.random() < 0.55 else 0
+            out[x, y] = (first * 16 + second, share * 16 + lit, 0)
+    image.save(Target / f'{name}.png', optimize=True)
+    print(name, image.size)
     return image
-
-
-def RemoveGlint(still):
-    pixels = still.load()
-    for y in range(Glint[1] - GlintRadius, Glint[1] + GlintRadius):
-        for x in range(Glint[0] - GlintRadius, Glint[0] + GlintRadius):
-            reach = ((x - Glint[0]) ** 2 + (y - Glint[1]) ** 2) ** 0.5 / GlintRadius
-            weight = min(1.0, max(0.0, (1 - reach) * 2.2))
-            if weight > 0:
-                pixels[x, y] = tuple(round(pixels[x, y][i] * (1 - weight) + GlintOcean[i] * weight) for i in range(3))
 
 
 def Main():
     Target.mkdir(parents=True, exist_ok=True)
-    still, lights = Prepare()
-    for name, diameter in (('EarthLarge', 500), ('EarthMedium', 250), ('EarthSmall', 140)):
-        image = Render(still, lights, diameter)
-        image.save(Target / f'{name}.png', optimize=True, transparency=0)
-        print(name, image.size)
-
-
-def Prepare():
-    still = Image.open(Source).convert('RGB')
-    RemoveGlint(still)
-    still = ImageEnhance.Color(still).enhance(1.5).point(lambda v: round(255 * (v / 255) ** 0.8))
-    pixels = still.load()
-    mask = Image.new('L', still.size, 0)
-    target = mask.load()
-    width, height = still.size
-    for y in range(0, height):
-        for x in range(0, width):
-            r, g, b = pixels[x, y]
-            if r > 110 and r > b * 1.6 and g > b * 1.15 and r + g + b < 520:
-                target[x, y] = 255
-    return still, mask
+    for name, width in Maps:
+        MakeMap(name, width)
 
 
 Main()
