@@ -3,7 +3,7 @@ const Dimmed = [0, 0, 1, 3, 3, 4, 5, 7, 7, 8, 10, 10, 11, 15, 15, 15]
 const LightsColour = '#ffcf6b'
 const Bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5]
 const Sun = [0.82, 0.3, 0.49]
-const ViewLatitude = (12 * Math.PI) / 180
+const ViewLatitude = (-14 * Math.PI) / 180
 const ViewLongitude = (120 * Math.PI) / 180
 export const GlobePad = 3
 

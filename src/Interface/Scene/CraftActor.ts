@@ -113,6 +113,13 @@ export class CraftActor {
     return { cx: this.left(now) + hoop.cx + OriginX - this.crop.x, cy: this.top(now) + hoop.cy + OriginY - this.crop.y, rx: hoop.rx, ry: hoop.ry }
   }
 
+  mend() {
+    this.pieces = []
+    this.brokeAt = -1
+    this.unfold = 1
+    this.visible = true
+  }
+
   hit(now: number, heavy: boolean) {
     this.flashUntil = now + FlashMs
     this.shakeUntil = now + ShakeMs

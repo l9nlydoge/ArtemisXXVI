@@ -4,3 +4,15 @@
 .SpacecraftSprite canvas { display: block; image-rendering: pixelated; }
 .HangarStage { grid-column: 2; grid-row: 2; min-height: 0; min-width: 0; padding: 2vh 0 24vh; }
 .EncounterStage { grid-column: 2; grid-row: 1; align-self: stretch; min-height: 0; min-width: 0; padding: 4vh 0 12vh; }
+.TurnClock { display: grid; grid-template-columns: auto auto; align-items: center; gap: 9px; color: var(--Hull4); }
+.TurnClockText { min-width: 2.6rem; text-align: right; }
+.TurnClockCells { display: flex; gap: var(--U); padding: var(--U); background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull1); }
+.TurnClockCell { width: 9px; height: 9px; background: var(--Hull1); }
+.TurnClockCell.IsOn { background: var(--Hull3); }
+.TurnClock.IsCaution { color: var(--Caution); }
+.TurnClock.IsCaution .TurnClockCell.IsOn { background: var(--Caution); }
+.TurnClock.IsDanger { color: var(--NoGo); }
+.TurnClock.IsDanger .TurnClockCell.IsOn { background: var(--Danger2); animation: ClockBlink 1s steps(1, end) infinite; }
+.TurnClock.IsPaused .TurnClockCell.IsOn { animation: none; }
+@keyframes ClockBlink { 50% { background: var(--Danger0); } }
+@media (prefers-reduced-motion: reduce) { .TurnClock.IsDanger .TurnClockCell.IsOn { animation: none; } }

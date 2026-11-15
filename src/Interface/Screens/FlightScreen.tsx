@@ -19,6 +19,8 @@ import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { Meter } from '../Meters/Meter'
 import { SceneMode } from '../Scene/FlightScene'
 import { useSceneStage } from '../Scene/SceneStage'
+import { useEncounterScene } from '../Scene/UseEncounterScene'
+import { TurnClock, useTurnTimer } from '../Scene/TurnClock'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -171,7 +173,7 @@ function conditionText(condition: TurnCondition, wording: Wording): string {
   ].join(', ')
 }
 
-function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encounter }) {
+function EncounterView({ flight, encounter, paused }: { flight: Flight; encounter: Encounter; paused: boolean }) {
   const wording = useWording()
   const plan = useGameStore((state) => state.plan)
   const togglePlan = useGameStore((state) => state.togglePlan)
@@ -185,6 +187,10 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
   const visible = encounter.visible
   const recording = [...preview.gains.values()].reduce((sum, gain) => sum + gain, 0)
   const result = over ? encounter.result() : undefined
+  const timer = useTurnTimer(`${flight.legIndex}:${encounter.event.id}:${encounter.turnIndex}`, paused || over, () => {
+    const current = useGameStore.getState().plan
+    send(Commands.commit(encounter.preview(current).valid ? current.list : []))
+  })
   const openContacts = flight.contacts.map((contact, index) => ({ contact, index })).filter(({ index }) => flight.can(Commands.chase(index)))
 
   useEffect(() => {
@@ -302,6 +308,7 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
                 <li className={preview.incoming > 0 ? 'IsDamage' : ''}>{preview.incoming > 0 ? wording.t('Encounter.Damage', { damage: preview.incoming }) : wording.t('Encounter.NoDamage')}</li>
               </ul>
               {preview.lost && <p className="LethalLine">{wording.t('Encounter.Lethal')}</p>}
+              <TurnClock timer={timer} paused={paused} />
               <button type="button" className="Primary IsLarge" disabled={!preview.valid} onClick={() => send(Commands.commit(plan.list))}>{wording.t('Encounter.EndTurn')}</button>
             </div>
           </>
@@ -321,8 +328,9 @@ export function FlightScreen() {
   const loadout = useGameStore((state) => state.loadout)
   const root = useRef<HTMLElement>(null)
   const encounter = flight?.encounter
-  const mode = !flight || flight.isOver ? (encounter ? SceneMode.Encounter : SceneMode.Scanner) : encounter ? SceneMode.Encounter : SceneMode.Scanner
+  const mode = encounter ? SceneMode.Encounter : SceneMode.Scanner
   useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}`)
+  const endShown = useEncounterScene(flight, plan, tick)
   if (!flight) return null
   const hit = flight.lastOutcome?.incoming ?? 0
 
@@ -334,8 +342,8 @@ export function FlightScreen() {
         <FlightTrack flight={flight} />
         <p className="FlightPoints">{wording.t('Flight.Points', { points: flight.pointsEarned })}</p>
       </header>
-      {encounter ? <EncounterView flight={flight} encounter={encounter} /> : flight.isOver ? <div /> : <ScannerView flight={flight} />}
-      {flight.isOver && (
+      {encounter ? <EncounterView flight={flight} encounter={encounter} paused={flight.isOver} /> : flight.isOver ? <div /> : <ScannerView flight={flight} />}
+      {flight.isOver && endShown && (
         <div className={`FlightEnd Panel ${flight.phase === FlightPhase.Lost ? 'IsLost' : ''}`} role="dialog" aria-label={wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}>
           <h2>{wording.t(flight.phase === FlightPhase.Lost ? 'Flight.Lost' : 'Flight.Complete')}</h2>
           <p>{wording.t('Flight.Points', { points: flight.pointsEarned })}</p>

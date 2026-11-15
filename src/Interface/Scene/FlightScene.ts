@@ -6,7 +6,7 @@ import { SceneClock } from './SceneClock'
 import { SceneLayers, type SceneLayer, type SceneView } from './SceneView'
 
 export interface SceneEffect {
-  paint(context: CanvasRenderingContext2D, view: SceneView, now: number): boolean
+  paint(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene): boolean
 }
 
 export interface StageRect {
@@ -26,6 +26,7 @@ export enum SceneMode {
 
 export interface ScenePart {
   paint(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene): void
+  paintBack?(context: CanvasRenderingContext2D, view: SceneView, now: number, scene: FlightScene): void
 }
 
 export class FlightScene implements SceneLayer {
@@ -58,7 +59,10 @@ export class FlightScene implements SceneLayer {
   }
 
   show(mode: SceneMode) {
-    if (mode !== SceneMode.Hidden && !this.detach) this.detach = SceneLayers.shared.add(this)
+    if (mode !== SceneMode.Hidden && !this.detach) {
+      this.detach = SceneLayers.shared.add(this)
+      this.craft.mend()
+    }
     if (mode === SceneMode.Hidden) {
       this.detach?.()
       this.detach = undefined
@@ -115,10 +119,10 @@ export class FlightScene implements SceneLayer {
     if (fresh) this.placeCraft(true)
     if (!view.settled && this.sceneMode !== SceneMode.Launch) return
     const still = MotionPreference.reduced
-    for (const name of ['Back', 'Field']) this.parts.get(name)?.paint(context, view, now, this)
+    for (const part of this.parts.values()) part.paintBack?.(context, view, now, this)
     this.craft.paint(context, now, still)
     for (const name of ['Contact', 'Beams', 'Front', 'Launch']) this.parts.get(name)?.paint(context, view, now, this)
-    this.effects = this.effects.filter((effect) => effect.paint(context, view, now))
+    this.effects = this.effects.filter((effect) => effect.paint(context, view, now, this))
   }
 
   private placeCraft(instant: boolean) {
