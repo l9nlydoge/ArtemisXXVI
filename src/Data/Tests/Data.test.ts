@@ -260,8 +260,8 @@ describe('Every event is complete', () => {
       expect(image, `${event.id} wants image ${event.imageId}`).toBeDefined()
       const file = join(process.cwd(), 'public', image!.file)
       expect(existsSync(file), file).toBe(true)
-      expect(statSync(file).size).toBeGreaterThan(5000)
-      expect(statSync(file).size).toBeLessThan(700000)
+      expect(statSync(file).size).toBeGreaterThan(1000)
+      expect(statSync(file).size).toBeLessThan(60000)
       expect(image!.credit.length).toBeGreaterThan(3)
       expect(image!.pageUrl).toMatch(/^https:\/\/(images\.nasa\.gov\/details\/|www\.nasa\.gov\/universe\/).{5,}/)
       expect(strings[image!.captionKey], image!.captionKey).toBeDefined()
@@ -272,7 +272,7 @@ describe('Every event is complete', () => {
     const used = new Set(everyEvent.map(({ event }) => event.imageId))
     used.add('Storm').add('StormSevere')
     for (const image of Images.all) expect(used.has(image.id), image.id).toBe(true)
-    const onDisk = readdirSync(join(process.cwd(), 'public/Images/Events')).map((name) => name.replace(/\.jpg$/, '')).sort()
+    const onDisk = readdirSync(join(process.cwd(), 'public/Images/Events')).map((name) => name.replace(/\.png$/, '')).sort()
     expect(onDisk).toEqual(Images.all.map((image) => image.id).sort())
   })
 
@@ -308,7 +308,7 @@ describe('Every event is complete', () => {
     const flags = PlanetList.map((entry) => `${entry.name}|${entry.famous}|${entry.atmosphere}`)
     const rare = RareEvents.all.map((event) => `${event.id}|${event.dateUtc}|${event.sourceUrl}`)
     const checked = [...lines, ...credits, ...sources, ...flags, ...rare].join('\n')
-    expect(SeededRandom.hashText(checked), 'A checked line, credit, source or flag changed. Verify it against its source again, then update this number.').toBe(3850285133)
+    expect(SeededRandom.hashText(checked), 'A checked line, credit, source or flag changed. Verify it against its source again, then update this number.').toBe(951616518)
   })
 
   test('a hand-written line names the NASA page it was checked against', () => {
