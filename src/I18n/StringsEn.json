@@ -285,5 +285,8 @@
   "Debrief.Log": "Leg by leg",
   "Debrief.NotFlown": "Not flown",
   "Debrief.LostHere": "Spacecraft lost here",
-  "Debrief.Channels": "{full} of {total} channels complete"
+  "Debrief.Channels": "{full} of {total} channels complete",
+  "Sound.Label": "Sound",
+  "Sound.TurnOff": "Turn sound off (M)",
+  "Sound.TurnOn": "Turn sound on (M)"
 }
