@@ -53,7 +53,11 @@
   color-scheme: dark;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); }
+::-webkit-scrollbar { width: 9px; height: 9px; background: var(--Hull0); }
+::-webkit-scrollbar-thumb { background: var(--Hull2); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--Hull3); }
+::-webkit-scrollbar-corner { background: var(--Hull0); }
 html, body, #Root { height: 100%; }
 body { background: var(--Space); color: var(--Text); font-family: var(--Type); font-size: var(--Body); line-height: 24px; font-variant-numeric: tabular-nums; -webkit-font-smoothing: none; font-smooth: never; overflow: hidden; }
 ul, ol { list-style: none; }
@@ -146,7 +150,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .WeekCard.IsLocked h2 { color: var(--Hull4); }
 .WeekLock { color: var(--Text); margin-top: 6px; padding: 6px 12px; background: var(--Hull1); justify-self: start; }
 
-.HangarScreen { display: grid; grid-template-columns: minmax(300px, 360px) minmax(200px, 1fr) minmax(440px, 560px); grid-template-rows: auto minmax(0, 1fr); gap: 12px 21px; padding: 12px var(--Gutter) 21px; }
+.HangarScreen { display: grid; grid-template-columns: minmax(300px, 360px) minmax(200px, 1fr) minmax(440px, 560px); grid-template-rows: auto minmax(0, 1fr); gap: 12px 21px; padding: 12px var(--Gutter) 21px; width: 100%; max-width: 1920px; margin-inline: auto; }
 .HangarScreen .ScreenHead { grid-column: 1 / -1; }
 .HangarLeft { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 0; }
 .HangarForecast, .HangarCraft { padding: 15px 18px 18px; display: grid; gap: 9px; }
@@ -170,7 +174,8 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .ModuleRow.IsExtra { display: flex; align-items: baseline; gap: 12px; padding: 0 0 0 6px; margin: -6px 3px 6px; background: none; box-shadow: none; }
 .ModuleRow.IsExtra button { flex: none; white-space: nowrap; margin: 0; padding: 0 6px; line-height: 22px; }
 .ModuleRow.IsExtra .ModuleShort { min-width: 0; }
-.ModuleShort { grid-area: Short; color: var(--Caution); line-height: 22px; }
+.ModuleShort { color: var(--Caution); line-height: 22px; }
+.ModuleRow .ModuleShort { grid-area: Short; }
 .ModuleRow > button { grid-area: Act; grid-row: 1 / span 2; margin-block: 3px 6px; }
 .ModuleRow > button.IsShort { color: var(--Muted); }
 .ModuleRow > .ModuleDrawing { grid-area: Draw; align-self: center; }
@@ -179,9 +184,11 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .ModuleDrawing { --Scale: 2; display: block; width: calc(32px * var(--Scale)); height: calc(20px * var(--Scale)); background-repeat: no-repeat; background-size: calc(448px * var(--Scale)) calc(20px * var(--Scale)); background-position: calc(var(--Sprite, 0) * -32px * var(--Scale)) 0; image-rendering: pixelated; }
 .IsLocked .ModuleDrawing { opacity: 0.35; }
 .ModuleMain, .ModuleControls { display: contents; }
-.ModuleEffect { grid-area: Effect; color: var(--Muted); min-width: 0; }
-.IsLocked .ModuleEffect { grid-column: 2 / -1; }
-.ModuleStats { grid-area: Stats; display: flex; flex-wrap: wrap; gap: 0 12px; color: var(--Text); min-width: 0; }
+.ModuleEffect { color: var(--Muted); min-width: 0; }
+.ModuleRow .ModuleEffect { grid-area: Effect; }
+.ModuleRow.IsLocked .ModuleEffect { grid-column: 2 / -1; }
+.ModuleRow .ModuleStats { grid-area: Stats; }
+.ModuleStats { display: flex; flex-wrap: wrap; gap: 0 12px; color: var(--Text); min-width: 0; }
 .ModuleControls .Quiet { grid-area: Remove; justify-self: end; padding: 0 6px; margin: 0; line-height: 22px; }
 .MarkStepper { grid-area: Act; justify-self: end; display: flex; margin: 3px 3px 6px; }
 .MarkStepper button { min-width: 33px; padding: 0 6px; line-height: 21px; margin: 0; --Drop: var(--Black); box-shadow: inset 0 var(--U) 0 var(--Lit), inset 0 calc(var(--U) * -1) 0 var(--Dim), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Drop); }
@@ -212,7 +219,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .Meter.IsDanger .MeterText { color: var(--NoGo); }
 .MeterNote { color: var(--Muted); }
 
-.FlightScreen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 15px; padding: 12px var(--Gutter) 18px; position: relative; }
+.FlightScreen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 15px; padding: 12px var(--Gutter) 18px; position: relative; width: 100%; max-width: 1920px; margin-inline: auto; }
 .FlightHead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 24px; }
 .LegLabel { font-size: var(--Head); line-height: 30px; color: var(--White); }
 .FlightPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); }
@@ -424,7 +431,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
   .ActionCard:hover:not(:disabled) { transform: none; }
 }
 
-.DebriefScreen { display: grid; grid-template-columns: minmax(330px, 450px) minmax(0, 1fr) minmax(260px, 318px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px 21px; padding: 21px var(--Gutter) 24px; }
+.DebriefScreen { display: grid; grid-template-columns: minmax(330px, 450px) minmax(0, 1fr) minmax(260px, 318px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 18px 21px; padding: 21px var(--Gutter) 24px; width: 100%; max-width: 1920px; margin-inline: auto; }
 .DebriefVerdict { align-self: start; padding: 24px 24px 21px; display: grid; gap: 9px; box-shadow: inset 0 9px 0 var(--Good1), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
 .DebriefVerdict.IsLost { box-shadow: inset 0 9px 0 var(--Danger2), 0 -3px 0 var(--Hull1), 0 3px 0 var(--Hull1), -3px 0 0 var(--Hull1), 3px 0 0 var(--Hull1), 0 6px 0 var(--Black); }
 .DebriefVerdict h1 { font-size: var(--Display); line-height: 40px; color: var(--White); }
@@ -460,13 +467,13 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .DebriefActions { display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin: 0 -18px; padding: 12px 18px 15px; box-shadow: inset 0 var(--U) 0 var(--Hull1); }
 .DebriefActions .Primary { margin-left: 9px; }
 
-.LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 15px; padding: 18px var(--Gutter) 21px; }
+.LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 15px; padding: 18px var(--Gutter) 21px; width: 100%; max-width: calc(1833px + 2 * var(--Gutter)); margin-inline: auto; }
 .LabHead .LabPoints { font-size: var(--Head); line-height: 30px; color: var(--Foil); margin-left: auto; }
 .LabBody { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 21px; min-height: 0; }
 .LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 18px; margin: 3px; }
-.LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding: 3px 9px 9px 3px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); display: grid; gap: 6px; align-content: start; }
+.LabScroll { grid-column: 1; grid-row: 1; overflow: hidden auto; padding: 3px 9px 9px 3px; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); display: grid; gap: 6px; align-content: start; }
 .LabScroll > h2 { font-size: var(--Head); line-height: 30px; margin-top: 9px; }
-.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(216px, 1fr)); gap: 18px; padding-bottom: 6px; }
+.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, 288px); justify-content: start; gap: 18px; padding-bottom: 6px; }
 .OfferFamily { color: var(--Muted); }
 .OfferCard { --Muted: var(--Hull4); display: grid; grid-template-rows: auto auto auto auto 1fr auto; gap: 3px; padding: 12px 15px 12px; background: var(--Hull1); box-shadow: inset 0 var(--U) 0 var(--Hull2), 0 -3px 0 var(--Black), 0 3px 0 var(--Black), -3px 0 0 var(--Black), 3px 0 0 var(--Black), 0 9px 0 var(--Black); margin-bottom: 6px; }
 .OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 9px; }
