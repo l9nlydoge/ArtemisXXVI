@@ -1,8 +1,8 @@
-import { Dots, Seeded } from '../../../src/Interface/Scene/SpriteImage'
+import { Dots, Seeded, SpriteImage } from '../../../src/Interface/Scene/SpriteImage'
 import { Assets } from '../Kit/Assets'
 import { Fps, Layer, Pixels, Type } from '../Kit/Film'
 import { Beat, Motion } from '../Kit/Motion'
-import { Bayer, Palette } from '../Kit/Palette'
+import { Palette } from '../Kit/Palette'
 import { Globe, Sky } from '../Kit/Sky'
 import { Shot } from '../Kit/Timeline'
 
@@ -12,6 +12,8 @@ export const ShieldUp = Beat.at(5)
 
 const Craft = { x: 330, y: 150 }
 const Earth = { x: 40, y: 330, radius: 200 }
+const FrontStart = 560
+const FrontRadius = 300
 
 interface Particle {
   y: number
@@ -25,6 +27,7 @@ export class StormShot extends Shot {
   private readonly stage = new Layer(480, 270)
   private readonly sky = new Sky(480, 270)
   private globe?: Globe
+  private hurt?: SpriteImage
   private readonly particles: Particle[]
 
   constructor(start: number, end: number) {
@@ -33,7 +36,7 @@ export class StormShot extends Shot {
     this.particles = Array.from({ length: 220 }, (_, at) => ({
       y: random.next(),
       speed: 140 + random.next() * 160,
-      length: 2 + Math.floor(random.next() * 5),
+      length: 3 + Math.floor(random.next() * 8),
       start: random.next(),
       colour: at % 5 === 0 ? '#ffffff' : at % 3 === 0 ? '#ffd27a' : at % 7 === 0 ? '#ff5263' : '#f2e05a',
     }))
@@ -67,19 +70,49 @@ export class StormShot extends Shot {
     this.aurora(s, t)
     this.streaks(s, t)
     if (t >= ShieldUp) this.shield(s, t)
-    Pixels.present(context, stage)
+    if (t >= Hit && t < Hit + 8 / Fps) this.shock(s, Math.floor((t - Hit) * Fps))
+    const jolt = t >= Hit && t < Hit + 4 / Fps ? [2, -2, 1, -1][Math.floor((t - Hit) * Fps)] ?? 0 : 0
+    context.fillStyle = Palette.Space0
+    context.fillRect(0, 0, 1920, 1080)
+    context.imageSmoothingEnabled = false
+    context.drawImage(stage.canvas, jolt * 4, 0, 1920, 1080)
     const shake = t >= Hit && t < Hit + 0.2 ? [8, -8, 4, -4, 0, 0][Math.floor((t - Hit) * Fps)] ?? 0 : 0
     const sprite = (t >= ShieldUp ? Assets.craftShielded : Assets.craft)[Math.floor(t / Beat.Length) % 2]
-    Pixels.blit(context, sprite.canvas, Craft.x * 4 + shake * 2, Craft.y * 4, Assets.craftScale)
-    if (t >= Hit && t < Hit + 3 / Fps) this.flash(context, Math.floor((t - Hit) * Fps))
+    const hurt = t >= Hit && [0, 1, 4, 5].includes(Math.floor((t - Hit) * Fps))
+    this.hurt ??= SpriteImage.silhouette(Assets.craft[0], Palette.Danger2)
+    Pixels.blit(context, (hurt ? this.hurt : sprite).canvas, Craft.x * 4 + shake * 2, Craft.y * 4, Assets.craftScale)
+  }
+
+  frontX(t: number, delay = 0): number {
+    const speed = (FrontStart - Craft.x) / (Hit - SceneFrom)
+    return Math.round(FrontStart - speed * (t - SceneFrom - delay))
   }
 
   private fronts(context: CanvasRenderingContext2D, t: number) {
-    const period = Beat.at(2)
-    for (let front = 0; front < 3; front++) {
-      const age = ((t + (front * period) / 3) % period) / period
-      const cx = Math.round(480 + 140 - age * (480 + 280))
-      Dots.ring(context, cx + 140, Craft.y, 140, front % 2 ? Palette.Aurora0 : Palette.Aurora1, (angle, step) => Math.cos(angle) < -0.5 && step % 4 < 2)
+    const shielded = t >= ShieldUp
+    const waves: [number, number, readonly string[]][] = [
+      [0, 3, [Palette.White, Palette.Aurora1, Palette.Aurora1, Palette.Aurora0, Palette.Cell2]],
+      [Beat.at(1), 2, [Palette.Aurora1, Palette.Aurora0, Palette.Cell2]],
+      [Beat.at(2), 1, [Palette.Aurora0, Palette.Cell2]],
+      [Beat.at(3), 1, [Palette.Aurora0, Palette.Cell1]],
+    ]
+    for (const [delay, , colours] of waves) {
+      const lead = this.frontX(t, delay)
+      if (lead > 520 || lead < -400) continue
+      colours.forEach((colour, ring) => {
+        const radius = FrontRadius + ring * 2
+        const cx = lead + FrontRadius
+        Dots.ring(context, cx, Craft.y, radius, colour, (angle, step) => {
+          if (Math.cos(angle) > -0.35) return false
+          if (ring > 1 && step % 5 > 2) return false
+          if (!shielded) return true
+          const x = cx + Math.cos(angle) * radius
+          const y = Craft.y + Math.sin(angle) * radius
+          const dx = (x - Craft.x) / 66
+          const dy = (y - Craft.y) / 48
+          return dx * dx + dy * dy > 1
+        })
+      })
     }
   }
 
@@ -102,7 +135,8 @@ export class StormShot extends Shot {
 
   private streaks(context: CanvasRenderingContext2D, t: number) {
     const build = Motion.span(t, SceneFrom, Hit)
-    const count = Math.round(40 + build * 180)
+    const count = Math.round(30 + build * 190)
+    const front = this.frontX(t)
     const shielded = t >= ShieldUp
     for (let at = 0; at < count; at++) {
       const particle = this.particles[at]
@@ -110,6 +144,7 @@ export class StormShot extends Shot {
       const travelled = (t * particle.speed * (0.8 + build * 0.6) + particle.start * span) % span
       const x = Math.round(500 - travelled)
       const y = Math.round(particle.y * 270)
+      if (at >= 30 && x < front + 6) continue
       if (shielded) {
         const dx = (x - Craft.x) / 62
         const dy = (y - Craft.y) / 44
@@ -142,10 +177,11 @@ export class StormShot extends Shot {
     }
   }
 
-  private flash(context: CanvasRenderingContext2D, frame: number) {
-    const colour = frame === 0 ? Palette.White : frame === 1 ? Palette.Aurora1 : Palette.Aurora0
-    const level = frame === 0 ? 6 : frame === 1 ? 3 : 1
-    context.fillStyle = colour
-    for (let y = 0; y < 1080; y += 40) for (let x = 0; x < 1920; x += 40) if (Bayer[((y / 40) % 4) * 4 + ((x / 40) % 4)] < level) context.fillRect(x, y, 40, 40)
+  private shock(context: CanvasRenderingContext2D, frame: number) {
+    const colours = [Palette.White, Palette.White, Palette.Danger2, Palette.Aurora1, Palette.Aurora1, Palette.Aurora0, Palette.Aurora0, Palette.Cell1]
+    const radius = 20 + frame * 14
+    Dots.ring(context, Craft.x, Craft.y, radius, colours[frame], (_a, step) => frame < 3 || step % 3 !== 2)
+    Dots.ring(context, Craft.x, Craft.y, radius + 1, colours[frame], (_a, step) => frame < 2 || step % 2 === 0)
+    if (frame < 4) Dots.ring(context, Craft.x, Craft.y, Math.max(4, radius - 10), colours[Math.min(7, frame + 2)], (_a, step) => step % 2 === 0)
   }
 }

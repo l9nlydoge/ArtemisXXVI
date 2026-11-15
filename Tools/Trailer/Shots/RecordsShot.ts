@@ -47,6 +47,6 @@ export class RecordsShot extends Shot {
     Type.reveal(context, figure, 160, 900, local, { size: 240, colour: Palette.Foil3, shadow: Palette.Black })
     const left = 160 + Type.width(context, card.figure, 240) + 40
     Type.reveal(context, card.label, left, 900, local - 0.1, { size: 120, shadow: Palette.Black })
-    Type.reveal(context, 'from NASA records', left, 960, local - 0.3, { size: 40, colour: Palette.Hull4, shadow: Palette.Black })
+    Type.reveal(context, 'from NASA records', left, 980, local - 0.3, { size: 60, colour: Palette.Hull4, shadow: Palette.Black })
   }
 }

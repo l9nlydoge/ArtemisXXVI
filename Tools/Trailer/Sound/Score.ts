@@ -84,6 +84,7 @@ class Music {
     }
     this.kick(Hit, 0.7)
     this.kick(9.6, 0.4)
+    this.kick(19.2, 0.3)
     this.kick(26.4, 0.45)
     this.riser(19.8, Hit)
     for (const [offset, note] of [[0, 62], [0.15, 66], [0.3, 69], [0.45, 74]] as const) this.pluck(26.4 + offset, note + 12, 0.04, 1.6)
@@ -209,6 +210,7 @@ class Music {
 export const Effects: [number, CueName, CueParams?][] = [
   [Beat.at(2), 'ScannerPing'],
   ...[1, 2, 3, 4, 5, 6].map((beat) => [4.8 + Beat.at(beat), 'ModuleFit'] as [number, CueName]),
+  [4.8, 'ScreenForward'],
   [13.2, 'Deploy'],
   [13.4, 'ObjectPass', { duration: 3 }],
   [14.4, 'Camera'],
@@ -219,6 +221,7 @@ export const Effects: [number, CueName, CueParams?][] = [
   [Hit, 'RadiationHit', { amount: 8 }],
   [22.2, 'ShieldEngage'],
   [22.5, 'ShieldDeflect', { amount: 4 }],
+  [24.0, 'ScreenForward'],
   [25.2, 'ModuleFit'],
   [26.4, 'RankUp'],
 ]
@@ -275,7 +278,7 @@ export class Score {
 
   private static limit(value: number): number {
     const knee = 0.6
-    const ceiling = 0.87
+    const ceiling = 0.84
     const size = Math.abs(value)
     if (size <= knee) return value
     return Math.sign(value) * (knee + (ceiling - knee) * Math.tanh((size - knee) / (ceiling - knee)))

@@ -63,6 +63,7 @@ class Browser {
 
   async evaluate(expression) {
     const reply = await this.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true })
+    if (!reply.result) throw new Error(JSON.stringify(reply.error ?? reply))
     if (reply.result?.exceptionDetails) throw new Error(reply.result.exceptionDetails.exception?.description ?? 'evaluate failed')
     return reply.result.result.value
   }
@@ -82,11 +83,14 @@ try {
   await browser.send('Page.enable')
   await browser.send('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false })
   await browser.send('Page.navigate', { url: values.url })
-  for (let attempt = 0; attempt < 80; attempt++) {
-    await sleep(250)
-    if (await browser.evaluate('typeof window.Trailer === "object"').catch(() => false)) break
+  let ready
+  for (let attempt = 0; attempt < 80 && !ready; attempt++) {
+    await sleep(500)
+    if (!(await browser.evaluate('typeof window.Trailer === "object"').catch(() => false))) continue
+    ready = await browser.evaluate('window.Trailer.ready()').catch(() => undefined)
   }
-  console.log('ready', JSON.stringify(await browser.evaluate('window.Trailer.ready()')))
+  await sleep(300)
+  console.log('ready', JSON.stringify(ready))
   if (values.sound) {
     const sound = await browser.evaluate('window.Trailer.sound()')
     await writeFile(join(values.out, 'Score.wav'), Buffer.from(sound.wav, 'base64'))

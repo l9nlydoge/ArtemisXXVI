@@ -1,7 +1,7 @@
 import { Layer, Pixels, Type } from '../Kit/Film'
 import { Beat } from '../Kit/Motion'
 import { Palette } from '../Kit/Palette'
-import { Sky } from '../Kit/Sky'
+import { Globe, Sky } from '../Kit/Sky'
 import { Shot } from '../Kit/Timeline'
 
 export const Address = 'l9nlydoge.github.io/ArtemisXXVI'
@@ -9,11 +9,14 @@ export const Address = 'l9nlydoge.github.io/ArtemisXXVI'
 export class EndShot extends Shot {
   private readonly stage = new Layer(480, 270)
   private readonly sky = new Sky(480, 270)
+  private globe?: Globe
 
   draw(context: CanvasRenderingContext2D, t: number) {
     const stage = this.stage
     stage.clear(Palette.Space0)
     this.sky.paint(stage.context, 0, 0, 0, 3)
+    this.globe ??= new Globe(330)
+    this.globe.paint(stage.context, 240, 270 + 330 - 26, 0.62)
     Pixels.present(context, stage)
     const letters = 'Artemis 26'
     const shown = Math.min(letters.length, Math.floor(t * 30 / 2) + 1)

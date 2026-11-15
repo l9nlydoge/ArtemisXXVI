@@ -83,7 +83,10 @@ export class HangarShot extends Shot {
     const left = 440
     const width = 92
     const gap = 8
-    const lit = Math.round((final * fitted) / Fit.length)
+    const before = Math.round((final * Math.max(0, fitted - 1)) / Fit.length)
+    const after = Math.round((final * fitted) / Fit.length)
+    const sinceLast = fitted > 0 ? t - HangarShot.arrival(fitted - 1) : 0
+    const lit = Math.min(after, before + Math.floor(sinceLast * Fps / 2) + 1)
     const full = lit >= Segments
     const sinceFull = t - HangarShot.arrival(Fit.length - 1)
     for (let segment = 0; segment < Segments; segment++) {
