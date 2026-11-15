@@ -268,26 +268,39 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
   .ActionCard.IsOn { transform: none; }
 }
 
-.DebriefScreen { display: grid; grid-template-columns: minmax(340px, 460px) minmax(0, 560px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 18px; padding: 22px var(--Gutter) 20px; align-content: start; }
-.DebriefVerdict { grid-row: 1 / span 2; align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
+.DebriefScreen { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr) minmax(250px, 310px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 16px; padding: 22px var(--Gutter) 20px; }
+.DebriefVerdict { align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
 .DebriefVerdict.IsLost { border-top-color: var(--NoGo); }
 .DebriefVerdict h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
 .BankedPoints { font-size: 1.3rem; font-weight: 600; color: var(--Foil); }
 .LossWhy { color: var(--NoGo); }
-.DebriefVerdict .RankBadge { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--Line); width: 100%; }
+.DebriefRank { align-self: start; padding: 18px; display: grid; gap: 12px; }
+.DebriefRank .RankBadge { width: 100%; }
 .RankUp { padding: 10px 12px; border: 1px solid var(--Foil); display: grid; gap: 2px; }
 .RankUpTitle { font-weight: 700; color: var(--Foil); }
-.DebriefMissed, .DebriefFlight { padding: 14px 18px; display: grid; gap: 8px; align-content: start; min-height: 0; }
-.DebriefFlight { overflow-y: auto; scrollbar-width: thin; align-self: start; max-height: 100%; }
-.MissList { display: grid; gap: 6px; }
+.DebriefMissed { padding: 16px 20px; display: grid; gap: 10px; align-content: start; align-self: start; }
+.MissList { display: grid; gap: 8px; }
 .MissList button { white-space: nowrap; }
 .MissList li { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 0.95rem; color: var(--Muted); }
-.MissList li.IsBiggest { font-size: 1.1rem; font-weight: 600; color: var(--Text); }
-.EncounterList { display: grid; }
-.EncounterList li { display: grid; grid-template-columns: 6.4rem 1fr auto auto; gap: 12px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--Line); font-size: 0.93rem; }
-.EncounterList li:first-child { border-top: 0; }
-.IsComplete { color: var(--Go); font-size: 0.85rem; }
-.DebriefActions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; }
+.MissList li.IsBiggest { font-size: 1.15rem; font-weight: 600; color: var(--Text); }
+.DebriefLog { grid-column: 1 / -1; grid-row: 3; padding: 14px 18px 0; display: grid; gap: 10px; }
+.LegLog { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.LegEntry { display: grid; gap: 4px; align-content: start; padding: 10px 14px 12px; border-top: 3px solid var(--Line); min-width: 0; }
+.LegEntry + .LegEntry { border-left: 1px solid var(--Line); }
+.LegEntry.IsComplete { border-top-color: var(--Go); }
+.LegEntry.IsPartial { border-top-color: var(--Foil); }
+.LegEntry.IsLostHere { border-top-color: var(--NoGo); }
+.LegEntry.IsNotFlown { border-top-style: dashed; }
+.LegDate { font-size: 0.85rem; color: var(--Muted); }
+.LegEvent { display: grid; gap: 1px; }
+.LegEvent + .LegEvent { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--Line); }
+.LegName { font-weight: 600; font-size: 1.02rem; overflow-wrap: anywhere; }
+.LegName.IsQuiet { font-weight: 400; color: var(--Muted); }
+.LegState { font-size: 0.85rem; color: var(--Muted); }
+.LegEntry.IsComplete .LegState { color: var(--Go); }
+.LegPoints { font-size: 1.15rem; font-weight: 700; color: var(--Foil); margin-top: 2px; }
+.LegLost { font-size: 0.88rem; font-weight: 600; color: var(--NoGo); }
+.DebriefActions { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin: 0 -18px; padding: 12px 18px; border-top: 1px solid var(--Line); }
 .DebriefActions .Primary { margin-left: 6px; }
 
 .LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px var(--Gutter) 18px; }

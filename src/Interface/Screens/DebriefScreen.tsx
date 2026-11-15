@@ -49,13 +49,6 @@ export function DebriefScreen() {
         {lost && report.loss && (
           <p className="LossWhy">{wording.t(report.loss.hadActiveShield ? 'Debrief.LossShield' : 'Debrief.LossBare', { radiation: report.loss.radiation, shielding: report.loss.shielding })}</p>
         )}
-        <RankBadge from={summary.lifetimeBefore} />
-        {rankUps.map((rank) => (
-          <div key={rank} className="RankUp">
-            <p className="RankUpTitle">{wording.t('Debrief.RankUp', { rank, title: wording.t(`Rank.${rank}`) })}</p>
-            <p className="Muted">{wording.t('Debrief.Unlocked')} {Rank.unlocksAt(rank).map((unlock) => unlockText(unlock, wording)).join(', ')}</p>
-          </div>
-        ))}
       </section>
 
       <section className="Panel DebriefMissed">
@@ -74,28 +67,56 @@ export function DebriefScreen() {
         )}
       </section>
 
-      <section className="Panel DebriefFlight">
-        <h2>{wording.t('Debrief.Encounters')}</h2>
-        <ol className="EncounterList">
-          {report.encounters.map((encounter, index) => {
-            const event = week.event(encounter.eventId)
+      <section className="Panel DebriefRank">
+        <RankBadge from={summary.lifetimeBefore} />
+        {rankUps.map((rank) => (
+          <div key={rank} className="RankUp">
+            <p className="RankUpTitle">{wording.t('Debrief.RankUp', { rank, title: wording.t(`Rank.${rank}`) })}</p>
+            <p className="Muted">{wording.t('Debrief.Unlocked')} {Rank.unlocksAt(rank).map((unlock) => unlockText(unlock, wording)).join(', ')}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="Panel DebriefLog">
+        <h2>{wording.t('Debrief.Log')}</h2>
+        <ol className="LegLog">
+          {week.legs.map((leg, legIndex) => {
+            const met = report.encounters.filter((encounter) => encounter.legIndex === legIndex)
+            const flown = legIndex < report.legsFlown
+            const lostHere = lost && report.loss?.legIndex === legIndex
+            const tone = lostHere ? 'IsLostHere' : !flown ? 'IsNotFlown' : met.some((encounter) => encounter.complete) ? 'IsComplete' : met.some((encounter) => encounter.anyRecorded) ? 'IsPartial' : ''
             return (
-              <li key={index}>
-                <span className="Muted">{wording.dayRange(week.legs[encounter.legIndex].window.startUtc, week.legs[encounter.legIndex].window.endUtc)}</span>
-                <span>{event ? wording.text(event.label) : encounter.eventId}</span>
-                <span className={encounter.complete ? 'IsComplete' : 'Muted'}>{encounter.complete ? wording.t('Result.Complete') : encounter.anyRecorded ? '' : wording.t('Result.Nothing')}</span>
-                <strong>{wording.t('Result.Points', { points: encounter.points })}</strong>
+              <li key={legIndex} className={`LegEntry ${tone}`}>
+                <p className="LegDate">{wording.dayRange(leg.window.startUtc, leg.window.endUtc)}</p>
+                {met.map((encounter, at) => {
+                  const event = week.event(encounter.eventId)
+                  const full = event ? [...event.channels].filter(([channel, spec]) => (encounter.recorded.get(channel) ?? 0) >= spec.capacity).length : 0
+                  return (
+                    <div key={at} className="LegEvent">
+                      <p className="LegName">{event ? wording.text(event.label) : encounter.eventId}</p>
+                      <p className="LegState">
+                        {encounter.complete
+                          ? wording.t('Result.Complete')
+                          : encounter.anyRecorded && event
+                            ? wording.t('Debrief.Channels', { full, total: event.channels.size })
+                            : wording.t('Result.Nothing')}
+                      </p>
+                      <p className="LegPoints">{wording.t('Result.Points', { points: encounter.points })}</p>
+                    </div>
+                  )
+                })}
+                {met.length === 0 && <p className="LegName IsQuiet">{flown ? wording.t('Debrief.Held') : wording.t('Debrief.NotFlown')}</p>}
+                {lostHere && <p className="LegLost">{wording.t('Debrief.LostHere')}</p>}
               </li>
             )
           })}
         </ol>
+        <footer className="DebriefActions">
+          <button type="button" className="Quiet" onClick={() => go(Screen.Home)}>{wording.t('Debrief.Home')}</button>
+          <button type="button" onClick={() => pickWeek(summary.weekId)}>{wording.t('Debrief.Again')}</button>
+          <button type="button" className="Primary IsLarge" onClick={() => go(Screen.Lab)}>{wording.t('Debrief.GoLab')}</button>
+        </footer>
       </section>
-
-      <footer className="DebriefActions">
-        <button type="button" className="Quiet" onClick={() => go(Screen.Home)}>{wording.t('Debrief.Home')}</button>
-        <button type="button" onClick={() => pickWeek(summary.weekId)}>{wording.t('Debrief.Again')}</button>
-        <button type="button" className="Primary IsLarge" onClick={() => go(Screen.Lab)}>{wording.t('Debrief.GoLab')}</button>
-      </footer>
     </main>
   )
 }
