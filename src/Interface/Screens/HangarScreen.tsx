@@ -20,8 +20,8 @@ const WantedShare = 0.12
 
 function shortText(card: ModuleCard, mark: Mark, bayLeft: number, budgetLeft: number, t: (key: string, params?: Record<string, string | number>) => string): string | undefined {
   const spec = card.mark(mark)
-  const bay = Math.max(0, spec.bayUnits - Math.max(0, bayLeft))
-  const budget = Math.max(0, spec.costMusd - Math.max(0, budgetLeft))
+  const bay = Math.max(0, spec.bayUnits - bayLeft)
+  const budget = Math.max(0, spec.costMusd - budgetLeft)
   if (bay > 0 && budget > 0) return t('Hangar.NeedsBoth', { bay, budget })
   if (bay > 0) return t('Hangar.NeedsBay', { bay })
   if (budget > 0) return t('Hangar.NeedsBudget', { budget })

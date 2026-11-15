@@ -2,7 +2,8 @@ import { spawn } from 'node:child_process'
 import { mkdir, writeFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const [width, height, outDir, only] = [Number(process.argv[2] ?? 1440), Number(process.argv[3] ?? 900), process.argv[4] ?? 'out', process.argv[5]]
+const [width, height, outDir, only] = [Number(process.argv[2] ?? 1440), Number(process.argv[3] ?? 900), process.argv[4] ?? 'out', process.argv[5] || undefined]
+const baseUrl = process.argv[6] || process.env.CaptureUrl || 'http://localhost:5173/'
 const port = 9333 + Math.floor(Math.random() * 500)
 const profile = join(outDir, '.profile')
 await rm(profile, { recursive: true, force: true })
@@ -39,17 +40,21 @@ const shot = async (name) => {
 const helpers = `const wait = (ms) => new Promise(r => setTimeout(r, ms)); const btn = (text) => [...document.querySelectorAll('button')].find(b => b.textContent.trim().includes(text) && !b.disabled);`
 await send('Page.enable')
 await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false })
-await send('Page.navigate', { url: 'http://localhost:5173/' })
+await send('Page.navigate', { url: baseUrl })
 await sleep(6000)
 const steps = [
   ['1-Home', ''],
   ['2-Week', `btn('Fly a mission').click(); await wait(2500);`],
   ['3-Hangar', `btn('Build for this week').click(); await wait(2500);`],
+  ['3b-HangarOverBay', `btn('Add a second').click(); await wait(600);`],
+  ['3c-HangarBack', `document.querySelector('.ModuleRow.IsFitted .ModuleControls .Quiet').click(); await wait(600);`],
   ['4-Scanner', `btn('Launch').click(); await wait(2500);`],
   ['5-Encounter', `btn('Approach').click(); await wait(1500); document.querySelector('.ActionCard:not(.IsIdle)')?.click(); await wait(600);`],
   ['6-Result', `let g = 0; while (btn('End turn') && g++ < 8) { document.querySelectorAll('.ActionCard:not(.IsIdle):not(.IsOn):not(:disabled)').forEach(c => c.click()); await wait(80); btn('End turn')?.click(); await wait(150) } await wait(600);`],
   ['7-Debrief', `let g = 0; while (!btn('See the debrief') && g++ < 150) { if (btn('End turn')) { document.querySelectorAll('.ActionCard:not(.IsIdle):not(.IsOn):not(:disabled)').forEach(c => c.click()); await wait(40); btn('End turn')?.click() } else if (btn('Continue')) btn('Continue').click(); else if (btn('Approach')) btn('Approach').click(); else if (btn('Hold and recharge')) btn('Hold and recharge').click(); await wait(60) } btn('See the debrief')?.click(); await wait(2500);`],
   ['8-Lab', `btn('Go to the lab').click(); await wait(2500);`],
+  ['9-LabBought', `btn('Unlock Mk I: 90')?.click(); await wait(1000);`],
+  ['10-HangarAfterLab', `btn('Fly a mission').click(); await wait(2500); btn('Build for this week').click(); await wait(2500); document.querySelector('.ModuleRow.IsShort')?.scrollIntoView({ block: 'center' }); await wait(400);`],
 ]
 for (const [name, script] of steps) {
   if (script) await evaluate(helpers + script)

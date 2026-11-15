@@ -165,7 +165,7 @@
   "Hangar.NeedsBoth": "Needs {bay} more bay and ${budget}M more: remove a module first",
   "Hangar.BayFull": "Bay full. To fit another module, remove one first.",
   "Issue.OverBudget": "Over budget by ${amount}M",
-  "Issue.OverBay": "{amount} bay units too many",
+  "Issue.OverBay": "Over bay space by {amount}",
   "Issue.NotOwned": "A fitted module is not unlocked",
   "Issue.TooManyCopies": "Too many of one module",
   "Issue.NoInstrument": "Fit at least one instrument",
