@@ -18,6 +18,8 @@ export interface LoadoutScore {
 }
 
 export class LoadoutSearch {
+  static readonly directLimit = 80
+
   constructor(
     private readonly owner: Ownership,
     private readonly catalog: ModuleCatalog = ModuleCatalog.shared,
@@ -89,6 +91,15 @@ export class LoadoutSearch {
       if (report.survived) completed += 1
     }
     return { loadout, mean: total / seeds.length, completed: completed / seeds.length }
+  }
+
+  static shortlisted(candidates: readonly Loadout[], bot: FlightBot, scout: FlightBot, week: Week, seeds: readonly number[], shortlist: number, options: EngineOptions = {}): Loadout {
+    const scouted = candidates.length <= LoadoutSearch.directLimit || scout === bot ? candidates : candidates
+      .map((loadout) => LoadoutSearch.evaluate(scout, loadout, week, seeds, options))
+      .sort((a, b) => b.mean - a.mean)
+      .slice(0, shortlist)
+      .map((score) => score.loadout)
+    return scouted.map((loadout) => LoadoutSearch.evaluate(bot, loadout, week, seeds, options)).sort((a, b) => b.mean - a.mean)[0].loadout
   }
 
   best(bot: FlightBot, bus: Bus, week: Week, seeds: readonly number[], options: EngineOptions = {}, include?: (card: ModuleCard) => boolean, cooldowns = false): LoadoutScore[] {

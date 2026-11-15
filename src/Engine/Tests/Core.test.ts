@@ -91,7 +91,7 @@ describe('Tables match the spec', () => {
     expect(row('RadiationShielding')).toEqual({ rank: 1, power: 0, cost: [5, 9, 15], bay: [1, 2, 3], value: [1, 2, 3], unlock: [0, 80, 240] })
     expect(row('MagneticShield')).toEqual({ rank: 1, power: 4, cost: [12, 20, 32], bay: [2, 2, 3], value: [6, 9, 13], unlock: [70, 150, 380] })
     expect(row('FlightComputer')).toEqual({ rank: 1, power: 0, cost: [6, 10, 16], bay: [1, 1, 1], value: [1, 2, Number.POSITIVE_INFINITY], unlock: [40, 100, 240] })
-    expect(row('Thrusters')).toEqual({ rank: 2, power: 2, cost: [10, 16, 26], bay: [2, 2, 3], value: [2, 3, 4], unlock: [100, 180, 400] })
+    expect(row('Thrusters')).toEqual({ rank: 2, power: 2, cost: [10, 16, 26], bay: [1, 1, 2], value: [2, 3, 4], unlock: [100, 180, 400] })
     expect(row('Antenna')).toEqual({ rank: 3, power: 0, cost: [8, 14, 22], bay: [1, 2, 2], value: [1.1, 1.2, 1.35], unlock: [120, 220, 460] })
     expect(row('RepairDrone')).toEqual({ rank: 3, power: 3, cost: [9, 15, 24], bay: [1, 1, 2], value: [6, 9, 12], unlock: [110, 200, 420] })
   })

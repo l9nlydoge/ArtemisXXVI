@@ -6,10 +6,13 @@ import type { FlightBot } from '../Bots/FlightBot'
 import { GreedyBot } from '../Bots/GreedyBot'
 import { LoadoutSearch, type LoadoutScore } from '../Bots/LoadoutSearch'
 import { PlannerBot } from '../Bots/PlannerBot'
+import { PurchaseStudy } from '../Bots/PurchaseStudy'
 import { Flight } from '../Flight/Flight'
 import type { FlightReport } from '../Flight/FlightReport'
 import type { Mark } from '../Modules/MarkSpec'
 import { ModuleCatalog } from '../Modules/ModuleCatalog'
+import { Profile } from '../Progress/Profile'
+import { Rank } from '../Progress/Rank'
 import type { Ownership } from '../Spacecraft/LoadoutIssue'
 import { BusCatalog } from '../Spacecraft/BusCatalog'
 import { Loadout } from '../Spacecraft/Loadout'
@@ -39,7 +42,7 @@ function everyMarkOne(rank: number): Ownership {
 const searches: Record<string, { busId: string; rank: number }> = {
   JulyNineteen: { busId: 'SmallSat', rank: 1 },
   AutumnTwentyTwo: { busId: 'SmallSat', rank: 2 },
-  MayTwentyFour: { busId: 'Explorer', rank: 4 },
+  MayTwentyFour: { busId: 'Explorer', rank: 3 },
 }
 const ranked: Record<string, LoadoutScore[]> = {}
 
@@ -130,10 +133,10 @@ describe('Balance on the real weeks (spec 13.2, as adjusted in GameDesign.md)', 
     }
   })
 
-  test('B7: a player following the greedy bot reaches rank 2 within 2 flights and rank 3 within 5', () => {
-    const log = new Campaign(greedy, { flights: 5, seed: 7, searchSeeds: [1, 2], priorities: Campaign.defaultPriorities, weekChoice: Campaign.newestWeek }, WeekCatalog.shared).run()
+  test('B7: a player following the greedy bot reaches rank 2 within 2 flights and rank 3 within 3', () => {
+    const log = new Campaign(greedy, { flights: 3, seed: 7, searchSeeds: [1, 2], priorities: Campaign.defaultPriorities, weekChoice: Campaign.newestWeek }, WeekCatalog.shared).run()
     expect(log[1].rank).toBeGreaterThanOrEqual(2)
-    expect(log[4].rank).toBeGreaterThanOrEqual(3)
+    expect(log[2].rank).toBeGreaterThanOrEqual(3)
   })
 
   test('B8: every module the lab sells by rank 2 appears in some week\'s top five loadouts', () => {
@@ -151,4 +154,53 @@ describe('Balance on the real weeks (spec 13.2, as adjusted in GameDesign.md)', 
     }
     expect(bestFlown(greedy, starterAnd('Radar'), 'AutumnTwentyTwo')).toBeGreaterThan(bestFlown(greedy, starterAnd(''), 'AutumnTwentyTwo') * 1.15)
   })
+
+  test('B10: the second week opens after one flight, and the storm week by the third flight for a careful player and the fourth for a careless one, on a spacecraft that can survive it', () => {
+    const may = week('MayTwentyFour')
+    const autumn = week('AutumnTwentyTwo')
+    expect(BusCatalog.shared.largestFor(may.minRank).id).toBe('Explorer')
+    const planner = new PlannerBot()
+    const settings = { flights: 2, searchSeeds: [1, 2, 3], priorities: Campaign.carefulPriorities, weekChoice: Campaign.newestShieldedWeek, scout: cautious }
+    const careful = [1, 2, 3].map((seed) => new Campaign(planner, { ...settings, seed }, WeekCatalog.shared))
+    const logs = careful.map((campaign) => campaign.run())
+    for (const log of logs) {
+      expect(log[0].rank).toBeGreaterThanOrEqual(autumn.minRank)
+      expect(log[1].rank).toBeGreaterThanOrEqual(may.minRank)
+      expect(log[1].profile.owns('MagneticShield')).toBe(true)
+    }
+    const careless = [3, 4].map((seed) => new Campaign(greedy, { flights: 3, seed, searchSeeds: [1, 2], priorities: Campaign.defaultPriorities, weekChoice: Campaign.newestWeek }, WeekCatalog.shared).run())
+    for (const log of careless) expect(log[2].rank).toBeGreaterThanOrEqual(may.minRank)
+
+    const fit = careful[0].bestLoadout(logs[0][1].profile, may)
+    expect(fit.has('MagneticShield')).toBe(true)
+    const flown = fly(planner, fit, 'MayTwentyFour', 60)
+    expect(completed(flown)).toBeGreaterThanOrEqual(0.75)
+    expect(completed(flown)).toBeLessThan(0.97)
+    expect(completed(fly(greedy, fit, 'MayTwentyFour', 60))).toBeLessThan(completed(flown) - 0.1)
+  }, 30_000)
+
+  test('B11: every purchase offered after the first flight earns a careful player 10% more on a week open to them, or is what survives the storm week that opens next', () => {
+    const planner = new PlannerBot()
+    const study = new PurchaseStudy(planner, cautious, searchSeeds, seeds.slice(0, 40))
+    const starter = Profile.starter().toJson()
+    const afterOne = Profile.fromJson({ ...starter, points: 230, lifetimePoints: 230 })
+    const gains = new Map<string, number>()
+    for (const offer of study.offers(afterOne)) {
+      gains.set(offer.card.id, Math.max(...WeekCatalog.shared.availableAt(afterOne.rank).map((each) => study.value(afterOne, offer.card.id, each).gain)))
+    }
+    const storm = new Set(['MagneticShield', 'FlightComputer'])
+    for (const [id, gain] of gains) if (!storm.has(id)) expect(gain, id).toBeGreaterThanOrEqual(0.1)
+    expect(Math.max(...gains.values())).toBeLessThan(0.4)
+    expect([...gains.values()].filter((gain) => gain >= 0.1).length).toBeGreaterThanOrEqual(3)
+
+    const may = week('MayTwentyFour')
+    expect(may.minRank).toBe(afterOne.rank + 1)
+    const atMay = Profile.fromJson({ ...starter, points: 200, lifetimePoints: Rank.threshold(may.minRank), ownedMarks: { ...starter.ownedMarks, Radar: 1 } })
+    const shield = study.value(atMay, 'MagneticShield', may)
+    expect(shield.without.completed).toBeLessThanOrEqual(0.1)
+    expect(shield.with.completed).toBeGreaterThanOrEqual(0.75)
+    const kit = build('Explorer', [['SolarArray', 1], ['Battery', 1], ['Camera', 1], ['ParticleDetector', 1], ['HighEnergyDetector', 1], ['RadiationShielding', 1], ['MagneticShield', 1]])
+    const withComputer = kit.install(ModuleCatalog.shared.get('FlightComputer'), 1)
+    expect(completed(fly(planner, withComputer, 'MayTwentyFour', 100))).toBeGreaterThanOrEqual(completed(fly(planner, kit, 'MayTwentyFour', 100)) + 0.08)
+  }, 30_000)
 })

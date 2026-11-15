@@ -18,5 +18,5 @@ export class Rules {
   static readonly asteroidsPerLeg = 6
   static readonly asteroidMaxLunar = 20
   static readonly minEventsPerWeek = 8
-  static readonly markRanks = [1, 2, 4] as const
+  static readonly markRanks = [1, 3, 4] as const
 }
