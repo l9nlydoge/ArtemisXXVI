@@ -15,6 +15,7 @@ import { ModuleWording } from '../Cards/ModuleWording'
 import { Meter } from '../Meters/Meter'
 import { ForecastLines } from '../Shared/ForecastLines'
 import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
+import { LaunchCue } from '../Scene/UseLaunch'
 
 const Families = [ModuleFamily.Power, ModuleFamily.Instrument, ModuleFamily.Protection, ModuleFamily.Mobility, ModuleFamily.Utility, ModuleFamily.Crew]
 const WantedShare = 0.12
@@ -191,7 +192,7 @@ export function HangarScreen() {
         </div>
         <footer className="HangarLaunch">
           {issues.length > 0 && <p className="IssueLine">{issues.map((issue) => issueText(issue, (key, params) => wording.t(key, params))).join('. ')}</p>}
-          <button type="button" className="Primary IsLarge" disabled={issues.length > 0} onClick={launch}>{wording.t('Hangar.Launch')}</button>
+          <button type="button" className="Primary IsLarge" disabled={issues.length > 0} onClick={() => { LaunchCue.ask(); launch() }}>{wording.t('Hangar.Launch')}</button>
         </footer>
       </aside>
     </main>

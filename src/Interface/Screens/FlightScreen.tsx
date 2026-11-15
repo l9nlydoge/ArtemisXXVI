@@ -22,6 +22,7 @@ import { useSceneStage } from '../Scene/SceneStage'
 import { useEncounterScene } from '../Scene/UseEncounterScene'
 import { TurnClock, useTurnTimer } from '../Scene/TurnClock'
 import { useTravelBeat, type Travel } from '../Scene/UseTravelBeat'
+import { useLaunch } from '../Scene/UseLaunch'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -347,15 +348,17 @@ export function FlightScreen() {
   const loadout = useGameStore((state) => state.loadout)
   const root = useRef<HTMLElement>(null)
   const encounter = flight?.encounter
+  const firstFlight = useGameStore((state) => state.profile.flights === 0)
   const travel = useTravelBeat(flight)
   const mode = encounter ? SceneMode.Encounter : travel ? SceneMode.Travel : SceneMode.Scanner
   useSceneStage(root, mode, loadout, encounter && !encounter.isOver ? plan.keys : undefined, `${flight?.legIndex}:${flight?.contacts.length}:${mode}`)
+  const inLaunch = useLaunch(flight, firstFlight)
   const endShown = useEncounterScene(flight, plan, tick)
   if (!flight) return null
   const hit = flight.lastOutcome?.incoming ?? 0
 
   return (
-    <main ref={root} className={`FlightScreen ${flight.isStormLeg ? 'IsStormLeg' : ''}`}>
+    <main ref={root} className={`FlightScreen ${flight.isStormLeg ? 'IsStormLeg' : ''} ${inLaunch ? 'IsLaunching' : ''}`}>
       {hit > 0 && <div key={tick} className={`RadiationHit ${hit >= 6 ? 'IsHeavy' : ''}`} aria-hidden="true" />}
       <header className="FlightHead">
         <p className="LegLabel">{wording.t('Flight.Leg', { leg: flight.legIndex + 1, count: Rules.legsPerFlight })}</p>

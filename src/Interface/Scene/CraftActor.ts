@@ -60,8 +60,9 @@ export class CraftActor {
       const reach = Math.max(1, ...this.blueprint.wings.map((wing) => (wing.side === 1 ? wing.box.x + wing.box.w - (hull.x + hull.w) : hull.x - wing.box.x)))
       this.unfoldFrames = Array.from({ length: UnfoldSteps + 1 }, (_, step) => {
         const limit = (reach * step) / UnfoldSteps
-        return SpriteImage.fromPixels(plain, this.crop, (x, _y, owner) => {
-          if (owner !== 'Wing' && owner !== 'Strut') return true
+        return SpriteImage.fromPixels(plain, this.crop, (x, _y, owner, colour) => {
+          const wingLine = owner === null && colour === Colours.CellDeep
+          if (owner !== 'Wing' && owner !== 'Strut' && !wingLine) return true
           const local = x + this.crop.x - OriginX
           const distance = Math.max(hull.x - local, local - (hull.x + hull.w - 1), 0)
           return distance <= limit

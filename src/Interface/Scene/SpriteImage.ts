@@ -10,14 +10,14 @@ export class SpriteImage {
     if (paint) paint(this.canvas.getContext('2d')!)
   }
 
-  static fromPixels(pixels: PixelCanvas, crop = { x: 0, y: 0, w: pixels.width, h: pixels.height }, keep?: (x: number, y: number, owner: string | null) => boolean): SpriteImage {
+  static fromPixels(pixels: PixelCanvas, crop = { x: 0, y: 0, w: pixels.width, h: pixels.height }, keep?: (x: number, y: number, owner: string | null, colour: string) => boolean): SpriteImage {
     return new SpriteImage(crop.w, crop.h, (context) => {
       const image = context.createImageData(crop.w, crop.h)
       for (let y = 0; y < crop.h; y++) {
         for (let x = 0; x < crop.w; x++) {
           const at = (y + crop.y) * pixels.width + x + crop.x
           const colour = pixels.colours[at]
-          if (!colour || (keep && !keep(x, y, pixels.owners[at]))) continue
+          if (!colour || (keep && !keep(x, y, pixels.owners[at], colour))) continue
           const value = parseInt(colour.slice(1), 16)
           const out = (y * crop.w + x) * 4
           image.data[out] = value >> 16

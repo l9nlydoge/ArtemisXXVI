@@ -20,3 +20,8 @@
 .TravelLine { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; padding: 12px 21px; color: var(--Hull4); animation: Arrive 90ms steps(3, end) backwards; }
 .TravelLine strong { font-weight: 400; color: var(--White); }
 .FlightFoot.IsTravel { grid-template-columns: minmax(210px, 258px); }
+.FlightScreen.IsLaunching > * { visibility: hidden; }
+.FlightScreen:not(.IsLaunching) > .FlightHead { animation: Arrive 240ms steps(4, end) backwards; }
+.FlightScreen:not(.IsLaunching) > .FlightFoot { animation: SlideUp 240ms steps(4, end) backwards; }
+@keyframes SlideUp { from { transform: translateY(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .FlightScreen > .FlightHead, .FlightScreen > .FlightFoot { animation: none; } }

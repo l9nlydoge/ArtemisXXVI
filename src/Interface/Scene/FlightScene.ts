@@ -117,7 +117,7 @@ export class FlightScene implements SceneLayer {
     const fresh = !this.lastView || this.lastView.scale !== view.scale || this.lastView.width !== view.width || this.lastView.height !== view.height
     this.lastView = view
     if (fresh) this.placeCraft(true)
-    if (!view.settled && this.sceneMode !== SceneMode.Launch) return
+    if (!view.settled && !this.parts.has('Launch')) return
     const still = MotionPreference.reduced
     for (const part of this.parts.values()) part.paintBack?.(context, view, now, this)
     this.craft.paint(context, now, still)
