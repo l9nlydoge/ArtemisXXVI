@@ -308,7 +308,7 @@ describe('Every event is complete', () => {
     const flags = PlanetList.map((entry) => `${entry.name}|${entry.famous}|${entry.atmosphere}`)
     const rare = RareEvents.all.map((event) => `${event.id}|${event.dateUtc}|${event.sourceUrl}`)
     const checked = [...lines, ...credits, ...sources, ...flags, ...rare].join('\n')
-    expect(SeededRandom.hashText(checked), 'A checked line, credit, source or flag changed. Verify it against its source again, then update this number.').toBe(3768986256)
+    expect(SeededRandom.hashText(checked), 'A checked line, credit, source or flag changed. Verify it against its source again, then update this number.').toBe(3850285133)
   })
 
   test('a hand-written line names the NASA page it was checked against', () => {

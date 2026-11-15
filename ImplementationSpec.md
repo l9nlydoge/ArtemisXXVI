@@ -463,13 +463,15 @@ An asteroid's id is its designation without spaces, for example `2019OK`.
 
 | The pass is | The card says | "What was learned" says |
 |---|---|---|
-| Between the first and last observation | "Observed from 2017-02-21 to 2019-07-25" | its orbit rests on those observations |
+| Between the first and last observation | "NASA/JPL's observations of it run from 2017-02-21 to 2019-07-25" | its orbit rests on those observations. This does not mean it was being watched as it passed: the early date can be an old image found later. |
 | Before the first observation | "First observed 2019-07-26, after this pass" | it passed before anyone had recorded it |
-| After the last observation | "Last observed 2021-05-17. This pass is computed from its orbit" | nobody recorded it going by |
+| After the last observation | "Last observation on record: 2019-07-23. This pass is computed from its orbit" | the pass is computed, with no later observation on record |
 
 Of the 77 asteroids in the three weeks, 32 fall in the first group, 28 in the second and 17 in the third.
 
 **Rough passes are left out.** The service gives a three-sigma uncertainty for the time of each pass and a smallest and largest possible distance. A pass is dropped when its time is uncertain by more than an hour, or when the gap between the largest and smallest distance is more than a quarter of the distance. Fifteen were dropped; the snapshot lists them under `leftOut`. One, 2021 JG9, could have passed anywhere from 0.3 to 51 lunar distances.
+
+**Distances are from the centre of the Earth,** as NASA/JPL gives them, and the card says so. 2024 JT3's 25,753 km is about 19,400 km above the surface.
 
 **Sizes are estimates** and the card says so: "Estimated 58 to 130 m across, from its brightness".
 
@@ -647,8 +649,8 @@ Every source is keyless. No key is used, stored or needed.
 
 Not used:
 
-- **api.nasa.gov (NeoWs and DONKI with a key).** The demo key allows 10 requests and takes about ten hours to clear. It ran out during the first download.
-- **`kauai.ccmc.gsfc.nasa.gov`,** the documented keyless DONKI host. It does not answer from the team's network.
+- **api.nasa.gov (NeoWs and DONKI with a key).** In our use the demo key reported a limit of 10 requests and a wait of over four hours once it ran out, which happened during the first download.
+- **`kauai.ccmc.gsfc.nasa.gov`,** an older keyless DONKI host. It does not answer from the team's network.
 
 The asteroid numbers were compared with NeoWs for the eleven records both had: speed, distance, size and hazard flag agree.
 
@@ -767,14 +769,13 @@ interface SnapshotFile<T> {
 
 ### 7.5 Images
 
-Ten images are in `public/Images/Events/`, about 960 KB in all. Nine are from NASA's Image and Video Library and one from a NASA article. Each was resized to at most 1280 px and looked at before it went in: none carries a logo, insignia or mission patch.
+Nine images are in `public/Images/Events/`, about 850 KB in all. Eight are from NASA's Image and Video Library and one from a NASA article. Each was resized to at most 1280 px and looked at before it went in: none carries a logo, insignia or mission patch.
 
 | File | NASA id | What it shows | Credit | Kind |
 |---|---|---|---|---|
 | AsteroidA | PIA00136 | Asteroid Ida and its moon Dactyl | NASA/JPL | Photograph |
 | AsteroidB | PIA00119 | Asteroid Gaspra | NASA/JPL/USGS | Photograph |
 | AsteroidC | PIA02900 | The saddle of asteroid Eros | NASA/JPL/JHUAPL | Photograph |
-| AsteroidD | PIA00333 | Asteroid Ida in enhanced colour | NASA/JPL/USGS | Photograph |
 | Storm | iss074e0150531 | Aurora from a geomagnetic storm, seen from the ISS, January 2026 | NASA | Photograph |
 | StormSevere | PIA21949 | The X9.3 solar flare of 6 September 2017 | NASA/GSFC/Solar Dynamics Observatory | Telescope image |
 | ExoplanetVisible | PIA21429 | The TRAPPIST-1 planets crossing their star | NASA/JPL-Caltech | Illustration |
@@ -785,6 +786,7 @@ Ten images are in `public/Images/Events/`, about 960 KB in all. Nine are from NA
 - **Most are representative, and say so.** No photograph exists of a 30 m asteroid passing Earth, or of these particular storms. Each image has a caption such as "Representative image: asteroid Gaspra, from NASA's Galileo spacecraft", and the card must show it.
 - **Illustrations are labelled as illustrations.**
 - **`Data/Curated/Images.ts` lists each file** with its NASA id, title, credit, kind, caption key and library page link. The Sources screen reads from it. A test fails if an event wants an image that is not listed, or a file is on disk without a credit.
+- **A fourth asteroid image was dropped** because it has an unexplained inset of a second body.
 - **Two gamma-ray images were dropped:** the first carried a mission logo, and the second turned out to show a star torn apart by a black hole, not an ordinary burst. The one used is NASA's own image of the 2022 burst.
 - **Every image but that one and the DART illustration is representative,** and its caption begins "Representative". A test checks this.
 

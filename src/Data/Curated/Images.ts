@@ -27,7 +27,6 @@ export class Images {
     Images.entry('AsteroidA', 'PIA00136', 'Asteroid Ida and Its Moon', 'NASA/JPL', ImageKind.Photograph, true),
     Images.entry('AsteroidB', 'PIA00119', 'Highest Resolution Gaspra Mosaic', 'NASA/JPL/USGS', ImageKind.Photograph, true),
     Images.entry('AsteroidC', 'PIA02900', 'Back in the Saddle Again', 'NASA/JPL/JHUAPL', ImageKind.Photograph, true),
-    Images.entry('AsteroidD', 'PIA00333', 'Asteroid Ida and its Satellite Dactyl in Enhanced Color', 'NASA/JPL/USGS', ImageKind.Photograph, true),
     Images.entry('Storm', 'iss074e0150531', 'A wispy, multi-colored aurora created by a geomagnetic storm', 'NASA', ImageKind.Photograph, true),
     Images.entry('StormSevere', 'PIA21949', 'Major Solar Flare', 'NASA/GSFC/Solar Dynamics Observatory', ImageKind.TelescopeImage, true),
     Images.entry('ExoplanetVisible', 'PIA21429', 'Transit Illustration of TRAPPIST-1', 'NASA/JPL-Caltech', ImageKind.Illustration, true),

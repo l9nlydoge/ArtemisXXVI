@@ -1,30 +1,285 @@
 :root {
   --Space: #000000;
   --Panel: rgba(7, 9, 12, 0.94);
+  --Plate: #0b0d10;
   --Line: rgba(255, 255, 255, 0.14);
+  --LineStrong: rgba(255, 255, 255, 0.4);
   --Text: #f3f5f6;
   --Muted: #a6b0bb;
   --Foil: #e8a838;
   --Go: #3ecf85;
   --NoGo: #ff5263;
   --Caution: #f2e05a;
-  --Gutter: clamp(16px, 4vw, 56px);
+  --Gutter: clamp(16px, 2.6vw, 40px);
+  --Ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body, #Root { height: 100%; }
-body { background: var(--Space); color: var(--Text); font-family: 'Jost', system-ui, sans-serif; font-size: 17px; line-height: 1.45; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; overflow: hidden; }
-button { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--Foil); outline-offset: 3px; }
-
-.WorldLayer { position: fixed; inset: 0; z-index: 0; }
-.World { width: 100%; height: 100%; display: block; }
-.Interface { position: relative; z-index: 1; height: 100dvh; }
+body { background: var(--Space); color: var(--Text); font-family: 'Jost', 'Futura', 'Century Gothic', sans-serif; font-size: 16px; line-height: 1.4; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; overflow: hidden; }
+ul, ol { list-style: none; }
+h1, h2, h3 { font-weight: 600; line-height: 1.15; }
+h2 { font-size: 1.05rem; }
+h3 { font-size: 1rem; }
+a { color: var(--Text); text-underline-offset: 3px; }
+button { font: inherit; color: inherit; background: none; border: 1px solid var(--Line); border-radius: 2px; padding: 8px 14px; cursor: pointer; transition: border-color 120ms, background-color 120ms, color 120ms; }
+button:hover:not(:disabled) { border-color: var(--LineStrong); }
+button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
+:focus-visible { outline: 2px solid var(--Foil); outline-offset: 2px; }
+.Primary { background: var(--Foil); border-color: var(--Foil); color: #14100a; font-weight: 600; }
+.Primary:hover:not(:disabled) { background: #f4b94e; border-color: #f4b94e; }
+.Primary:disabled { background: transparent; border-color: var(--Line); color: var(--Muted); opacity: 1; }
+.Primary.IsLarge { font-size: 1.15rem; padding: 13px 28px; }
+.Quiet { border-color: transparent; color: var(--Muted); padding-inline: 10px; }
+.Quiet:hover:not(:disabled) { color: var(--Text); border-color: var(--Line); }
 .Muted { color: var(--Muted); }
+.Panel { background: var(--Panel); border: 1px solid var(--Line); border-radius: 2px; }
 
-.HomeScreen { height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(24px, 6vh, 64px) var(--Gutter) 20px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.55) 34%, rgba(0, 0, 0, 0) 60%); }
-.HomeIntro { max-width: 30rem; display: grid; gap: 14px; }
-.HomeIntro h1 { font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.95; }
-.Pitch { font-size: 1.25rem; font-weight: 500; }
-.HomeFooter { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 0.82rem; color: var(--Muted); }
+.WorldLayer { position: fixed; inset: 0; z-index: 0; background: var(--Space); }
+.WorldLayer.IsStill { background: radial-gradient(120% 90% at 78% 60%, #10233f 0%, #050a14 45%, #000000 75%); }
+.World { width: 100%; height: 100% !important; display: block; }
+.Interface { position: relative; z-index: 1; height: 100dvh; }
+.Interface > main { height: 100%; }
+
+.HomeScreen { display: flex; flex-direction: column; justify-content: space-between; padding: clamp(28px, 7vh, 72px) var(--Gutter) 18px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.72) 30%, rgba(0, 0, 0, 0) 58%); }
+.HomeIntro { max-width: 31rem; display: grid; gap: 18px; }
+.HomeIntro h1 { font-size: clamp(3.2rem, 7.4vw, 6.2rem); font-weight: 800; letter-spacing: -0.035em; line-height: 0.92; }
+.Pitch { font-size: 1.3rem; font-weight: 500; line-height: 1.3; max-width: 26rem; }
+.HomeActions { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.HomeFoot { display: grid; gap: 22px; }
+.RankBadge { width: min(100%, 22rem); display: grid; gap: 6px; }
+.RankTitle { display: flex; gap: 10px; align-items: baseline; font-size: 1.15rem; font-weight: 600; }
+.RankNumber { color: var(--Foil); }
+.RankTrack { height: 4px; background: var(--Line); }
+.RankFill { height: 100%; background: var(--Foil); transition: width 600ms var(--Ease); }
+.RankNote, .RankPoints { font-size: 0.9rem; color: var(--Muted); }
+.RankPoints { color: var(--Text); }
+.Credits { display: flex; flex-wrap: wrap; gap: 4px 24px; font-size: 0.78rem; color: var(--Muted); }
+
+.ScreenHead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.ScreenHead h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+.ScreenHead .Quiet { padding: 4px 8px; margin-left: -8px; }
+
+.ForecastLines { display: grid; gap: 3px; font-size: 0.95rem; }
+.ForecastLines li.IsDanger { color: var(--NoGo); font-weight: 600; }
+.ForecastLines li.IsCaution { color: var(--Caution); font-weight: 600; }
+
+.WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 22px var(--Gutter) 26px; }
+.WeekRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: start; }
+.WeekCard { display: grid; grid-template-rows: clamp(120px, 24vh, 210px) 1fr; overflow: hidden; }
+.WeekCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.WeekBody { display: grid; gap: 8px; padding: 16px 18px 18px; align-content: start; }
+.WeekBody h2 { font-size: 1.3rem; }
+.WeekDates { font-size: 0.9rem; color: var(--Muted); }
+.WeekAbout { font-size: 0.95rem; }
+.WeekBody .Primary { justify-self: start; margin-top: 6px; }
+.WeekLogged { font-size: 0.85rem; }
+.WeekCard.IsLocked img { filter: grayscale(1) brightness(0.45); }
+.WeekCard.IsLocked .WeekBody > :not(.WeekLock):not(h2):not(.WeekDates) { color: var(--Muted); }
+.WeekLock { font-weight: 600; color: var(--Muted); margin-top: 6px; }
+
+.HangarScreen { display: grid; grid-template-columns: minmax(300px, 380px) 1fr minmax(380px, 470px); grid-template-rows: auto 1fr; gap: 14px 18px; padding: 18px var(--Gutter) 20px; }
+.HangarScreen .ScreenHead { grid-column: 1 / -1; }
+.HangarLeft { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-height: 0; }
+.HangarForecast, .HangarCraft { padding: 14px 16px; display: grid; gap: 9px; }
+.HangarCraft p { font-size: 0.95rem; }
+.RecordLists { display: grid; gap: 6px; font-size: 0.95rem; }
+.RecordLists dt { color: var(--Muted); font-size: 0.82rem; }
+.RecordLists dd { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+.RecordLists .IsWanted { color: var(--Caution); }
+.RecordLists em { font-style: normal; font-size: 0.85rem; }
+.HangarModules { grid-column: 3; display: grid; grid-template-rows: auto 1fr auto; min-height: 0; }
+.HangarModules > h2 { padding: 12px 16px 8px; }
+.ModuleScroll { overflow-y: auto; padding: 0 16px 8px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; }
+.FamilyName { font-size: 0.82rem; font-weight: 500; color: var(--Muted); padding: 10px 0 2px; }
+.ModuleRow { display: grid; grid-template-columns: 62px 1fr auto; align-items: center; gap: 12px; padding: 9px 0 9px 10px; border-top: 1px solid var(--Line); border-left: 3px solid transparent; }
+.ModuleRow.IsFitted { border-left-color: var(--Foil); background: rgba(232, 168, 56, 0.06); }
+.ModuleRow.IsLocked { color: var(--Muted); }
+.ModuleRow.IsExtra { grid-template-columns: 1fr; padding-block: 2px; border-top: 0; }
+.ModuleRow.IsExtra button { justify-self: start; font-size: 0.88rem; }
+.ModuleDrawing { width: 62px; height: 38px; color: var(--Text); opacity: 0.85; }
+.IsLocked .ModuleDrawing { opacity: 0.35; }
+.ModuleMain { min-width: 0; display: grid; gap: 1px; }
+.ModuleEffect { font-size: 0.88rem; color: var(--Muted); }
+.ModuleStats { display: flex; gap: 12px; font-size: 0.84rem; }
+.ModuleControls { display: grid; gap: 2px; justify-items: end; }
+.ModuleControls .Quiet { font-size: 0.82rem; padding: 2px 6px; }
+.MarkStepper { display: flex; }
+.MarkStepper button { min-width: 34px; padding: 5px 8px; border-radius: 0; margin-left: -1px; font-weight: 600; letter-spacing: 0.08em; }
+.MarkStepper button[aria-pressed='true'] { background: var(--Foil); border-color: var(--Foil); color: #14100a; position: relative; }
+.HangarLaunch { display: flex; align-items: center; justify-content: flex-end; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--Line); }
+.IssueLine { color: var(--NoGo); font-size: 0.92rem; font-weight: 500; }
+
+.Meter { display: grid; gap: 4px; }
+.MeterHead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.92rem; }
+.MeterLabel { color: var(--Muted); }
+.MeterText { font-weight: 600; }
+.MeterTrack { position: relative; height: 6px; background: var(--Line); }
+.MeterFill, .MeterGhost { position: absolute; inset: 0 auto 0 0; transition: width 240ms var(--Ease); }
+.MeterFill { background: var(--Text); }
+.MeterGhost { background: var(--LineStrong); }
+.Meter.IsFoil .MeterFill { background: var(--Foil); }
+.Meter.IsGood .MeterFill { background: var(--Go); }
+.Meter.IsDanger .MeterFill { background: var(--NoGo); }
+.Meter.IsDanger .MeterText { color: var(--NoGo); }
+.MeterNote { font-size: 0.82rem; color: var(--Muted); }
+
+.FlightScreen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; padding: 14px var(--Gutter) 16px; position: relative; }
+.FlightHead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 22px; }
+.LegLabel { font-size: 1.15rem; font-weight: 700; }
+.FlightPoints { font-size: 1.15rem; font-weight: 700; color: var(--Foil); }
+.FlightTrack { display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+.TrackLeg { position: relative; display: grid; justify-items: center; gap: 3px; font-size: 0.8rem; color: var(--Muted); padding-top: 14px; }
+.TrackLeg::before { content: ''; position: absolute; top: 4px; left: 0; right: 0; height: 1px; background: var(--Line); }
+.TrackLeg:first-child::before { left: 50%; }
+.TrackLeg:last-child::before { right: 50%; }
+.TrackDot { position: absolute; top: 0; width: 9px; height: 9px; border: 1px solid var(--LineStrong); background: var(--Space); }
+.TrackLeg.IsDone .TrackDot { background: var(--Muted); border-color: var(--Muted); }
+.TrackLeg.IsNow { color: var(--Text); font-weight: 600; }
+.TrackLeg.IsNow .TrackDot { background: var(--Foil); border-color: var(--Foil); transform: scale(1.35); }
+.TrackStorm { font-size: 0.74rem; font-weight: 600; color: var(--Caution); }
+.TrackLeg.IsSevere .TrackStorm { color: var(--NoGo); }
+.TrackLeg.IsStorm .TrackDot { border-color: var(--Caution); }
+.TrackLeg.IsSevere .TrackDot { border-color: var(--NoGo); }
+
+.ScannerView { display: grid; grid-template-rows: auto 1fr; gap: 10px; min-height: 0; }
+.ViewTitle { font-size: 1rem; font-weight: 500; color: var(--Muted); }
+.ContactRow { display: flex; justify-content: center; align-items: start; gap: 16px; min-height: 0; }
+.ContactCard { width: min(100%, 390px); display: grid; grid-template-rows: auto 1fr; max-height: 100%; overflow: hidden; }
+.ContactRow[data-count="3"] .ContactCard { width: min(100%, 360px); }
+.ContactBody { display: grid; gap: 7px; padding: 12px 14px 14px; align-content: start; overflow-y: auto; scrollbar-width: thin; }
+.ContactBody h2 { font-size: 1.2rem; }
+.ContactBody .Primary { justify-self: start; margin-top: 4px; }
+.ContactMeta { font-size: 0.88rem; color: var(--Muted); }
+.ContactBand { font-size: 0.9rem; font-weight: 600; color: var(--Caution); }
+.ContactBand.IsSevere, .ContactBand.IsHigh { color: var(--NoGo); }
+.ContactPoints { font-size: 0.9rem; }
+.ContactCard.IsPlayed { opacity: 0.55; }
+.UnknownField { height: clamp(84px, 15vh, 130px); background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 5px), radial-gradient(60% 90% at 50% 50%, rgba(255, 255, 255, 0.1), transparent 70%); border-bottom: 1px solid var(--Line); }
+.EmptyNote { padding: 16px; justify-self: center; }
+.FactList { display: grid; gap: 2px; font-size: 0.9rem; }
+
+.EventPhoto { display: grid; }
+.EventPhoto img { width: 100%; height: clamp(120px, 24vh, 230px); object-fit: cover; display: block; background: #000000; }
+.EventPhoto.IsCompact img { height: clamp(84px, 15vh, 130px); }
+.EventPhoto figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 5px 14px; font-size: 0.72rem; line-height: 1.3; color: var(--Muted); border-bottom: 1px solid var(--Line); }
+.EventPhoto .Credit { text-align: right; flex: none; max-width: 45%; }
+
+.ChannelBars { display: grid; gap: 6px; }
+.ChannelBar { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 0.88rem; }
+.ChannelAmount { font-weight: 600; }
+.ChannelTrack { grid-column: 1 / -1; position: relative; height: 5px; background: var(--Line); }
+.ChannelFill, .ChannelPending { position: absolute; inset: 0 auto 0 0; transition: width 240ms var(--Ease); }
+.ChannelFill { background: var(--Text); }
+.ChannelPending { background: var(--Foil); }
+.ChannelBar.IsFull .ChannelFill { background: var(--Go); }
+.ChannelBar.IsClosed { color: var(--Muted); }
+.ChannelBar.IsClosed .ChannelAmount { font-weight: 400; font-size: 0.82rem; }
+.ChannelBar.IsClosed .ChannelTrack { background: repeating-linear-gradient(90deg, var(--Line) 0 4px, transparent 4px 8px); }
+
+.EncounterView { display: grid; grid-template-columns: minmax(300px, 400px) 1fr minmax(250px, 310px); gap: 16px; min-height: 0; align-items: start; }
+.EventCard { grid-column: 1; display: grid; grid-template-rows: auto 1fr; max-height: 100%; overflow: hidden; }
+.EventBody { display: grid; gap: 8px; padding: 12px 14px 14px; overflow-y: auto; scrollbar-width: thin; align-content: start; }
+.EventBody h1 { font-size: 1.35rem; font-weight: 700; }
+.TurnTrack { grid-column: 3; display: grid; gap: 0; }
+.TurnCell { display: grid; grid-template-columns: auto 1fr; gap: 1px 12px; padding: 8px 12px; border-left: 3px solid transparent; font-size: 0.86rem; color: var(--Muted); }
+.TurnCell + .TurnCell { border-top: 1px solid var(--Line); }
+.TurnNumber { grid-row: span 3; font-weight: 600; min-width: 3.4rem; }
+.TurnCell.IsNow { border-left-color: var(--Foil); color: var(--Text); background: rgba(232, 168, 56, 0.07); }
+.TurnCell.IsPast { opacity: 0.5; }
+.TurnCell.IsNow .TurnSignal { font-weight: 600; }
+.TurnRadiation { color: var(--NoGo); font-weight: 600; }
+.TurnShadow { color: var(--Caution); }
+.TurnUnknown { grid-row: span 3; align-self: center; }
+.TurnHint { padding: 8px 12px; font-size: 0.8rem; color: var(--Muted); border-top: 1px solid var(--Line); }
+
+.FlightFoot { display: grid; grid-template-columns: minmax(200px, 250px) 1fr; align-items: center; gap: 18px; padding: 12px 16px; }
+.FlightFoot.IsEncounter { grid-template-columns: minmax(200px, 250px) 1fr auto; }
+.StatusMeters { display: grid; gap: 10px; }
+.FootActions { display: flex; justify-content: flex-end; gap: 10px; }
+.ActionRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.ActionCard { position: relative; width: 148px; display: grid; gap: 1px; justify-items: start; text-align: left; padding: 8px 10px 9px; background: var(--Plate); border-left-width: 3px; transition: transform 120ms var(--Ease), border-color 120ms, background-color 120ms; }
+.ActionCard .ModuleDrawing { width: 54px; height: 32px; }
+.ActionKey { position: absolute; top: 6px; right: 8px; font-size: 0.74rem; color: var(--Muted); }
+.ActionName { font-size: 0.9rem; font-weight: 600; line-height: 1.15; }
+.ActionMark { font-weight: 400; color: var(--Muted); }
+.ActionCost { font-size: 0.8rem; color: var(--Muted); }
+.ActionUse { font-size: 0.86rem; }
+.ActionCard.IsIdle .ActionUse { color: var(--Muted); }
+.ActionCard.IsOn { border-color: var(--Foil); background: rgba(232, 168, 56, 0.12); transform: translateY(-4px); }
+.ActionCard.IsOn .ActionCost { color: var(--Foil); }
+.TurnCommit { display: grid; gap: 8px; justify-items: end; max-width: 260px; }
+.PreviewLine { font-size: 0.9rem; text-align: right; }
+.PreviewLine .IsDamage { color: var(--NoGo); font-weight: 600; }
+.PreviewLine.IsLethal strong { display: block; color: var(--NoGo); }
+.ResultStrip { grid-column: 2 / -1; display: grid; grid-template-columns: auto 1fr auto; gap: 4px 18px; align-items: center; }
+.ResultPoints { font-size: 1.5rem; font-weight: 700; color: var(--Foil); grid-row: span 2; }
+.ResultState { font-weight: 600; }
+.ResultLearned { grid-column: 2; font-size: 0.9rem; color: var(--Muted); max-width: 46rem; }
+.ResultActions { grid-column: 3; grid-row: 1 / span 2; display: flex; gap: 8px; align-items: center; }
+.FlightEnd { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; gap: 10px; justify-items: center; padding: 26px 40px; text-align: center; }
+.FlightEnd h2 { font-size: 1.6rem; }
+
+.ContactCard { animation: Deal 420ms var(--Ease) backwards; }
+.ContactCard:nth-child(2) { animation-delay: 110ms; }
+.ContactCard:nth-child(3) { animation-delay: 220ms; }
+.EventCard, .TurnTrack { animation: Arrive 360ms var(--Ease) backwards; }
+.TurnTrack { animation-delay: 120ms; }
+.ResultStrip { animation: Arrive 300ms var(--Ease) backwards; }
+.FlightEnd { animation: Arrive 360ms var(--Ease) backwards; }
+.FlightScreen.IsStormLeg { box-shadow: inset 0 3px 0 var(--NoGo); }
+.RadiationHit { position: fixed; inset: 0; z-index: 3; pointer-events: none; animation: Hit 700ms ease-out forwards; background: repeating-linear-gradient(112deg, transparent 0 46px, rgba(255, 82, 99, 0.16) 46px 48px), radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(255, 82, 99, 0.3) 100%); }
+.RadiationHit.IsHeavy { background: repeating-linear-gradient(112deg, transparent 0 30px, rgba(255, 82, 99, 0.26) 30px 33px), radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(255, 82, 99, 0.48) 100%); }
+@keyframes Deal { from { opacity: 0; transform: translateY(22px); } }
+@keyframes Arrive { from { opacity: 0; transform: translateY(8px); } }
+@keyframes Hit { 0% { opacity: 0; background-position: 0 0, 0 0; } 12% { opacity: 1; } 100% { opacity: 0; background-position: 90px 0, 0 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .RadiationHit { display: none; }
+  * { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+  .ActionCard.IsOn { transform: none; }
+}
+
+.DebriefScreen { display: grid; grid-template-columns: minmax(340px, 460px) minmax(0, 560px); grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px 18px; padding: 22px var(--Gutter) 20px; align-content: start; }
+.DebriefVerdict { grid-row: 1 / span 2; align-self: start; padding: 20px 22px; display: grid; gap: 10px; border-top: 3px solid var(--Go); }
+.DebriefVerdict.IsLost { border-top-color: var(--NoGo); }
+.DebriefVerdict h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+.BankedPoints { font-size: 1.3rem; font-weight: 600; color: var(--Foil); }
+.LossWhy { color: var(--NoGo); }
+.DebriefVerdict .RankBadge { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--Line); width: 100%; }
+.RankUp { padding: 10px 12px; border: 1px solid var(--Foil); display: grid; gap: 2px; }
+.RankUpTitle { font-weight: 700; color: var(--Foil); }
+.DebriefMissed, .DebriefFlight { padding: 14px 18px; display: grid; gap: 8px; align-content: start; min-height: 0; }
+.DebriefFlight { overflow-y: auto; scrollbar-width: thin; align-self: start; max-height: 100%; }
+.MissList { display: grid; gap: 6px; }
+.MissList button { white-space: nowrap; }
+.MissList li { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 0.95rem; color: var(--Muted); }
+.MissList li.IsBiggest { font-size: 1.1rem; font-weight: 600; color: var(--Text); }
+.EncounterList { display: grid; }
+.EncounterList li { display: grid; grid-template-columns: 6.4rem 1fr auto auto; gap: 12px; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--Line); font-size: 0.93rem; }
+.EncounterList li:first-child { border-top: 0; }
+.IsComplete { color: var(--Go); font-size: 0.85rem; }
+.DebriefActions { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; }
+.DebriefActions .Primary { margin-left: 6px; }
+
+.LabScreen { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 14px; padding: 18px var(--Gutter) 18px; }
+.LabHead .LabPoints { font-size: 1.1rem; font-weight: 600; color: var(--Foil); margin-left: auto; }
+.LabBody { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; min-height: 0; }
+.LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 16px; }
+.LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; display: grid; gap: 6px; align-content: start; }
+.OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.OfferFamily { font-size: 0.74rem; color: var(--Muted); }
+.OfferCard { display: grid; grid-template-rows: auto auto auto 1fr auto auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
+.OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.OfferCard h3 { font-size: 1.02rem; }
+.OwnedMark { font-size: 0.78rem; color: var(--Muted); white-space: nowrap; }
+.OfferCard .ModuleDrawing { width: 100%; height: 46px; margin: 2px 0; }
+.OfferEffect { font-size: 0.88rem; }
+.OfferMark { font-weight: 700; }
+.OfferCard footer { padding-top: 6px; border-top: 1px solid var(--Line); font-size: 0.86rem; min-height: 2.5rem; display: flex; align-items: center; }
+.OfferCard .Primary { width: 100%; font-size: 0.9rem; padding: 7px 8px; }
+.OfferCard.IsRankLocked, .OfferCard.IsInDevelopment { color: var(--Muted); }
+.OfferCard.IsRankLocked .ModuleDrawing, .OfferCard.IsInDevelopment .ModuleDrawing { opacity: 0.35; }
+.OfferCard.IsTop { border-color: var(--Foil); }
+.IsMaxed { color: var(--Foil); font-weight: 600; }
