@@ -7,12 +7,11 @@ import { Shot } from '../Kit/Timeline'
 
 export const Found = Beat.at(2)
 
-const Hero = { x: 1360, y: 760, scale: 12 }
+const Panel = { x: 160, y: 520, w: 880, h: 360 }
 
 export class DebriefShot extends Shot {
   private ghost?: HTMLCanvasElement
   private bright?: HTMLCanvasElement
-  private flash?: HTMLCanvasElement
 
   draw(context: CanvasRenderingContext2D, t: number) {
     context.fillStyle = Palette.Space0
@@ -21,42 +20,45 @@ export class DebriefShot extends Shot {
     for (let y = 40; y < 1080; y += 40) for (let x = 40; x < 1920; x += 40) context.fillRect(x, y, 4, 4)
     Type.reveal(context, 'Find out what you', 160, 250, t - 0.05, { size: 160 })
     Type.reveal(context, 'should have packed.', 160, 400, t - Beat.at(1), { size: 160, colour: Palette.Foil3 })
-    this.hero(context, t - Found)
-  }
-
-  private sprites() {
-    const sprite = Assets.modules.get('Radar')!
-    const source = new SpriteImage(32, 20, (c) => c.drawImage(sprite, 0, 0))
-    this.ghost = SpriteImage.silhouette(source, Palette.Hull1).canvas
-    const bright = SpriteImage.withOutline(source, Palette.Foil3)
-    this.bright = bright.canvas
-    this.flash = SpriteImage.silhouette(bright, Palette.White).canvas
+    this.panel(context, t)
   }
 
   private hero(context: CanvasRenderingContext2D, since: number) {
-    if (!this.ghost) this.sprites()
-    const { x, y, scale } = Hero
-    const w = 32 * scale
-    const h = 20 * scale
-    const frame = Math.floor(since * Fps)
-    this.slot(context, x - w / 2 - 36, y - h / 2 - 36, w + 72, h + 72, since < 0 ? Palette.Hull2 : frame < 3 ? Palette.White : Palette.Foil1)
+    const x = 1460
+    const y = 700
+    const scale = 12
     if (since < 0) {
-      Pixels.blit(context, this.ghost!, x, y, scale)
+      Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(32, 20, (c) => c.drawImage(this.ghost!, 0, 0)), Palette.Hull1).canvas, x, y, scale)
       return
     }
-    const lift = [36, 12, 0][Math.min(2, frame)]
-    Pixels.blit(context, frame < 2 ? this.flash! : this.bright!, x, y - lift, scale)
+    const frame = Math.floor(since * Fps)
+    const lift = [24, 12, 0][Math.min(2, frame)]
+    if (frame < 2) Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(34, 22, (c) => c.drawImage(this.bright!, 0, 0)), Palette.White).canvas, x, y - lift, scale)
+    else Pixels.blit(context, this.bright!, x, y - lift, scale)
   }
 
-  private slot(context: CanvasRenderingContext2D, left: number, top: number, w: number, h: number, colour: string) {
-    context.fillStyle = colour
-    for (let at = 0; at < w; at += 48) {
-      context.fillRect(left + at, top, 24, 8)
-      context.fillRect(left + at, top + h - 8, 24, 8)
-    }
-    for (let at = 0; at < h; at += 48) {
-      context.fillRect(left, top + at, 8, 24)
-      context.fillRect(left + w - 8, top + at, 8, 24)
-    }
+  private panel(context: CanvasRenderingContext2D, t: number) {
+    const open = Math.min(4, Math.floor((t - Beat.at(0.5)) * Fps))
+    if (open < 0) return
+    const { x, y, w } = Panel
+    const h = Math.round((Panel.h * (open + 1)) / 5 / 4) * 4
+    Pixels.rect(context, x - 8, y - 8, w + 16, h + 16, Palette.Hull2)
+    Pixels.rect(context, x - 4, y - 4, w + 8, h + 8, Palette.Hull0)
+    Pixels.rect(context, x, y, w, h, Palette.Hull1)
+    Pixels.rect(context, x, y, w, 4, Palette.Hull2)
+    if (open < 4) return
+    Type.reveal(context, Assets.word('Debrief.Missed'), x + 40, y + 80, t - Beat.at(1), { size: 80, colour: Palette.Foil2 })
+    const sprite = Assets.modules.get('Radar')!
+    this.ghost ??= SpriteImage.silhouette(new SpriteImage(32, 20, (c) => c.drawImage(sprite, 0, 0)), Palette.Hull2).canvas
+    this.bright ??= SpriteImage.withOutline(new SpriteImage(32, 20, (c) => c.drawImage(sprite, 0, 0)), Palette.Foil3).canvas
+    const since = t - Found
+    const iconX = x + 40
+    const iconY = y + 160
+    if (since < 0) Pixels.blit(context, this.ghost, iconX, iconY, 6, false)
+    else if (since * Fps < 2) Pixels.blit(context, SpriteImage.silhouette(new SpriteImage(34, 22, (c) => c.drawImage(this.bright!, 0, 0)), Palette.White).canvas, iconX - 6, iconY - 6, 6, false)
+    else Pixels.blit(context, this.bright, iconX - 6, iconY - 6, 6, false)
+    this.hero(context, since)
+    const name = Assets.word('Module.Radar.Name')
+    Type.reveal(context, name, iconX + 260, iconY + 90, since, { size: 120, colour: Palette.White })
   }
 }
