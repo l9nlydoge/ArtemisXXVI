@@ -13,7 +13,7 @@ await mkdir(outDir, { recursive: true })
 const vite = spawn(join(root, 'node_modules', '.bin', 'vite'), ['--port', String(vitePort), '--strictPort'], { cwd: root, stdio: 'ignore' })
 const profile = join(outDir, '.profile')
 await rm(profile, { recursive: true, force: true })
-const chrome = spawn('/usr/bin/google-chrome', ['--headless=new', `--remote-debugging-port=${chromePort}`, `--user-data-dir=${profile}`, '--use-angle=swiftshader', '--enable-unsafe-swiftshader', `--window-size=${width},${height}`, '--hide-scrollbars', '--no-first-run', '--disable-extensions', 'about:blank'], { stdio: 'ignore' })
+const chrome = spawn('/usr/bin/google-chrome', ['--headless=new', '--mute-audio', `--remote-debugging-port=${chromePort}`, `--user-data-dir=${profile}`, '--use-angle=swiftshader', '--enable-unsafe-swiftshader', `--window-size=${width},${height}`, '--hide-scrollbars', '--no-first-run', '--disable-extensions', 'about:blank'], { stdio: 'ignore' })
 let target
 for (let attempt = 0; attempt < 60 && !target; attempt++) {
   await sleep(250)

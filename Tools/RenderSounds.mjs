@@ -13,7 +13,7 @@ await mkdir(outDir, { recursive: true })
 const vite = spawn(join(root, 'node_modules', '.bin', 'vite'), ['--port', String(vitePort), '--strictPort'], { cwd: root, stdio: 'ignore' })
 const profile = join(outDir, '.profile')
 await rm(profile, { recursive: true, force: true })
-const chrome = spawn('/usr/bin/google-chrome', ['--headless=new', `--remote-debugging-port=${chromePort}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-extensions', 'about:blank'], { stdio: 'ignore' })
+const chrome = spawn('/usr/bin/google-chrome', ['--headless=new', '--mute-audio', `--remote-debugging-port=${chromePort}`, `--user-data-dir=${profile}`, '--no-first-run', '--disable-extensions', 'about:blank'], { stdio: 'ignore' })
 const stopAll = async () => {
   chrome.kill()
   vite.kill()
