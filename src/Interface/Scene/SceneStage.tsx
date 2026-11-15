@@ -22,8 +22,11 @@ function measure(root: HTMLElement, mode: SceneMode): { rect: StageRect; anchor:
   if (!row || row.width === 0) return { rect: view, anchor: { x: 0.5, y: 0.45 } }
   const rightGap = view.left + view.width - (row.left + row.width)
   const leftGap = row.left - view.left
-  if (rightGap >= RoomForCraft && rightGap >= leftGap) return { rect: { left: row.left + row.width, top: row.top, width: rightGap, height: row.height }, anchor: { x: 0.5, y: 0.5 } }
-  if (leftGap >= RoomForCraft) return { rect: { left: view.left, top: row.top, width: leftGap, height: row.height }, anchor: { x: 0.5, y: 0.5 } }
+  const scene = FlightScene.shared
+  const needed = Math.max(RoomForCraft, scene.view ? (scene.craft.width * scene.view.scale) / scene.view.ratio : 0)
+  if (rightGap < needed && leftGap < needed) return { rect: { left: view.left, top: row.top + row.height, width: view.width, height: Math.max(0, view.top + view.height - row.top - row.height) }, anchor: { x: 0.5, y: 0.5 } }
+  if (rightGap >= needed && rightGap >= leftGap) return { rect: { left: row.left + row.width, top: row.top, width: rightGap, height: row.height }, anchor: { x: 0.5, y: 0.5 } }
+  if (leftGap >= needed) return { rect: { left: view.left, top: row.top, width: leftGap, height: row.height }, anchor: { x: 0.5, y: 0.5 } }
   return { rect: view, anchor: { x: 0.5, y: 0.5 } }
 }
 

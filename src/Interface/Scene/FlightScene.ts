@@ -128,7 +128,8 @@ export class FlightScene implements SceneLayer {
   private placeCraft(instant: boolean) {
     if (!this.lastView) return
     const stage = this.stageArt()
-    const x = Math.round(stage.left + (stage.right - stage.left) * this.craftAnchor.x)
+    const half = Math.ceil(this.craft.width / 2) + 2
+    const x = Math.max(half, Math.min(this.lastView.width - half, Math.round(stage.left + (stage.right - stage.left) * this.craftAnchor.x)))
     const y = Math.round(stage.top + (stage.bottom - stage.top) * this.craftAnchor.y)
     const now = this.clock.now
     const snap = instant || MotionPreference.reduced
