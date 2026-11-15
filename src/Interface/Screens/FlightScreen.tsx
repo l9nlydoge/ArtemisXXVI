@@ -17,6 +17,7 @@ import { ChannelBars } from '../Cards/ChannelBars'
 import { EventPhoto } from '../Cards/EventPhoto'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { Meter } from '../Meters/Meter'
+import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
 
 function signalText(signal: number): string {
   return Number(signal.toFixed(2)).toString()
@@ -172,6 +173,7 @@ function conditionText(condition: TurnCondition, wording: Wording): string {
 function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encounter }) {
   const wording = useWording()
   const plan = useGameStore((state) => state.plan)
+  const loadout = useGameStore((state) => state.loadout)
   const togglePlan = useGameStore((state) => state.togglePlan)
   const clearPlan = useGameStore((state) => state.clearPlan)
   const send = useGameStore((state) => state.send)
@@ -214,6 +216,10 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
             <ChannelBars event={event} craft={craft} recorded={encounter.recorded} pending={over ? undefined : preview.gains} />
           </div>
         </article>
+
+        <div className="EncounterStage">
+          <SpacecraftSprite loadout={loadout} active={over ? undefined : plan.keys} maxScale={3} label={wording.t('Hangar.Spacecraft')} />
+        </div>
 
         <ol className="TurnTrack Panel" aria-label={wording.t('Turn.Label', { turn: encounter.turnIndex + 1 })}>
           {visible.map((condition, index) => {
