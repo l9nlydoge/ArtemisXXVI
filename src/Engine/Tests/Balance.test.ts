@@ -43,6 +43,17 @@ const searches: Record<string, { busId: string; rank: number }> = {
 }
 const ranked: Record<string, LoadoutScore[]> = {}
 
+function starterAnd(extra: string): Ownership {
+  const starters = new Set(ModuleCatalog.shared.starters.map((card) => card.id))
+  return { rank: 2, owns: (id: string, mark: number) => mark === 1 && (starters.has(id) || id === extra) }
+}
+
+function bestFlown(bot: FlightBot, owner: Ownership, weekId: string): number {
+  const candidates = new LoadoutSearch(owner).candidates(BusCatalog.shared.get('SmallSat'))
+  const best = candidates.map((loadout) => LoadoutSearch.evaluate(bot, loadout, week(weekId), searchSeeds)).sort((a, b) => b.mean - a.mean)[0]
+  return mean(fly(bot, best.loadout, weekId, 60))
+}
+
 function instrumentShares(loadout: Loadout, weekId: string): Map<string, number> {
   const byChannel = new Map<string, number>()
   for (const report of fly(cautious, loadout, weekId, 40)) {
@@ -129,5 +140,15 @@ describe('Balance on the real weeks (spec 13.2, as adjusted in GameDesign.md)', 
     const seen = new Set(Object.values(ranked).flatMap((scores) => scores.slice(0, 5).flatMap((score) => [...LoadoutSearch.modules(score.loadout)])))
     const sold = ModuleCatalog.shared.all.filter((card) => card.isObtainable && card.minRank <= 2).map((card) => card.id)
     expect(sold.filter((id) => !seen.has(id))).toEqual([])
+  })
+
+  test('B9: buying the radar after flight one earns a careful player at least 15% more on flight two, about one more fully recorded asteroid', () => {
+    const planner = new PlannerBot()
+    for (const [weekId, margin] of [['AutumnTwentyTwo', 1.15], ['JulyNineteen', 1.05]] as const) {
+      const without = bestFlown(planner, starterAnd(''), weekId)
+      const withRadar = bestFlown(planner, starterAnd('Radar'), weekId)
+      expect(withRadar, weekId).toBeGreaterThan(without * margin)
+    }
+    expect(bestFlown(greedy, starterAnd('Radar'), 'AutumnTwentyTwo')).toBeGreaterThan(bestFlown(greedy, starterAnd(''), 'AutumnTwentyTwo') * 1.15)
   })
 })

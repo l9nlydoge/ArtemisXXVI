@@ -25,11 +25,11 @@ describe('Loadout', () => {
   })
 
   test('going over budget and over bay space are reported with the excess', () => {
-    const heavy = Fixtures.loadout('SmallSat', [['Camera', 3], ['Spectrometer', 3], ['Radar', 1]])
-    expect(heavy.costMusd).toBe(84)
+    const heavy = Fixtures.loadout('SmallSat', [['Camera', 3], ['Spectrometer', 3], ['Radar', 2]])
+    expect(heavy.costMusd).toBe(94)
     expect(heavy.bayUsed).toBe(9)
     expect(heavy.issues(Fixtures.everything)).toEqual([
-      { kind: LoadoutIssueKind.OverBudget, amount: 24 },
+      { kind: LoadoutIssueKind.OverBudget, amount: 34 },
       { kind: LoadoutIssueKind.OverBay, amount: 1 },
     ])
   })

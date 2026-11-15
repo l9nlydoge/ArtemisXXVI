@@ -73,7 +73,7 @@ describe('Starting a flight checks its setup', () => {
     const cases: [Loadout, LoadoutIssueKind][] = [
       [new Loadout(starter.bus, []), LoadoutIssueKind.NoInstrument],
       [Fixtures.loadout('SmallSat', [['Camera', 3], ['Spectrometer', 3], ['Radar', 3]]), LoadoutIssueKind.OverBudget],
-      [Fixtures.loadout('SmallSat', [['Camera', 1], ['Spectrometer', 1], ['Radar', 1], ['MagneticShield', 1]]), LoadoutIssueKind.OverBay],
+      [Fixtures.loadout('SmallSat', [['SolarArray', 1], ['Camera', 1], ['Spectrometer', 1], ['Radar', 1], ['MagneticShield', 1]]), LoadoutIssueKind.OverBay],
       [Fixtures.loadout('Flagship', [['Camera', 1], ['SolarArray', 1], ['SolarArray', 1], ['SolarArray', 1]]), LoadoutIssueKind.TooManyCopies],
       [Fixtures.loadout('Flagship', [['Camera', 1], ['RadiationShielding', 1], ['RadiationShielding', 1]]), LoadoutIssueKind.TooManyCopies],
     ]

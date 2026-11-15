@@ -13,7 +13,7 @@ export class ModuleCatalog {
     new Battery('Battery', { minRank: 1, maxCopies: 2, marks: Marks.table([6, 10, 18], [1, 1, 2], [6, 10, 16], [0, 70, 220]) }),
     new Instrument('Camera', Channel.Visible, 3, { minRank: 1, marks: Marks.table([10, 18, 30], [2, 2, 3], [3, 4, 6], [0, 110, 320]) }),
     new Instrument('Spectrometer', Channel.Spectrum, 3, { minRank: 1, marks: Marks.table([14, 24, 38], [2, 3, 3], [4, 6, 8], [0, 140, 360]) }),
-    new Radar('Radar', Channel.Radar, 4, { minRank: 1, marks: Marks.table([16, 26, 40], [3, 3, 4], [5, 7, 10], [90, 170, 400]) }),
+    new Radar('Radar', Channel.Radar, 4, { minRank: 1, marks: Marks.table([16, 26, 40], [2, 3, 4], [5, 7, 10], [90, 170, 400]) }),
     new Instrument('ParticleDetector', Channel.Particles, 1, { minRank: 1, marks: Marks.table([6, 10, 16], [1, 1, 1], [2, 3, 5], [0, 80, 240]) }),
     new Instrument('HighEnergyDetector', Channel.HighEnergy, 3, { minRank: 2, marks: Marks.table([18, 28, 44], [2, 2, 3], [4, 6, 9], [120, 200, 440]) }),
     new RadiationShielding('RadiationShielding', { minRank: 1, marks: Marks.table([5, 9, 15], [1, 2, 3], [1, 2, 3], [0, 80, 240]) }),

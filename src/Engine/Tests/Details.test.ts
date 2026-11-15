@@ -95,7 +95,7 @@ describe('Boundaries', () => {
     const atBudget = Fixtures.loadout('SmallSat', [['Camera', 2], ['Spectrometer', 2], ['HighEnergyDetector', 1]])
     expect(atBudget.costMusd).toBe(60)
     expect(atBudget.issues(Fixtures.everything)).toEqual([])
-    const fullBay = Fixtures.loadout('SmallSat', [['SolarArray', 1], ['Camera', 1], ['Spectrometer', 1], ['Radar', 1]])
+    const fullBay = Fixtures.loadout('SmallSat', [['SolarArray', 1], ['Battery', 1], ['Camera', 1], ['Spectrometer', 1], ['Radar', 1]])
     expect(fullBay.bayUsed).toBe(8)
     expect(fullBay.issues(Fixtures.everything)).toEqual([])
   })
