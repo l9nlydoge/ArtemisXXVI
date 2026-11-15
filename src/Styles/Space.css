@@ -104,9 +104,6 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
   box-shadow: inset 0 var(--U) 0 var(--Hull1), 0 calc(var(--U) * -1) 0 var(--Ring), 0 var(--U) 0 var(--Ring), calc(var(--U) * -1) 0 0 var(--Ring), var(--U) 0 0 var(--Ring), 0 calc(var(--U) * 2) 0 var(--Black);
 }
 
-.WorldLayer { position: fixed; inset: 0; z-index: 0; background: var(--Space); }
-.WorldLayer.IsStill { background: var(--Space0); }
-.World { width: 100%; height: 100% !important; display: block; }
 .Interface { position: relative; z-index: 1; height: 100dvh; }
 .Interface > main { height: 100%; }
 
@@ -115,16 +112,17 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .HomeIntro h1 { font-size: 80px; line-height: 72px; color: var(--White); text-shadow: 0 6px 0 var(--Black); }
 .Pitch { font-size: var(--Head); line-height: 33px; max-width: 27rem; color: var(--Cloud1); }
 .HomeActions { display: flex; align-items: center; gap: 15px; margin-top: 9px; }
+.HomeActions .Quiet { font-size: var(--Head); line-height: 30px; padding: 12px 15px; }
 .HomeFoot { display: grid; gap: 24px; justify-items: start; }
 .RankBadge { width: min(100%, 24rem); display: grid; gap: 6px; }
 .HomeFoot .RankBadge { padding: 15px 18px 18px; background: var(--Hull0); box-shadow: inset 0 var(--U) 0 var(--Hull1), 0 calc(var(--U) * -1) 0 var(--Hull1), 0 var(--U) 0 var(--Hull1), calc(var(--U) * -1) 0 0 var(--Hull1), var(--U) 0 0 var(--Hull1), 0 calc(var(--U) * 2) 0 var(--Black); }
-.RankTitle { display: flex; gap: 12px; align-items: baseline; font-size: var(--Head); line-height: 30px; color: var(--White); }
+.RankTitle { display: flex; flex-wrap: wrap; gap: 0 12px; align-items: baseline; font-size: var(--Head); line-height: 30px; color: var(--White); }
 .RankNumber { color: var(--Foil); }
 .RankTrack { height: 12px; background: var(--Space0); box-shadow: 0 0 0 var(--U) var(--Hull1); margin: var(--U) var(--U) 6px; }
 .RankFill { height: 100%; background: var(--Foil); box-shadow: inset 0 var(--U) 0 var(--Foil3), inset 0 calc(var(--U) * -1) 0 var(--Foil1); transition: width var(--Snap); }
 .RankNote { color: var(--Hull4); }
 .RankPoints { color: var(--Text); }
-.Credits { display: flex; flex-wrap: wrap; gap: 0 27px; color: var(--Hull4); padding: 6px 12px; background: var(--Space0); }
+.Credits { display: grid; gap: 0; color: var(--Hull4); padding: 6px 12px 9px; background: var(--Space0); }
 .CreditArt { color: var(--Cloud0); }
 
 .ScreenHead { display: flex; align-items: baseline; gap: 6px 18px; flex-wrap: wrap; }
@@ -272,7 +270,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 
 .EncounterView { display: grid; grid-template-columns: 384px 1fr minmax(260px, 318px); gap: 18px; min-height: 0; align-items: start; padding: 3px 3px 0; }
 .EventCard { grid-column: 1; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100% - 6px); overflow: hidden; }
-.EventBody { display: grid; grid-template-rows: auto minmax(0, auto) auto; gap: 9px; padding: 12px 18px 18px; min-height: 0; align-content: start; }
+.EventBody { display: grid; grid-template-rows: auto minmax(48px, auto) auto; gap: 9px; padding: 12px 18px 18px; min-height: 0; align-content: start; }
 .FactList.IsScrolling { overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--Hull2) var(--Hull0); min-height: 48px; }
 .EventBody h1 { color: var(--White); }
 .TurnTrack { grid-column: 3; display: grid; gap: 0; }
@@ -281,7 +279,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .TurnNumber { grid-row: span 3; min-width: 3.4rem; }
 .TurnCell.IsNow { color: var(--Text); background: var(--Hull1); box-shadow: inset 6px 0 0 var(--Foil2); padding-block: 9px; }
 .TurnCell.IsNow .TurnNumber { color: var(--Foil); }
-.TurnCell.IsPast { color: var(--Hull2); }
+.TurnCell.IsPast { color: var(--Hull3); }
 .TurnCell.IsPast span { color: inherit; }
 .TurnCell.IsNow .TurnSignal { color: var(--White); }
 .TurnRadiation { color: var(--NoGo); }
@@ -368,9 +366,9 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 @keyframes Hit { 0% { opacity: 1; background-position: 0 0; } 100% { opacity: 0; background-position: 96px 0; } }
 
 @media (max-height: 860px) {
-  .EventPhoto { justify-items: center; padding-top: 9px; background: var(--Hull0); }
+  .EventPhoto { justify-items: center; padding-top: 6px; background: var(--Hull0); }
   .EventPhoto img, .EventPhoto.IsCompact img { width: 256px; height: 144px; padding-inline: 0; box-shadow: 0 0 0 var(--U) var(--Black); }
-  .EventPhoto figcaption { justify-self: stretch; margin-top: 9px; }
+  .EventPhoto figcaption { justify-self: stretch; margin-top: 6px; padding-block: 3px 6px; line-height: 18px; }
   .UnknownField { height: 153px; }
 }
 
@@ -387,6 +385,10 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
   .ChannelBars { gap: 3px; }
   .StatusMeters { gap: 6px; }
   .TurnCell { padding-block: 3px; }
+  .EventBody { gap: 6px; padding: 9px 18px 12px; }
+  .FlightFoot:not(.IsEncounter) { grid-template-columns: minmax(420px, 540px) 1fr auto; }
+  .FlightFoot:not(.IsEncounter) .StatusMeters { grid-template-columns: 1fr 1fr; gap: 0 24px; align-items: start; }
+  .ContactBody h2 { font-size: var(--Body); line-height: 24px; }
   .TurnCell + .TurnCell { padding-top: 6px; }
   .TurnCell.IsNow { padding-block: 6px; }
 }
