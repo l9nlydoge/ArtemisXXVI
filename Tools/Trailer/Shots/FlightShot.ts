@@ -42,8 +42,9 @@ export class FlightShot extends Shot {
     this.craft(context, t)
     if (t >= BeamOn - Beat.Length) this.brackets(context, rock, t - (BeamOn - Beat.Length))
     this.data(context, t)
-    Type.reveal(context, Assets.rock.name, 160, 210, t - (BeamOn - Beat.Length), { size: 160, colour: Palette.White })
-    Type.reveal(context, `${Assets.rock.missKm.toLocaleString('en-US')} km`, 160, 300, t - BeamOn, { size: 80, colour: Palette.Foil3 })
+    const day = new Date(Assets.rock.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+    Type.reveal(context, `Asteroid ${Assets.rock.name}`, 160, 210, t - (BeamOn - Beat.Length), { size: 160, colour: Palette.White })
+    Type.reveal(context, `${Assets.rock.missKm.toLocaleString('en-US')} km from Earth's centre, ${day}`, 160, 300, t - BeamOn, { size: 80, colour: Palette.Foil3, stagger: 0.05 })
   }
 
   private craft(context: CanvasRenderingContext2D, t: number) {
@@ -85,7 +86,7 @@ export class FlightShot extends Shot {
     const cells = 10
     const filled = Math.min(cells, Math.floor((t - BeamOn) / (Beat.Length / 4)) + 1)
     const left = 160
-    const top = 340
+    const top = 350
     for (let cell = 0; cell < cells; cell++) {
       context.fillStyle = Palette.Hull0
       context.fillRect(left + cell * 28 - 4, top - 4, 28, 32)

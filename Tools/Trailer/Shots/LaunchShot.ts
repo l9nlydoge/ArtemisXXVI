@@ -1,7 +1,7 @@
 import { GroundShot } from '../../../src/Interface/Scene/GroundShot'
 import { RocketPainter, RocketPiece } from '../../../src/Interface/Scene/RocketPainter'
 import { Dots, Seeded } from '../../../src/Interface/Scene/SpriteImage'
-import { Layer, Pixels } from '../Kit/Film'
+import { Layer, Pixels, Type } from '../Kit/Film'
 import { Beat } from '../Kit/Motion'
 import { Palette } from '../Kit/Palette'
 import { Sky } from '../Kit/Sky'
@@ -13,7 +13,7 @@ const Smoke = ['#ffffff', '#eef3f7', '#c5d2e0', '#7c8797', '#4a5362']
 const PuffEvery = 0.035
 const Climb = 34
 const DeckAltitude = 300
-const DeckRows = 70
+const DeckRows = 18
 
 export const Liftoff = Beat.at(1)
 
@@ -64,6 +64,7 @@ export class LaunchShot extends Shot {
     const deckTop = this.groundY - DeckAltitude + lift
     if (deckTop < StageHeight && deckTop + DeckRows > -20) ground.paintDeck(stage, deckTop, DeckRows)
     Pixels.present(context, this.stage)
+    if (t < Beat.at(3.5)) Type.reveal(context, 'Launch it.', 160, 250, t - Liftoff, { size: 160, shadow: Palette.Hull0 })
   }
 
   private smoke(context: CanvasRenderingContext2D, t: number, lift: number) {
