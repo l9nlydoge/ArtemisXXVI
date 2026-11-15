@@ -66,7 +66,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ForecastLines li.IsCaution { color: var(--Caution); font-weight: 600; }
 
 .WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 22px var(--Gutter) 26px; }
-.WeekRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: start; max-width: 1240px; }
+.WeekRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: start; }
 .WeekCard { display: grid; grid-template-rows: clamp(120px, 24vh, 210px) 1fr; overflow: hidden; }
 .WeekCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .WeekBody { display: grid; gap: 8px; padding: 16px 18px 18px; align-content: start; }
@@ -236,8 +236,9 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .RankUp { padding: 10px 12px; border: 1px solid var(--Foil); display: grid; gap: 2px; }
 .RankUpTitle { font-weight: 700; color: var(--Foil); }
 .DebriefMissed, .DebriefFlight { padding: 14px 18px; display: grid; gap: 8px; align-content: start; min-height: 0; }
-.DebriefFlight { overflow-y: auto; scrollbar-width: thin; }
+.DebriefFlight { overflow-y: auto; scrollbar-width: thin; align-self: start; max-height: 100%; }
 .MissList { display: grid; gap: 6px; }
+.MissList button { white-space: nowrap; }
 .MissList li { display: flex; justify-content: space-between; align-items: center; gap: 14px; font-size: 0.95rem; color: var(--Muted); }
 .MissList li.IsBiggest { font-size: 1.1rem; font-weight: 600; color: var(--Text); }
 .EncounterList { display: grid; }
@@ -253,7 +254,8 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .LabRank { grid-column: 2; grid-row: 1; align-self: start; padding: 16px; }
 .LabScroll { grid-column: 1; grid-row: 1; overflow-y: auto; padding-right: 6px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; display: grid; gap: 6px; align-content: start; }
 .OfferGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-.OfferCard { display: grid; grid-template-rows: auto auto 1fr auto auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
+.OfferFamily { font-size: 0.74rem; color: var(--Muted); }
+.OfferCard { display: grid; grid-template-rows: auto auto auto 1fr auto auto; gap: 4px; padding: 10px 12px 11px; background: var(--Plate); }
 .OfferCard header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .OfferCard h3 { font-size: 1.02rem; }
 .OwnedMark { font-size: 0.78rem; color: var(--Muted); white-space: nowrap; }

@@ -21,6 +21,7 @@ function OfferCard({ offer }: { offer: LabOffer }) {
 
   return (
     <li className={`OfferCard Panel Is${state} ${offer.ownedMark === 3 ? 'IsTop' : ''}`}>
+      <p className="OfferFamily">{wording.t(`Family.${card.family}`)}</p>
       <header>
         <h3>{words.name(card)}</h3>
         <span className="OwnedMark">{offer.ownedMark > 0 ? wording.t('Lab.Owned', { mark: wording.t(`Mark.${offer.ownedMark}`) }) : state === OfferState.InDevelopment ? '' : wording.t('Lab.NotOwned')}</span>
@@ -62,16 +63,9 @@ export function LabScreen() {
       <div className="LabBody">
         <aside className="Panel LabRank"><RankBadge /></aside>
         <div className="LabScroll">
-          {Families.map((family) => {
-            const mine = offers.filter((offer) => offer.card.family === family)
-            if (mine.length === 0) return null
-            return (
-              <section key={family}>
-                <h2 className="FamilyName">{wording.t(`Family.${family}`)}</h2>
-                <ul className="OfferGrid">{mine.map((offer) => <OfferCard key={offer.card.id} offer={offer} />)}</ul>
-              </section>
-            )
-          })}
+          <ul className="OfferGrid">
+            {Families.flatMap((family) => offers.filter((offer) => offer.card.family === family)).map((offer) => <OfferCard key={offer.card.id} offer={offer} />)}
+          </ul>
         </div>
       </div>
     </main>

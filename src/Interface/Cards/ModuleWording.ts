@@ -17,6 +17,7 @@ export class ModuleWording {
   effect(card: ModuleCard, mark: Mark): string {
     const value = card.mark(mark).value
     if (!Number.isFinite(value)) return this.wording.t(`Module.${card.id}.EffectAll`)
+    if (value === 1 && card.id === 'FlightComputer') return this.wording.t(`Module.${card.id}.EffectOne`)
     return this.wording.t(`Module.${card.id}.Effect`, { value })
   }
 

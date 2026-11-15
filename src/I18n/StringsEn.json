@@ -264,5 +264,6 @@
   "Lab.NotOwned": "Not unlocked",
   "Lab.Back": "Home",
   "Lab.ToHangar": "To the hangar",
-  "Common.Back": "Back"
+  "Common.Back": "Back",
+  "Module.FlightComputer.EffectOne": "Shows the next turn of an encounter"
 }

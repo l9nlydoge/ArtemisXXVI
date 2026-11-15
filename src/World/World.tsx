@@ -22,7 +22,7 @@ const Framings: Readonly<Record<Screen, Framing>> = {
   [Screen.Hangar]: { x: -0.1, y: -1.5, scale: 1.5 },
   [Screen.Flight]: { x: 0.15, y: -1.62, scale: 1.7 },
   [Screen.Debrief]: { x: 1.05, y: 0.42, scale: 0.62 },
-  [Screen.Lab]: { x: -1.25, y: 0.5, scale: 0.55 },
+  [Screen.Lab]: { x: 1.28, y: -0.62, scale: 0.6 },
 }
 
 function Planet() {
