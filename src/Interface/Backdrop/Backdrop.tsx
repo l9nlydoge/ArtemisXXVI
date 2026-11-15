@@ -33,7 +33,7 @@ const Framings: Readonly<Record<Screen, Framing>> = {
   [Screen.Home]: { globe: Globe.Medium, x: 0.74, y: -0.03, drift: [0, 0] },
   [Screen.Week]: { globe: Globe.Large, x: 0.5, y: 0.64, drift: [-8, -14] },
   [Screen.Hangar]: { globe: Globe.Large, x: 0.47, y: 0.76, drift: [-14, -22] },
-  [Screen.Flight]: { globe: Globe.Large, x: 0.54, y: 0.62, drift: [6, -18] },
+  [Screen.Flight]: { globe: Globe.Large, x: 0.5, y: 0.62, drift: [0, -18] },
   [Screen.Debrief]: { globe: Globe.Large, x: 0.5, y: 0.43, drift: [0, -8] },
   [Screen.Lab]: { globe: Globe.Small, x: 0.86, y: 0.49, drift: [16, -4] },
   [Screen.Logbook]: { globe: Globe.Large, x: 0.5, y: 0.82, drift: [-6, -10] },
