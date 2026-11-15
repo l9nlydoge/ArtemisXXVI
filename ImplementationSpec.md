@@ -1531,8 +1531,6 @@ Shared by the backdrop, the spacecraft, the module pictures and the event card p
 - **Style.** Flat shading in two or three tones per material with the light from the upper left, a one-pixel darker outline on sprites against space, ordered dithering only where a gradient is needed (the Earth's terminator, the atmosphere), no anti-aliasing, no blur, no soft glows.
 - **Formats.** PNG, never JPEG, for pixel art. Indexed colour where possible.
 
----
-
 ### 11.9 Flight scene and motion
 
 The flight screens are a scene, not a backdrop with panels on it. Everything below is a game drawing: distances, sizes and speeds are not to scale, and no caption presents it as imagery. It supersedes "Encounter subject: not drawn" in 11.5 and widens the ambient motion of 11.6 for the flight screens.
@@ -1558,6 +1556,7 @@ The flight screens are a scene, not a backdrop with panels on it. Everything bel
 **Small effects.** Power cells fill one by one, cells the plan will spend blink, points count up in steps, a module card gives a one-step thunk when switched on, the timeline node flashes as a leg completes. Each is under 400 ms and never blocks input.
 
 **Reduced motion.** The Earth does not turn, contacts step between their stops, the launch and travel beat are cut, the stepped flashes and blinks are off; the turn clock still runs and shows.
+---
 
 ## 12. Text and languages
 
