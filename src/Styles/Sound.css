@@ -1,6 +1,5 @@
-.SoundToggle { position: fixed; left: calc(var(--U) * 3); bottom: calc(var(--U) * 2); z-index: 20; display: grid; place-items: center; width: 45px; height: 39px; padding: 0; margin: 0; }
-.SoundToggle .SoundIcon { display: block; image-rendering: pixelated; }
-.SoundToggle.IsOff .SoundIcon { opacity: 0.8; }
+button.SoundToggle { position: fixed; left: max(2px, calc((var(--Gutter) - 28px) / 2)); bottom: calc(var(--U) * 3); z-index: 20; display: grid; place-items: center; width: 28px; height: 27px; padding: 0; margin: 0; }
+button.SoundToggle .SoundIcon { display: block; }
 .SoundTip { position: absolute; left: 0; bottom: calc(100% + var(--U) * 2); white-space: nowrap; padding: var(--U) calc(var(--U) * 3); background: var(--Hull0); color: var(--Text); box-shadow: 0 0 0 var(--U) var(--Hull1); font-size: var(--Body); line-height: 24px; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 90ms steps(3, end), visibility 0s linear 90ms; }
 .SoundToggle:hover .SoundTip, .SoundToggle:focus-visible .SoundTip { opacity: 1; visibility: visible; transition: opacity 90ms steps(3, end) 300ms, visibility 0s linear 300ms; }
-@media (prefers-reduced-motion: reduce) { .SoundTip { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .SoundTip, .SoundToggle:hover .SoundTip, .SoundToggle:focus-visible .SoundTip { transition: none; } }

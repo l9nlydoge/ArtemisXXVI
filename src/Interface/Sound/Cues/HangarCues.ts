@@ -3,6 +3,7 @@ import { NoiseColour } from '../NoiseBank'
 import type { Voice } from '../Voice'
 
 export class ModuleFitCue extends Cue {
+  override readonly level = 0.6
   readonly name = 'ModuleFit'
   readonly description = 'A module is fitted in the Hangar: a short slide, a latch click and a seated thunk.'
   override readonly length = 0.7

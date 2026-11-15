@@ -211,6 +211,7 @@ export class SoundSystem {
   private ready(): LiveSound | undefined {
     const live = this.live
     if (!live || !this.on || live.context.state === 'closed') return undefined
+    if (typeof document !== 'undefined' && document.hidden) return undefined
     return live
   }
 
