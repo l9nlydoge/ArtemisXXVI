@@ -474,6 +474,7 @@ button:focus-visible { outline-offset: calc(var(--U) * 2); }
 .OwnedMark { color: var(--Muted); white-space: nowrap; }
 .OwnedMark.IsOwned { color: var(--Foil3); }
 .OfferCard .ModuleDrawing { --Scale: 3; margin: 6px 0; }
+.OfferCard .ModuleStats { grid-area: auto; }
 .OfferMark { color: var(--White); }
 .OfferCard footer { padding-top: 9px; box-shadow: inset 0 var(--U) 0 var(--Hull2); min-height: 54px; display: flex; align-items: center; }
 .OfferCard .Primary { width: calc(100% - 6px); }
