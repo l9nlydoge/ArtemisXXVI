@@ -68,7 +68,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .WeekScreen { display: grid; grid-template-rows: auto 1fr; gap: 18px; padding: 22px var(--Gutter) 26px; }
 .WeekRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-content: start; }
 .WeekCard { display: grid; grid-template-rows: clamp(120px, 24vh, 210px) 1fr; overflow: hidden; }
-.WeekCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.WeekCard img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 100%; object-position: 50% 0; }
 .WeekBody { display: grid; gap: 8px; padding: 16px 18px 18px; align-content: start; }
 .WeekBody h2 { font-size: 1.3rem; }
 .WeekDates { font-size: 0.9rem; color: var(--Muted); }
@@ -99,7 +99,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .HangarModules > h2 { padding: 12px 16px 8px; }
 .ModuleScroll { overflow-y: auto; padding: 0 16px 8px; scrollbar-width: thin; scrollbar-color: var(--LineStrong) transparent; }
 .FamilyName { font-size: 0.82rem; font-weight: 500; color: var(--Muted); padding: 10px 0 2px; }
-.ModuleRow { display: grid; grid-template-columns: 62px 1fr auto; align-items: center; gap: 12px; padding: 9px 0 9px 10px; border-top: 1px solid var(--Line); border-left: 3px solid transparent; }
+.ModuleRow { display: grid; grid-template-columns: 64px 1fr auto; align-items: center; gap: 12px; padding: 9px 0 9px 10px; border-top: 1px solid var(--Line); border-left: 3px solid transparent; }
 .ModuleRow.IsFitted { border-left-color: var(--Foil); background: rgba(232, 168, 56, 0.06); }
 .ModuleRow.IsLocked { color: var(--Muted); }
 .ModuleRow.IsExtra { grid-template-columns: 1fr; padding-block: 2px; border-top: 0; }
@@ -108,7 +108,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ModuleShort { font-size: 0.84rem; color: var(--Caution); }
 .ModuleRow > button.IsShort { color: var(--Muted); border-style: dashed; }
 .BayFull { color: var(--Caution); font-size: 0.92rem; }
-.ModuleDrawing { width: 62px; height: 38px; color: var(--Text); opacity: 0.85; }
+.ModuleDrawing { --Scale: 2; display: block; width: calc(32px * var(--Scale)); height: calc(20px * var(--Scale)); background-repeat: no-repeat; background-size: calc(448px * var(--Scale)) calc(20px * var(--Scale)); background-position: calc(var(--Sprite, 0) * -32px * var(--Scale)) 0; image-rendering: pixelated; }
 .IsLocked .ModuleDrawing { opacity: 0.35; }
 .ModuleMain { min-width: 0; display: grid; gap: 1px; }
 .ModuleEffect { font-size: 0.88rem; color: var(--Muted); }
@@ -176,8 +176,8 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .FactList { display: grid; gap: 2px; font-size: 0.9rem; }
 
 .EventPhoto { display: grid; }
-.EventPhoto img { width: 100%; height: clamp(120px, 24vh, 230px); object-fit: cover; display: block; background: #000000; }
-.EventPhoto.IsCompact img { height: clamp(84px, 15vh, 130px); }
+.EventPhoto img { width: 100%; box-sizing: border-box; padding-inline: max(0px, round(down, calc((100% - 384px) / 2), 1px)); object-fit: cover; image-rendering: pixelated; display: block; background: #000000; height: 216px; }
+.EventPhoto.IsCompact img { height: 126px; }
 .EventPhoto figcaption { display: flex; justify-content: space-between; gap: 12px; padding: 5px 14px; font-size: 0.72rem; line-height: 1.3; color: var(--Muted); border-bottom: 1px solid var(--Line); }
 .EventPhoto .Credit { text-align: right; flex: none; max-width: 45%; }
 
@@ -221,7 +221,6 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .ActionRow li { display: grid; min-width: 0; }
 .ActionCard { position: relative; display: grid; grid-template-rows: auto auto auto 1fr; gap: 2px; text-align: left; padding: 8px 12px 10px; background: var(--Plate); border-left-width: 3px; transition: transform 120ms var(--Ease), border-color 120ms, background-color 120ms; }
 .ActionTop { display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px; }
-.ActionCard .ModuleDrawing { width: 50px; height: 28px; }
 .ActionKey { font: inherit; font-size: 0.78rem; font-weight: 600; line-height: 1; min-width: 20px; padding: 3px 5px; text-align: center; border: 1px solid var(--LineStrong); border-radius: 2px; color: var(--Muted); }
 .ActionName { font-size: 0.95rem; font-weight: 600; line-height: 1.15; }
 .ActionCost { font-size: 0.82rem; color: var(--Muted); }
@@ -262,10 +261,10 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 
 @media (max-height: 760px) {
   .FlightFoot.IsEncounter { min-height: 172px; }
-  .EventPhoto img { height: clamp(110px, 19vh, 150px); }
+  .EventPhoto img { height: 144px; }
+  .EventPhoto.IsCompact img { height: 108px; }
   .ActionCard { padding: 6px 10px 8px; }
   .ActionTop { margin-bottom: 0; }
-  .ActionCard .ModuleDrawing { width: 36px; height: 20px; }
   .ActionName { font-size: 0.9rem; }
   .ActionUse { font-size: 0.92rem; }
   .TurnPlanArea { gap: 6px; }
@@ -332,7 +331,7 @@ button:disabled { cursor: not-allowed; color: var(--Muted); opacity: 0.6; }
 .OfferCard h3 { font-size: 1.05rem; }
 .OwnedMark { font-size: 0.8rem; color: var(--Muted); white-space: nowrap; }
 .OwnedMark.IsOwned { color: var(--Text); }
-.OfferCard .ModuleDrawing { width: 100%; height: 58px; margin: 4px 0; opacity: 0.9; }
+.OfferCard .ModuleDrawing { --Scale: 3; margin: 4px 0; }
 .OfferEffect { font-size: 0.88rem; }
 .OfferMark { font-weight: 700; }
 .OfferCard footer { padding-top: 6px; border-top: 1px solid var(--Line); font-size: 0.86rem; min-height: 2.5rem; display: flex; align-items: center; }

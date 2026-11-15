@@ -20,7 +20,7 @@ export class Images {
   static readonly downloadedOn = '2026-11-14T20:00:00.000Z'
 
   private static entry(id: string, nasaId: string, title: string, credit: string, kind: ImageKind, representative: boolean, pageUrl = `https://images.nasa.gov/details/${nasaId}`): ImageCredit {
-    return { id, file: `Images/Events/${id}.jpg`, nasaId, title, credit, kind, representative, captionKey: `Image.${id}`, pageUrl }
+    return { id, file: `Images/Events/${id}.png`, nasaId, title, credit, kind, representative, captionKey: `Image.${id}`, pageUrl }
   }
 
   static readonly all: readonly ImageCredit[] = [
