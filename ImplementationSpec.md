@@ -1233,6 +1233,7 @@ interface GameState {
   togglePlan(key: string): void
   finishFlight(): void
   buy(moduleId: string): void
+  markHint(hint: string): void
   setLanguage(language: Language): void
   resetProgress(): void
 }
@@ -1241,6 +1242,8 @@ enum Screen { Home, Week, Hangar, Flight, Debrief, Lab, Logbook, Sources }
 ```
 
 `Flight` is mutable inside the engine. The store holds one instance and bumps `flightTick` after each `apply`.
+
+**Hints.** `State/HintBook.ts` decides whether a first-flight hint is wanted: not yet in the profile's `hintsSeen`, and the player is new. The Hangar, Scanner, Encounter and Radiation hints need `flights === 0`; the Debrief and Lab hints need `flights === 1` and the Hangar hint already seen, so a player who flew before hints existed never gets them. A hint is written to `hintsSeen` through `markHint` the moment it appears, so it never shows twice even if the player ignores it. Erasing progress resets the profile and with it the hints.
 
 ### 9.2 Saved data
 
@@ -1406,16 +1409,24 @@ Unlocking plays one short stamp animation on the card and updates the balance. P
 
 ### 10.9 Logbook and Sources
 
-**Logbook:** a grid of every event in the unlocked weeks. Unrecorded events show as dark cards with only their kind. Recorded ones show the photograph, real facts, the "what was learned" line and the source link. Complete ones carry a gold corner. A header shows totals.
+Both are reached from Home (quiet links beside Lab). The Debrief links to the Logbook, and the Logbook links to Sources.
 
-**Sources:** a plain table.
+**Logbook:** a header with "N of M events recorded" and how many have a full dataset, counted by the engine's `Logbook` over the weeks the rank can fly. Below it, a scrolling grid of cards, one per recorded event, in date order: the pixel picture with its caption and credit, the name, the date and week, "Full dataset" or "Part of the dataset" with the best points, and the "what was learned" line with its source link. Complete ones have a gold border. Events not yet recorded are only counted, never shown. An empty logbook says to fly a mission and has the button for it.
 
-| Section | Rows |
-|---|---|
-| Data | Each dataset: name, what the game takes from it, date retrieved, link |
-| Images | Each image: title, credit, link |
-| Game numbers | A statement that power costs, capacities and prices are game values chosen for play, and are not real engineering figures |
-| AI use | What AI was used for |
+**Sources:** one scrolling column of panels, read from the code at run time.
+
+| Panel | Content | From |
+|---|---|---|
+| Intro | Where the data comes from, and how many asteroid passes, storm legs, planets and rare events the weeks hold (counted at run time) | `WeekCatalog.shared` |
+| Data | Each dataset: name, what the game takes from it, date retrieved, number of saved requests, its home page and one real request | `GameData.sources` (the snapshot files) |
+| Event pictures | Each picture at 2x: title, caption, kind, NASA id, credit, link to the original | `Images.all` |
+| Checked lines | Each hand-written "what was learned" line: event, date checked, the page it was checked against | `LearnedSources.all` |
+| How the data is used | The two `Sources.Note` lines, and that power costs, capacities, budgets and prices are game values | strings |
+| The challenge's resource list | The challenge page's list, said to be for reference only (nothing from it is claimed yet, section 7.2.1) | `ChallengeResources` |
+| AI use | `Credits.Statement`, word for word | strings |
+| Use and credit | The Earth credit and the non-affiliation line | `Footer.*` |
+
+Every link opens in a new tab with `rel="noopener noreferrer"`.
 
 ### 10.10 Smaller screens
 
@@ -1428,11 +1439,16 @@ Unlocking plays one short stamp animation on the card and updates the balance. P
 
 ### 10.11 First-flight hints (S1)
 
-Three prompts, each shown once and stored in `hintsSeen`:
+Six callouts, each shown once (section 9.1). A callout is a small dark-blue panel with a stepped pointer, one or two sentences and a **Got it** button; Escape closes it, and so does Enter unless another control has focus. It never dims the screen, never covers the control it describes, and play goes on while it is open (in the encounter, keys 1–9 still work; the first Enter closes the hint, the next ends the turn). The text describes mechanics, never numbers, so balance changes cannot make it false. Keys are `Hint.*` in `StringsEn.json`.
 
-1. Hangar: "This week is mostly asteroids. A camera records them. Press Launch."
-2. First encounter: "Switch on the camera, then end the turn. Signal is strongest at closest approach."
-3. First debrief: "You missed points because you had no radar. The lab is where you fix that."
+| Hint | Where | When it closes on its own |
+|---|---|---|
+| Hangar | In the space between the spacecraft panel and the module list, pointing at the spacecraft panel: each instrument records one kind of data, compare Cannot record with the forecast, budget and bay, launch | Leaving the Hangar |
+| Scanner | In the scanner's footer, in place of the usual line, pointing up at the contacts: approach one contact a leg, what the bars mean, what holding does | Leaving the scanner |
+| Encounter | Above the module row on the first turn of the first encounter: switch modules on by click or keys 1–9, power and sunlit turns, End turn or Enter | The turn ends |
+| Radiation | Same place, the first turn whose radiation is above the spacecraft's shielding: damage shows above End turn, hull at zero loses the spacecraft | The turn ends |
+| Debrief | Inside What you missed, after the first flight: points buy modules and marks in the lab, what the missed line means | Leaving the Debrief |
+| Lab | Under the rank panel, after the first flight: unlock, then fit in the hangar, swap when the bay is full | Leaving the Lab |
 
 ### 10.12 Accessibility
 
