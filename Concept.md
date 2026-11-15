@@ -247,13 +247,14 @@ The moments we are building for:
 
 ## 12. How it looks
 
-The direction from the first build stands: you are in orbit, the Earth is photographic, the interface is dark and quiet, and one gold accent means "yours".
+Artemis 26 is a 2D pixel-art game. The team chose this on 15 November, in place of the 3D scene of the first build: pixel art reads at a glance, runs on any laptop, and lets the spacecraft change visibly with every module. You are in orbit, the interface is dark and quiet, and one gold accent means "yours". It should feel clean and responsive, like a well-made 2D pixel game, and all the art is original.
 
 - **Event cards are photographs.** Each carries a real NASA image, with a caption strip like a photo log: date, catalogue name, credit.
-- **Module cards are data plates.** Black, with a fine line drawing of the hardware and its numbers stamped in. Mk III gets a gold edge.
-- **The Earth turns behind everything.** It is reused from the first build.
-- **The spacecraft is assembled from what you installed,** and visible in the hangar.
-- **A storm changes the scene:** aurora on the night side, and streaks across the view.
+- **Module cards are data plates.** Black, with a picture of the hardware and its numbers stamped in. Mk III gets a gold edge.
+- **A pixel-art Earth sits behind everything,** on a twinkling starfield: a big globe on the home screen, its limb across the view in the hangar and in flight, a small globe in the lab. It slides between screens. It was made from the first build's photographic globe by downsampling to a fixed palette with ordered dithering.
+- **The spacecraft is a pixel-art sprite assembled from what you installed,** large in the hangar and smaller in an encounter, where the modules switched on this turn are outlined in gold. Every module has its own part, and a higher mark looks bigger.
+- **A storm shows on the screen:** a red edge on storm legs and a red flash when radiation hits.
+- **Shared art rules:** art on a small grid shown at whole-number multiples with no smoothing, one fixed palette, two or three flat tones per material lit from the upper left, a one-pixel darker outline on sprites, dithering only where a gradient is needed. Section 11.8 of the implementation spec lists them in full.
 - **No decoration that carries no information.** No glass panels, no gradient buttons, no emoji.
 
 ## 13. Scope for the deadline
