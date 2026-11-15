@@ -13,10 +13,12 @@ import type { InstalledModule } from '../../Engine/Spacecraft/InstalledModule'
 import { LearnedSources } from '../../Data/Curated/LearnedSources'
 import { useWording, type Wording } from '../../I18n/UseTranslator'
 import { useGameStore } from '../../State/GameStore'
+import { Hint } from '../../State/HintBook'
 import { ChannelBars } from '../Cards/ChannelBars'
 import { EventPhoto } from '../Cards/EventPhoto'
 import { ModuleDrawing } from '../Cards/ModuleDrawing'
 import { Meter } from '../Meters/Meter'
+import { HintSlot } from '../Shared/HintSlot'
 import { SpacecraftSprite } from '../Spacecraft/SpacecraftSprite'
 
 function signalText(signal: number): string {
@@ -129,7 +131,10 @@ function ScannerView({ flight }: { flight: Flight }) {
       </section>
       <footer className="FlightFoot Panel">
         <StatusMeters flight={flight} />
-        <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
+        <div className="FootMiddle">
+          <p className="FootHint">{flight.isStormLeg ? wording.t('Flight.ScanHintStorm') : wording.t('Flight.ScanHint')}</p>
+          <HintSlot candidates={[{ hint: Hint.Scanner }]} pointer="Up" place="IsInline" />
+        </div>
         <div className="FootActions">
           {flight.craft.hasRadar && (
             <button type="button" disabled={!flight.can(Commands.survey)} onClick={() => send(Commands.survey)}>{wording.t('Flight.Survey', { cost: Rules.surveyCost })}</button>
@@ -219,6 +224,14 @@ function EncounterView({ flight, encounter }: { flight: Flight; encounter: Encou
 
         <div className="EncounterStage">
           <SpacecraftSprite loadout={loadout} active={over ? undefined : plan.keys} maxScale={3} label={wording.t('Hangar.Spacecraft')} />
+          <HintSlot
+            candidates={[
+              { hint: Hint.Encounter, when: !over && encounter.turnIndex === 0 },
+              { hint: Hint.Radiation, when: !over && encounter.current.radiation > craft.passiveShield },
+            ]}
+            pointer="Down"
+            place="IsStageFoot"
+          />
         </div>
 
         <ol className="TurnTrack Panel" aria-label={wording.t('Turn.Label', { turn: encounter.turnIndex + 1 })}>

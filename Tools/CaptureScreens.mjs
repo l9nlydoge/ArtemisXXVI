@@ -44,7 +44,11 @@ await send('Page.navigate', { url: baseUrl })
 await sleep(6000)
 const steps = [
   ['1-Home', ''],
-  ['2-Week', `btn('Fly a mission').click(); await wait(2500);`],
+  ['1b-LogbookEmpty', `btn('Logbook').click(); await wait(1500);`],
+  ['1c-Sources', `btn('Home').click(); await wait(800); btn('Sources').click(); await wait(1500);`],
+  ['1d-SourcesMiddle', `const page = document.querySelector('.SourcesScreen'); page.scrollTop = page.scrollHeight * 0.4; await wait(500);`],
+  ['1e-SourcesEnd', `const page = document.querySelector('.SourcesScreen'); page.scrollTop = page.scrollHeight; await wait(500);`],
+  ['2-Week', `btn('Home').click(); await wait(800); btn('Fly a mission').click(); await wait(2500);`],
   ['3-Hangar', `btn('Build for this week').click(); await wait(2500);`],
   ['3b-HangarOverBay', `btn('Add a second').click(); await wait(600);`],
   ['3c-HangarBack', `document.querySelector('.ModuleRow.IsFitted .ModuleControls .Quiet').click(); await wait(600);`],
@@ -55,9 +59,14 @@ const steps = [
   ['8-Lab', `btn('Go to the lab').click(); await wait(2500);`],
   ['9-LabBought', `btn('Unlock Mk I: 90')?.click(); await wait(1000);`],
   ['10-HangarAfterLab', `btn('Fly a mission').click(); await wait(2500); btn('Build for this week').click(); await wait(2500); document.querySelector('.ModuleRow.IsShort')?.scrollIntoView({ block: 'center' }); await wait(400);`],
+  ['11-LogbookAfterFlight', `btn('Weeks').click(); await wait(800); btn('Home').click(); await wait(800); btn('Logbook').click(); await wait(1500);`],
+  ['11b-LogbookScrolled', `const grid = document.querySelector('.LogbookGrid'); if (grid) grid.scrollTop = grid.scrollHeight; await wait(500);`],
+  ['12-RadiationHint', `const key = 'Artemis26.Profile.v1'; const saved = JSON.parse(localStorage.getItem(key)); localStorage.setItem(key, JSON.stringify({ ...saved, flights: 0, lifetimePoints: 100000, hintsSeen: ['Hangar', 'Scanner', 'Encounter', 'Debrief', 'Lab'] })); localStorage.removeItem('Artemis26.Flight.v1'); location.reload();`],
+  ['12-RadiationHint', `await wait(4000); btn('Fly a mission').click(); await wait(1500); [...document.querySelectorAll('button')].filter(b => b.textContent.includes('Build for this week')).pop().click(); await wait(1500); btn('Launch')?.click(); await wait(1500); let g = 0; while (!document.querySelector('[data-hint="Radiation"]') && !btn('See the debrief') && g++ < 200) { if (btn('End turn')) btn('End turn').click(); else if (btn('Continue')) btn('Continue').click(); else if (btn('Ride out the storm')) btn('Ride out the storm').click(); else if (btn('Approach')) btn('Approach').click(); else if (btn('Hold and recharge')) btn('Hold and recharge').click(); await wait(120) } await wait(600);`],
 ]
-for (const [name, script] of steps) {
+for (const [index, [name, script]] of steps.entries()) {
   if (script) await evaluate(helpers + script)
+  if (steps[index + 1]?.[0] === name) { await sleep(500); continue }
   if (!only || name.includes(only)) await shot(name)
 }
 socket.close()

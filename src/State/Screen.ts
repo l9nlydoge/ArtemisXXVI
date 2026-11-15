@@ -5,4 +5,6 @@ export enum Screen {
   Flight = 'Flight',
   Debrief = 'Debrief',
   Lab = 'Lab',
+  Logbook = 'Logbook',
+  Sources = 'Sources',
 }
